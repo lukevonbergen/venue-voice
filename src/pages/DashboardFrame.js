@@ -55,6 +55,11 @@ const DashboardFrame = ({ children }) => {
         <div className="px-4">
           <h2 className="text-xl font-bold text-gray-900 mb-1">Dashboard</h2>
           <p className="text-sm text-gray-500 mb-6">Manage your venue feedback</p>
+          <div className="text-sm">
+            <p className="text-gray-600">Logged in as:</p>
+            <p className="font-medium text-gray-900">{venueName}</p>
+            <p className="text-gray-500">ID: {venueId}</p>
+          </div>
         </div>
         <nav className="flex-1">
           <ul className="space-y-1">
@@ -70,11 +75,6 @@ const DashboardFrame = ({ children }) => {
           </ul>
         </nav>
         <div className="pt-6 px-4 border-t border-gray-200 space-y-4">
-          <div className="text-sm">
-            <p className="text-gray-600">Logged in as:</p>
-            <p className="font-medium text-gray-900">{venueName}</p>
-            <p className="text-gray-500">ID: {venueId}</p>
-          </div>
           <button
             onClick={handleLogout}
             className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
