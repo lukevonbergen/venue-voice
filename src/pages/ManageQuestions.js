@@ -16,6 +16,7 @@ const ManageQuestions = () => {
   const [searchTerm, setSearchTerm] = useState(''); // Search term for inactive questions
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false); // Modal state
   const [selectedInactiveQuestion, setSelectedInactiveQuestion] = useState(null); // Inactive question to re-add
+  const [pendingNewQuestion, setPendingNewQuestion] = useState('');
 
   // Fetch venue ID and questions
   useEffect(() => {
@@ -81,7 +82,8 @@ const ManageQuestions = () => {
   const handleAddQuestion = async () => {
     // Check if the question limit (5) has been reached
     if (questions.length >= 5) {
-      setIsReplaceModalOpen(true); // Open the replace modal if the limit is reached
+      setPendingNewQuestion(newQuestion); // Store the new question for replacement
+      setIsReplaceModalOpen(true); // Open the replace modal
       return;
     }
   
@@ -112,28 +114,33 @@ const ManageQuestions = () => {
 
   // Replace an active question with an inactive one
   const handleReplaceQuestion = async (questionIdToReplace) => {
-    if (!selectedInactiveQuestion) {
-      alert('Please select a question to re-add.');
+    if (!pendingNewQuestion.trim()) {
+      alert('Please enter a question to add.');
       return;
     }
-
+  
     // Mark the selected active question as inactive
     await supabase
       .from('questions')
       .update({ active: false })
       .eq('id', questionIdToReplace);
-
-    // Mark the selected inactive question as active
-    await supabase
+  
+    // Add the new question to the database
+    const { data, error } = await supabase
       .from('questions')
-      .update({ active: true, order: questions.length + 1 }) // Add it to the end of the list
-      .eq('id', selectedInactiveQuestion.id);
-
-    // Refresh both active and inactive questions
-    fetchQuestions(venueId);
-    fetchInactiveQuestions(venueId);
-    setIsReplaceModalOpen(false); // Close the modal
-    setSelectedInactiveQuestion(null); // Reset the selected inactive question
+      .insert([{ venue_id: venueId, question: pendingNewQuestion, order: questions.length, active: true }])
+      .select();
+  
+    if (error) {
+      console.error('Error adding new question:', error);
+    } else {
+      // Update the state with the new question and remove the replaced question
+      const updatedQuestions = questions.filter((q) => q.id !== questionIdToReplace);
+      setQuestions([...updatedQuestions, data[0]]);
+      setNewQuestion(''); // Clear the input field
+      setPendingNewQuestion(''); // Clear the pending new question
+      setIsReplaceModalOpen(false); // Close the modal
+    }
   };
 
   // Open the replace modal
@@ -449,31 +456,32 @@ const ManageQuestions = () => {
 
         {/* Replace Modal */}
         <Modal
-          isOpen={isReplaceModalOpen}
-          onRequestClose={closeReplaceModal}
-          contentLabel="Replace Question Modal"
-          className="modal"
-          overlayClassName="modal-overlay"
+        isOpen={isReplaceModalOpen}
+        onRequestClose={closeReplaceModal}
+        contentLabel="Replace Question Modal"
+        className="modal"
+        overlayClassName="modal-overlay"
         >
-          <h2 className="text-xl font-bold mb-4">Replace Question</h2>
-          <p className="mb-4">Select a question to replace:</p>
-          <div className="space-y-4">
+        <h2 className="text-xl font-bold mb-4">Replace Question</h2>
+        <p className="mb-4">You are adding: "{pendingNewQuestion}"</p>
+        <p className="mb-4">Select a question to replace:</p>
+        <div className="space-y-4">
             {questions.map((q) => (
-              <div
+            <div
                 key={q.id}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
                 onClick={() => handleReplaceQuestion(q.id)}
-              >
+            >
                 <p className="text-gray-700">{q.question}</p>
-              </div>
+            </div>
             ))}
-          </div>
-          <button
+        </div>
+        <button
             onClick={closeReplaceModal}
             className="mt-4 bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-          >
+        >
             Cancel
-          </button>
+        </button>
         </Modal>
       </div>
     </DashboardFrame>
