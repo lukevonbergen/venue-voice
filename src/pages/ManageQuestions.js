@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import QRCode from 'qrcode.react'; // Import QRCode library
+import { QRCodeSVG } from 'qrcode.react'; // Correct import
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -152,7 +152,7 @@ const ManageQuestions = () => {
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Feedback QR Code</h2>
           <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-            <QRCode value={feedbackUrl} size={200} /> {/* Generate QR code */}
+            <QRCodeSVG value={feedbackUrl} size={200} /> {/* Use QRCodeSVG */}
             <p className="text-gray-600 mt-4">Scan this QR code to provide feedback.</p>
             <p className="text-sm text-gray-500 mt-2">
               <a href={feedbackUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
