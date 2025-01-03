@@ -76,9 +76,6 @@ const DashboardFrame = ({ children }) => {
             <li>
               <NavLink to="/dashboard/questions">Manage Questions</NavLink>
             </li>
-            <li>
-              <NavLink to="/dashboard/feedback">View Feedback</NavLink>
-            </li>
           </ul>
         </nav>
 
