@@ -17,6 +17,7 @@ const ManageQuestions = () => {
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false); // Modal state
   const [selectedInactiveQuestion, setSelectedInactiveQuestion] = useState(null); // Inactive question to re-add
   const [pendingNewQuestion, setPendingNewQuestion] = useState('');
+  const [replacementSource, setReplacementSource] = useState(null); // 'new' or 'inactive'
 
   // Fetch venue ID and questions
   useEffect(() => {
@@ -83,6 +84,7 @@ const ManageQuestions = () => {
     // Check if the question limit (5) has been reached
     if (questions.length >= 5) {
       setPendingNewQuestion(newQuestion); // Store the new question for replacement
+      setReplacementSource('new'); // Indicate that the replacement is coming from a new question
       setIsReplaceModalOpen(true); // Open the replace modal
       return;
     }
@@ -114,8 +116,13 @@ const ManageQuestions = () => {
 
   // Replace an active question with an inactive one
   const handleReplaceQuestion = async (questionIdToReplace) => {
-    if (!pendingNewQuestion.trim()) {
+    if (replacementSource === 'new' && !pendingNewQuestion.trim()) {
       alert('Please enter a question to add.');
+      return;
+    }
+  
+    if (replacementSource === 'inactive' && !selectedInactiveQuestion) {
+      alert('Please select a question to re-add.');
       return;
     }
   
@@ -125,29 +132,45 @@ const ManageQuestions = () => {
       .update({ active: false })
       .eq('id', questionIdToReplace);
   
-    // Add the new question to the database
-    const { data, error } = await supabase
-      .from('questions')
-      .insert([{ venue_id: venueId, question: pendingNewQuestion, order: questions.length, active: true }])
-      .select();
+    // Add the new question or re-add the inactive question
+    if (replacementSource === 'new') {
+      const { data, error } = await supabase
+        .from('questions')
+        .insert([{ venue_id: venueId, question: pendingNewQuestion, order: questions.length, active: true }])
+        .select();
   
-    if (error) {
-      console.error('Error adding new question:', error);
-    } else {
-      // Update the state with the new question and remove the replaced question
-      const updatedQuestions = questions.filter((q) => q.id !== questionIdToReplace);
-      setQuestions([...updatedQuestions, data[0]]);
-      setNewQuestion(''); // Clear the input field
-      setPendingNewQuestion(''); // Clear the pending new question
-      setIsReplaceModalOpen(false); // Close the modal
+      if (error) {
+        console.error('Error adding new question:', error);
+      } else {
+        // Update the state with the new question and remove the replaced question
+        const updatedQuestions = questions.filter((q) => q.id !== questionIdToReplace);
+        setQuestions([...updatedQuestions, data[0]]);
+        setNewQuestion(''); // Clear the input field
+      }
+    } else if (replacementSource === 'inactive') {
+      await supabase
+        .from('questions')
+        .update({ active: true, order: questions.length })
+        .eq('id', selectedInactiveQuestion.id);
+  
+      // Refresh both active and inactive questions
+      fetchQuestions(venueId);
+      fetchInactiveQuestions(venueId);
     }
+  
+    // Reset states
+    setPendingNewQuestion('');
+    setSelectedInactiveQuestion(null);
+    setReplacementSource(null);
+    setIsReplaceModalOpen(false); // Close the modal
   };
 
   // Open the replace modal
   const openReplaceModal = (inactiveQuestion) => {
     if (questions.length >= 5) {
-      setSelectedInactiveQuestion(inactiveQuestion);
-      setIsReplaceModalOpen(true);
+      setSelectedInactiveQuestion(inactiveQuestion); // Store the inactive question for replacement
+      setReplacementSource('inactive'); // Indicate that the replacement is coming from an inactive question
+      setIsReplaceModalOpen(true); // Open the replace modal
     } else {
       // If the limit is not met, directly add the inactive question
       handleAddInactiveQuestion(inactiveQuestion);
@@ -463,7 +486,12 @@ const ManageQuestions = () => {
         overlayClassName="modal-overlay"
         >
         <h2 className="text-xl font-bold mb-4">Replace Question</h2>
-        <p className="mb-4">You are adding: "{pendingNewQuestion}"</p>
+        {replacementSource === 'new' && (
+            <p className="mb-4">You are adding: "{pendingNewQuestion}"</p>
+        )}
+        {replacementSource === 'inactive' && (
+            <p className="mb-4">You are re-adding: "{selectedInactiveQuestion?.question}"</p>
+        )}
         <p className="mb-4">Select a question to replace:</p>
         <div className="space-y-4">
             {questions.map((q) => (
