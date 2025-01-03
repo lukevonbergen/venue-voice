@@ -19,13 +19,16 @@ const CustomerFeedbackPage = () => {
     };
   }, []);
 
-  // Fetch questions for the venue
+  // Fetch active questions for the venue
   useEffect(() => {
     const fetchQuestions = async () => {
       const { data, error } = await supabase
         .from('questions')
         .select('*')
-        .eq('venue_id', venueId);
+        .eq('venue_id', venueId)
+        .eq('active', true) // Only fetch active questions
+        .order('order', { ascending: true }); // Fetch questions in order
+
       if (error) {
         console.error(error);
       } else {
