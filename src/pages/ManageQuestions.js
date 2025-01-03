@@ -3,7 +3,8 @@ import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import { QRCodeSVG } from 'qrcode.react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import Modal from 'react-modal'; // For the modal dialog
+import { Plus } from 'lucide-react';
+import Modal from 'react-modal';
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -13,8 +14,8 @@ const ManageQuestions = () => {
   const [venueId, setVenueId] = useState(null);
   const [inactiveQuestions, setInactiveQuestions] = useState([]); // Previously used questions
   const [searchTerm, setSearchTerm] = useState(''); // Search term for inactive questions
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const [selectedQuestionToReplace, setSelectedQuestionToReplace] = useState(null); // Question to replace
+  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false); // Modal state
+  const [selectedInactiveQuestion, setSelectedInactiveQuestion] = useState(null); // Inactive question to re-add
 
   // Fetch venue ID and questions
   useEffect(() => {
@@ -79,7 +80,7 @@ const ManageQuestions = () => {
   // Add a new question
   const handleAddQuestion = async () => {
     if (questions.length >= 5) {
-      alert('You can only add up to 5 questions.');
+      setIsReplaceModalOpen(true); // Open the replace modal if the limit is reached
       return;
     }
 
@@ -106,108 +107,42 @@ const ManageQuestions = () => {
     }
   };
 
-  // Start editing a question
-  const startEditingQuestion = (questionId, questionText) => {
-    setEditingQuestionId(questionId);
-    setEditingQuestionText(questionText);
-  };
-
-  // Save edited question
-  const saveEditedQuestion = async () => {
-    if (!editingQuestionText.trim()) {
-      alert('Question cannot be empty.');
-      return;
-    }
-
-    if (editingQuestionText.length > 100) {
-      alert('Question cannot exceed 100 characters.');
-      return;
-    }
-
-    const { error } = await supabase
-      .from('questions')
-      .update({ question: editingQuestionText })
-      .eq('id', editingQuestionId);
-
-    if (error) {
-      console.error('Error updating question:', error);
-    } else {
-      const updatedQuestions = questions.map((q) =>
-        q.id === editingQuestionId ? { ...q, question: editingQuestionText } : q
-      );
-      setQuestions(updatedQuestions);
-      setEditingQuestionId(null);
-      setEditingQuestionText('');
-    }
-  };
-
-  // Mark a question as inactive
-  const handleDeleteQuestion = async (questionId) => {
-    const { error } = await supabase
-      .from('questions')
-      .update({ active: false })
-      .eq('id', questionId);
-
-    if (error) {
-      console.error('Error marking question as inactive:', error);
-    } else {
-      setQuestions(questions.filter((q) => q.id !== questionId));
-      fetchInactiveQuestions(venueId); // Refresh inactive questions
-    }
-  };
-
-  // Handle drag-and-drop reordering
-  const onDragEnd = async (result) => {
-    if (!result.destination) return; // Dropped outside the list
-
-    const reorderedQuestions = Array.from(questions);
-    const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
-    reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
-
-    // Update the order in the database
-    const updates = reorderedQuestions.map((q, index) => ({
-      id: q.id,
-      question: q.question,
-      venue_id: q.venue_id,
-      order: index + 1,
-      active: q.active,
-    }));
-
-    const { error } = await supabase
-      .from('questions')
-      .upsert(updates);
-
-    if (error) {
-      console.error('Error updating question order:', error);
-    } else {
-      setQuestions(reorderedQuestions);
-    }
-  };
-
-  // Open modal to replace a question
-  const openReplaceModal = (questionId) => {
-    setSelectedQuestionToReplace(questionId);
-    setIsModalOpen(true);
-  };
-
   // Replace an active question with an inactive one
-  const replaceQuestion = async (inactiveQuestionId) => {
+  const handleReplaceQuestion = async (questionIdToReplace) => {
+    if (!selectedInactiveQuestion) {
+      alert('Please select a question to re-add.');
+      return;
+    }
+
     // Mark the selected active question as inactive
     await supabase
       .from('questions')
       .update({ active: false })
-      .eq('id', selectedQuestionToReplace);
+      .eq('id', questionIdToReplace);
 
     // Mark the selected inactive question as active
     await supabase
       .from('questions')
       .update({ active: true })
-      .eq('id', inactiveQuestionId);
+      .eq('id', selectedInactiveQuestion.id);
 
     // Refresh both active and inactive questions
     fetchQuestions(venueId);
     fetchInactiveQuestions(venueId);
-    setIsModalOpen(false);
+    setIsReplaceModalOpen(false); // Close the modal
+    setSelectedInactiveQuestion(null); // Reset the selected inactive question
+  };
+
+  // Open the replace modal
+  const openReplaceModal = (inactiveQuestion) => {
+    setSelectedInactiveQuestion(inactiveQuestion);
+    setIsReplaceModalOpen(true);
+  };
+
+  // Close the replace modal
+  const closeReplaceModal = () => {
+    setIsReplaceModalOpen(false);
+    setSelectedInactiveQuestion(null);
   };
 
   // Filter inactive questions based on search term
@@ -230,6 +165,13 @@ const ManageQuestions = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Manage Questions</h1>
+          <div className="bg-blue-50 px-4 py-2 rounded-lg">
+            <span className="text-blue-600 font-medium">Questions Active: {questions.length}/5</span>
+          </div>
+        </div>
+
         {/* QR Code Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Feedback QR Code</h2>
@@ -285,10 +227,13 @@ const ManageQuestions = () => {
               />
               <button
                 onClick={handleAddQuestion}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                disabled={questions.length >= 5}
+                className={`${
+                  questions.length >= 5
+                    ? 'bg-gray-500 hover:bg-gray-600'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                } text-white px-6 py-3 rounded-lg transition-colors duration-200`}
               >
-                Add Question
+                {questions.length >= 5 ? 'Replace...' : 'Add Question'}
               </button>
             </div>
             <div className="flex justify-between mt-2">
@@ -384,18 +329,25 @@ const ManageQuestions = () => {
               <div
                 key={q.id}
                 className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
-                onClick={() => openReplaceModal(q.id)}
               >
-                <p className="text-gray-700">{q.question}</p>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-700">{q.question}</p>
+                  <button
+                    onClick={() => openReplaceModal(q)}
+                    className="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                  >
+                    <Plus className="w-5 h-5 text-blue-600" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Modal for Replacing Questions */}
+        {/* Replace Modal */}
         <Modal
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
+          isOpen={isReplaceModalOpen}
+          onRequestClose={closeReplaceModal}
           contentLabel="Replace Question Modal"
           className="modal"
           overlayClassName="modal-overlay"
@@ -407,14 +359,14 @@ const ManageQuestions = () => {
               <div
                 key={q.id}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
-                onClick={() => replaceQuestion(q.id)}
+                onClick={() => handleReplaceQuestion(q.id)}
               >
                 <p className="text-gray-700">{q.question}</p>
               </div>
             ))}
           </div>
           <button
-            onClick={() => setIsModalOpen(false)}
+            onClick={closeReplaceModal}
             className="mt-4 bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
           >
             Cancel
