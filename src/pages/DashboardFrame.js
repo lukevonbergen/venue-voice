@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 
 const DashboardFrame = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [venueName, setVenueName] = useState('');
+  const [venueId, setVenueId] = useState('');
+
+  useEffect(() => {
+    const fetchVenue = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('venues')
+          .select('id, name')
+          .eq('email', user.email)
+          .single();
+
+        if (!error && data) {
+          setVenueName(data.name);
+          setVenueId(data.id);
+        }
+      }
+    };
+
+    fetchVenue();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -29,7 +51,6 @@ const DashboardFrame = ({ children }) => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 px-4 py-6 flex flex-col">
         <div className="px-4">
           <h2 className="text-xl font-bold text-gray-900 mb-1">Dashboard</h2>
@@ -48,7 +69,12 @@ const DashboardFrame = ({ children }) => {
             </li>
           </ul>
         </nav>
-        <div className="pt-6 px-4 border-t border-gray-200">
+        <div className="pt-6 px-4 border-t border-gray-200 space-y-4">
+          <div className="text-sm">
+            <p className="text-gray-600">Logged in as:</p>
+            <p className="font-medium text-gray-900">{venueName}</p>
+            <p className="text-gray-500">ID: {venueId}</p>
+          </div>
           <button
             onClick={handleLogout}
             className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -57,8 +83,6 @@ const DashboardFrame = ({ children }) => {
           </button>
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="flex-1">{children}</div>
     </div>
   );
