@@ -79,11 +79,13 @@ const ManageQuestions = () => {
 
   // Add a new question
   const handleAddQuestion = async () => {
+    // Check if the question limit (5) has been reached
     if (questions.length >= 5) {
       setIsReplaceModalOpen(true); // Open the replace modal if the limit is reached
       return;
     }
 
+    // Validate the new question
     if (!newQuestion.trim()) {
       alert('Question cannot be empty.');
       return;
@@ -94,6 +96,7 @@ const ManageQuestions = () => {
       return;
     }
 
+    // Add the new question to the database
     const { data, error } = await supabase
       .from('questions')
       .insert([{ venue_id: venueId, question: newQuestion, order: questions.length, active: true }])
@@ -102,8 +105,8 @@ const ManageQuestions = () => {
     if (error) {
       console.error('Error adding question:', error);
     } else {
-      setQuestions([...questions, data[0]]);
-      setNewQuestion('');
+      setQuestions([...questions, data[0]]); // Update the state with the new question
+      setNewQuestion(''); // Clear the input field
     }
   };
 
@@ -123,7 +126,7 @@ const ManageQuestions = () => {
     // Mark the selected inactive question as active
     await supabase
       .from('questions')
-      .update({ active: true })
+      .update({ active: true, order: questions.length + 1 }) // Add it to the end of the list
       .eq('id', selectedInactiveQuestion.id);
 
     // Refresh both active and inactive questions
@@ -404,11 +407,15 @@ const ManageQuestions = () => {
               <div
                 key={q.id}
                 className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
+                onClick={() => openReplaceModal(q)}
               >
                 <div className="flex justify-between items-center">
                   <p className="text-gray-700">{q.question}</p>
                   <button
-                    onClick={() => openReplaceModal(q)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent the parent div's onClick from firing
+                      openReplaceModal(q);
+                    }}
                     className="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
                   >
                     <Plus className="w-5 h-5 text-blue-600" />
