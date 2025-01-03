@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Clock, Users, Calendar, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Users, Calendar, AlertTriangle, ToggleLeft, ToggleRight } from 'lucide-react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 
@@ -9,6 +9,7 @@ const DashboardPage = () => {
   const [venueId, setVenueId] = useState(null);
   const [feedback, setFeedback] = useState([]);
   const [lastHourFeedback, setLastHourFeedback] = useState([]); // State for last hour's feedback
+  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true); // State for live updates toggle
   const navigate = useNavigate();
 
   // Check if the user is authenticated
@@ -45,7 +46,9 @@ const DashboardPage = () => {
       fetchFeedback(venueData.id);
       const lastHourData = await fetchLastHourFeedback(venueData.id); // Fetch last hour's feedback
       setLastHourFeedback(lastHourData);
-      setupRealtimeUpdates(venueData.id); // Set up real-time updates
+      if (liveUpdatesEnabled) {
+        setupRealtimeUpdates(venueData.id); // Set up real-time updates if enabled
+      }
     }
   };
 
@@ -124,6 +127,20 @@ const DashboardPage = () => {
     return () => {
       supabase.removeChannel(feedbackSubscription);
     };
+  };
+
+  // Toggle live updates
+  const toggleLiveUpdates = () => {
+    setLiveUpdatesEnabled((prev) => !prev);
+    if (venueId) {
+      if (liveUpdatesEnabled) {
+        // Disable live updates
+        supabase.removeAllChannels();
+      } else {
+        // Enable live updates
+        setupRealtimeUpdates(venueId);
+      }
+    }
   };
 
   // Calculate average rating for a specific question
@@ -318,6 +335,26 @@ const DashboardPage = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title and Live Updates Toggle */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Venue Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-500">Live Updates</span>
+            <button
+              onClick={toggleLiveUpdates}
+              className={`p-2 rounded-lg transition-colors duration-200 ${
+                liveUpdatesEnabled ? 'bg-green-50 hover:bg-green-100' : 'bg-red-50 hover:bg-red-100'
+              }`}
+            >
+              {liveUpdatesEnabled ? (
+                <ToggleRight className="w-6 h-6 text-green-600" />
+              ) : (
+                <ToggleLeft className="w-6 h-6 text-red-600" />
+              )}
+            </button>
+          </div>
+        </div>
+
         {/* Overall Satisfaction */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <SatisfactionCard
