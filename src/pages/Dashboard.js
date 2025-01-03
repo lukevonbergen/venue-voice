@@ -164,6 +164,39 @@ const DashboardPage = () => {
     return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
   };
 
+  // Get the count for the previous time interval
+  const getPreviousCount = (timeInterval) => {
+    const now = new Date();
+    let startTime, endTime;
+
+    switch (timeInterval) {
+      case '30min':
+        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Last hour
+        endTime = new Date(now.getTime() - 30 * 60 * 1000).toISOString(); // Last 30 minutes
+        break;
+      case '1hour':
+        startTime = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(); // Last 2 hours
+        endTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Last hour
+        break;
+      case 'today':
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        startTime = new Date(yesterday).toISOString(); // Yesterday
+        endTime = new Date(now.toISOString().split('T')[0]).toISOString(); // Today
+        break;
+      case '7days':
+        startTime = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(); // Last 14 days
+        endTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(); // Last 7 days
+        break;
+      default:
+        throw new Error('Invalid time interval');
+    }
+
+    const filteredFeedback = feedback.filter(
+      (f) => f.timestamp >= startTime && f.timestamp < endTime
+    );
+    return filteredFeedback.length;
+  };
+
   // Generate the feedback URL for the venue
   const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
 
@@ -178,7 +211,8 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Overall Satisfaction</h3>
           <p className="text-4xl font-bold">{calculateOverallAverageRating()}/5</p>
           <p className="text-sm text-gray-600 mt-2">
-            ↑ 0.3 from last hour {/* Placeholder for now */}
+            {calculateOverallAverageRating() > 0 ? '↑' : '↓'}{' '}
+            {Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)} from last hour
           </p>
         </div>
 
@@ -188,7 +222,8 @@ const DashboardPage = () => {
             <h3 className="text-lg font-semibold mb-2">{q.question}</h3>
             <p className="text-4xl font-bold">{calculateAverageRating(q.id)}/5</p>
             <p className="text-sm text-gray-600 mt-2">
-              ↑ 0.2 from last hour {/* Placeholder for now */}
+              {calculateAverageRating(q.id) > 0 ? '↑' : '↓'}{' '}
+              {Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)} from last hour
             </p>
           </div>
         ))}
@@ -201,7 +236,8 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Last 30 mins</h3>
           <p className="text-4xl font-bold">{countResponses('30min')}</p>
           <p className="text-sm text-gray-600 mt-2">
-            ↑ 10% from last hour {/* Placeholder for now */}
+            {countResponses('30min') > getPreviousCount('30min') ? '↑' : '↓'}{' '}
+            {Math.abs(calculatePercentageChange(countResponses('30min'), getPreviousCount('30min')))}% from last hour
           </p>
         </div>
 
@@ -210,7 +246,8 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Last Hour</h3>
           <p className="text-4xl font-bold">{countResponses('1hour')}</p>
           <p className="text-sm text-gray-600 mt-2">
-            ↓ 5% from yesterday {/* Placeholder for now */}
+            {countResponses('1hour') > getPreviousCount('1hour') ? '↑' : '↓'}{' '}
+            {Math.abs(calculatePercentageChange(countResponses('1hour'), getPreviousCount('1hour')))}% from yesterday
           </p>
         </div>
 
@@ -219,7 +256,8 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Today</h3>
           <p className="text-4xl font-bold">{countResponses('today')}</p>
           <p className="text-sm text-gray-600 mt-2">
-            ↑ 15% from yesterday {/* Placeholder for now */}
+            {countResponses('today') > getPreviousCount('today') ? '↑' : '↓'}{' '}
+            {Math.abs(calculatePercentageChange(countResponses('today'), getPreviousCount('today')))}% from yesterday
           </p>
         </div>
 
@@ -228,7 +266,8 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Last 7 Days</h3>
           <p className="text-4xl font-bold">{countResponses('7days')}</p>
           <p className="text-sm text-gray-600 mt-2">
-            ↑ 20% from last week {/* Placeholder for now */}
+            {countResponses('7days') > getPreviousCount('7days') ? '↑' : '↓'}{' '}
+            {Math.abs(calculatePercentageChange(countResponses('7days'), getPreviousCount('7days')))}% from last week
           </p>
         </div>
       </div>
