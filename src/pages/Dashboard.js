@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
-import DashboardFrame from '../components/DashboardFrame'; // Import the DashboardFrame
+import DashboardFrame from './DashboardFrame'; // Import the DashboardFrame
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
