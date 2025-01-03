@@ -8,18 +8,6 @@ import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import SignInPage from './pages/SignIn';
 
-// Navbar component (moved outside of App for clarity)
-const Navbar = () => {
-  return (
-    <div style={styles.navbar}>
-      <Link to="/" style={styles.link}>Home</Link>
-      <Link to="/dashboard" style={styles.link}>Dashboard</Link>
-      <Link to="/feedback" style={styles.link}>Feedback</Link>
-      <Link to="/signup" style={styles.link}>Sign Up</Link>
-      <Link to="/signin" style={styles.link}>Sign In</Link>
-    </div>
-  );
-};
 
 function App() {
   const location = useLocation(); // Get the current route
