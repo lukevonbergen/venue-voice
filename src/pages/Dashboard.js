@@ -47,12 +47,13 @@ const DashboardPage = () => {
     }
   };
 
-  // Fetch questions for the venue
+  // Fetch active questions for the venue
   const fetchQuestions = async (venueId) => {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
-      .eq('venue_id', venueId);
+      .eq('venue_id', venueId)
+      .eq('active', true); // Only fetch active questions
 
     if (error) {
       console.error('Error fetching questions:', error);
