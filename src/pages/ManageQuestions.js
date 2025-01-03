@@ -145,6 +145,81 @@ const ManageQuestions = () => {
     setSelectedInactiveQuestion(null);
   };
 
+  // Handle drag-and-drop reordering
+  const onDragEnd = async (result) => {
+    if (!result.destination) return; // Dropped outside the list
+
+    const reorderedQuestions = Array.from(questions);
+    const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
+    reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
+
+    // Update the order in the database
+    const updates = reorderedQuestions.map((q, index) => ({
+      id: q.id,
+      order: index + 1,
+    }));
+
+    const { error } = await supabase
+      .from('questions')
+      .upsert(updates);
+
+    if (error) {
+      console.error('Error updating question order:', error);
+    } else {
+      setQuestions(reorderedQuestions);
+    }
+  };
+
+  // Start editing a question
+  const startEditingQuestion = (questionId, questionText) => {
+    setEditingQuestionId(questionId);
+    setEditingQuestionText(questionText);
+  };
+
+  // Save edited question
+  const saveEditedQuestion = async () => {
+    if (!editingQuestionText.trim()) {
+      alert('Question cannot be empty.');
+      return;
+    }
+
+    if (editingQuestionText.length > 100) {
+      alert('Question cannot exceed 100 characters.');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('questions')
+      .update({ question: editingQuestionText })
+      .eq('id', editingQuestionId);
+
+    if (error) {
+      console.error('Error updating question:', error);
+    } else {
+      const updatedQuestions = questions.map((q) =>
+        q.id === editingQuestionId ? { ...q, question: editingQuestionText } : q
+      );
+      setQuestions(updatedQuestions);
+      setEditingQuestionId(null);
+      setEditingQuestionText('');
+    }
+  };
+
+  // Mark a question as inactive
+  const handleDeleteQuestion = async (questionId) => {
+    const { error } = await supabase
+      .from('questions')
+      .update({ active: false })
+      .eq('id', questionId);
+
+    if (error) {
+      console.error('Error marking question as inactive:', error);
+    } else {
+      setQuestions(questions.filter((q) => q.id !== questionId));
+      fetchInactiveQuestions(venueId); // Refresh inactive questions
+    }
+  };
+
   // Filter inactive questions based on search term
   const filteredInactiveQuestions = inactiveQuestions.filter((q) =>
     q.question.toLowerCase().includes(searchTerm.toLowerCase())
