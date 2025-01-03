@@ -153,7 +153,7 @@ const DashboardPage = () => {
   return (
     <div className="p-6 font-sans bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-8">Venue Dashboard</h1>
-  
+
       {/* Top Row: Overall Satisfaction and Per-Question Averages */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         {/* Overall Satisfaction Tile */}
@@ -161,7 +161,7 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Overall Satisfaction</h3>
           <p className="text-4xl font-bold">{calculateOverallAverageRating()}/5</p>
         </div>
-  
+
         {/* Per-Question Average Tiles */}
         {questions.map((q) => (
           <div key={q.id} className="bg-green-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
@@ -170,7 +170,7 @@ const DashboardPage = () => {
           </div>
         ))}
       </div>
-  
+
       {/* QR Code Section */}
       {venueId && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -178,7 +178,7 @@ const DashboardPage = () => {
           <QRCodeGenerator url={feedbackUrl} />
         </div>
       )}
-  
+
       {/* Middle Row: Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Responses in the Last Hour */}
@@ -186,26 +186,26 @@ const DashboardPage = () => {
           <h3 className="text-lg font-semibold mb-2">Responses (Last Hour)</h3>
           <p className="text-4xl font-bold">{countResponsesLastHour()}</p>
         </div>
-  
+
         {/* Total Responses Today */}
         <div className="bg-yellow-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
           <h3 className="text-lg font-semibold mb-2">Total Responses (Today)</h3>
           <p className="text-4xl font-bold">{countTodaysResponses()}</p>
         </div>
-  
+
         {/* Placeholder Tile 1 */}
         <div className="bg-pink-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
           <h3 className="text-lg font-semibold mb-2">Placeholder 1</h3>
           <p className="text-4xl font-bold">-</p>
         </div>
-  
+
         {/* Placeholder Tile 2 */}
         <div className="bg-indigo-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
           <h3 className="text-lg font-semibold mb-2">Placeholder 2</h3>
           <p className="text-4xl font-bold">-</p>
         </div>
       </div>
-  
+
       {/* Bottom Row: Question Management */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-bold mb-4">Manage Questions</h2>
@@ -239,6 +239,7 @@ const DashboardPage = () => {
         </div>
       </div>
     </div>
-  )};
+  );
+};
 
 export default DashboardPage;
