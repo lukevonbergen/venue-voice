@@ -11,15 +11,15 @@ const LandingPage = () => {
             <div className="px-6 py-4">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <div className="h-8 w-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg"></div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  <div className="h-8 w-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg"></div>
+                  <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                     FeedbackFlow
                   </span>
                 </div>
                 <div className="flex items-center space-x-6">
                   <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
                   <Link to="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
-                  <Link to="/signin" className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                  <Link to="/signin" className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors">
                     Sign In
                   </Link>
                 </div>
@@ -33,21 +33,21 @@ const LandingPage = () => {
       <div className="relative pt-32 pb-16 sm:pt-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl sm:text-6xl font-extrabold text-white space-y-3">
+            <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 space-y-3">
               <span className="block">Transform Customer Feedback</span>
-              <span className="block text-purple-200">Into Business Growth</span>
+              <span className="block bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Into Business Growth</span>
             </h1>
-            <p className="mt-6 max-w-2xl mx-auto text-xl text-purple-100">
+            <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-600">
               Real-time customer insights that help you make better business decisions. 
               Simple to set up, powerful to use.
             </p>
             <div className="mt-8 flex justify-center space-x-4">
               <Link to="/signup" 
-                className="px-8 py-3 text-base font-medium rounded-xl text-purple-700 bg-white hover:bg-purple-50 transition-colors">
+                className="px-8 py-3 text-base font-medium rounded-xl text-white bg-purple-600 hover:bg-purple-700 transition-colors">
                 Start Free Trial
               </Link>
               <a href="#demo" 
-                className="px-8 py-3 text-base font-medium rounded-xl text-white border-2 border-white/20 hover:bg-white/10 transition-colors">
+                className="px-8 py-3 text-base font-medium rounded-xl text-gray-700 border-2 border-gray-300 hover:bg-gray-50 transition-colors">
                 Watch Demo
               </a>
             </div>
@@ -64,9 +64,9 @@ const LandingPage = () => {
               { stat: '2.5x', desc: 'Revenue Growth' },
               { stat: '10min', desc: 'Setup Time' },
             ].map((item, i) => (
-              <div key={i} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center">
-                <div className="text-4xl font-bold text-white mb-2">{item.stat}</div>
-                <div className="text-purple-200">{item.desc}</div>
+              <div key={i} className="bg-white rounded-2xl p-6 text-center shadow-lg">
+                <div className="text-4xl font-bold text-gray-900 mb-2">{item.stat}</div>
+                <div className="text-gray-600">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -75,7 +75,7 @@ const LandingPage = () => {
 
       {/* Features Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">Everything you need to succeed</h2>
+        <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Everything you need to succeed</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
@@ -104,10 +104,10 @@ const LandingPage = () => {
             }
           ].map((feature, i) => (
             <div key={i} className="group relative">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-50 group-hover:opacity-75 transition duration-200"></div>
-              <div className="relative p-6 bg-black/30 backdrop-blur-sm rounded-2xl">
-                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-purple-100">{feature.desc}</p>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+              <div className="relative p-6 bg-white rounded-2xl">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.desc}</p>
               </div>
             </div>
           ))}
@@ -117,7 +117,7 @@ const LandingPage = () => {
       {/* Testimonials */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white">Trusted by Industry Leaders</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Trusted by Industry Leaders</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
@@ -137,10 +137,10 @@ const LandingPage = () => {
               role: "Café Owner"
             }
           ].map((testimonial, i) => (
-            <div key={i} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-              <p className="text-purple-100 mb-4">"{testimonial.quote}"</p>
-              <div className="text-white font-semibold">{testimonial.author}</div>
-              <div className="text-purple-200 text-sm">{testimonial.role}</div>
+            <div key={i} className="bg-white rounded-2xl p-6 shadow-lg">
+              <p className="text-gray-600 mb-4">"{testimonial.quote}"</p>
+              <div className="text-gray-900 font-semibold">{testimonial.author}</div>
+              <div className="text-gray-500 text-sm">{testimonial.role}</div>
             </div>
           ))}
         </div>
@@ -148,7 +148,7 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-gradient-to-r from-purple-600/90 to-pink-600/90 rounded-3xl p-12 text-center backdrop-blur-sm">
+        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-12 text-center shadow-xl">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to get started?</h2>
           <p className="text-purple-100 mb-8 max-w-2xl mx-auto">
             Join thousands of businesses using FeedbackFlow to improve customer satisfaction and drive growth.
