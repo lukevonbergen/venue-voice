@@ -212,7 +212,7 @@ const DashboardPage = () => {
           <p className="text-4xl font-bold">{calculateOverallAverageRating()}/5</p>
           <p className="text-sm text-gray-600 mt-2">
             {calculateOverallAverageRating() > 0 ? '↑' : '↓'}{' '}
-            {Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)} from last hour
+            {Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}% from last hour
           </p>
         </div>
 
@@ -223,7 +223,7 @@ const DashboardPage = () => {
             <p className="text-4xl font-bold">{calculateAverageRating(q.id)}/5</p>
             <p className="text-sm text-gray-600 mt-2">
               {calculateAverageRating(q.id) > 0 ? '↑' : '↓'}{' '}
-              {Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)} from last hour
+              {Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)}% from last hour
             </p>
           </div>
         ))}
