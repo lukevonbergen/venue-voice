@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
+import DashboardFrame from './DashboardFrame';
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -139,6 +140,7 @@ const ManageQuestions = () => {
   ];
 
   return (
+    <DashboardFrame>
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-8">Manage Questions</h1>
 
@@ -234,6 +236,7 @@ const ManageQuestions = () => {
         </div>
       </div>
     </div>
+    </DashboardFrame>
   );
 };
 
