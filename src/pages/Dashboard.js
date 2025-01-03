@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Clock, Users, Calendar, AlertTriangle } from 'lucide-react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import FeedbackGraph from '../components/FeedbackGraph';
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
   const [venueId, setVenueId] = useState(null);
   const [feedback, setFeedback] = useState([]);
+  const [lastHourFeedback, setLastHourFeedback] = useState([]); // State for last hour's feedback
   const navigate = useNavigate();
 
   // Check if the user is authenticated
@@ -43,6 +43,8 @@ const DashboardPage = () => {
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
       fetchFeedback(venueData.id);
+      const lastHourData = await fetchLastHourFeedback(venueData.id); // Fetch last hour's feedback
+      setLastHourFeedback(lastHourData);
       setupRealtimeUpdates(venueData.id); // Set up real-time updates
     }
   };
@@ -79,6 +81,26 @@ const DashboardPage = () => {
     }
   };
 
+  // Fetch last hour's feedback with additional_feedback
+  const fetchLastHourFeedback = async (venueId) => {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('venue_id', venueId)
+      .not('additional_feedback', 'is', null) // Only fetch rows with additional_feedback
+      .gte('timestamp', oneHourAgo) // Fetch feedback from the last hour
+      .order('timestamp', { ascending: false }); // Sort by most recent
+
+    if (error) {
+      console.error('Error fetching last hour feedback:', error);
+    } else {
+      return data;
+    }
+  };
+
   // Set up real-time updates for feedback
   const setupRealtimeUpdates = (venueId) => {
     const feedbackSubscription = supabase
@@ -86,9 +108,15 @@ const DashboardPage = () => {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
-        (payload) => {
+        async (payload) => {
           console.log('New feedback received:', payload.new);
           setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
+
+          // If the new feedback has additional_feedback, update the feed
+          if (payload.new.additional_feedback) {
+            const newFeedback = await fetchLastHourFeedback(venueId);
+            setLastHourFeedback(newFeedback);
+          }
         }
       )
       .subscribe();
@@ -182,7 +210,7 @@ const DashboardPage = () => {
 
   // Map questions to actionable suggestions
   const questionToSuggestionMap = {
-    'Do you like the music?': 'Consider updating the playlist or adjusting the volume.',
+    'How is the music?': 'Consider updating the playlist or adjusting the volume.',
     'How was the service?': 'Provide additional staff training to improve service quality.',
     'Was the venue clean?': 'Increase the frequency of cleaning schedules.',
     'How was the food?': 'Consider revising the menu or improving food quality.',
@@ -208,6 +236,7 @@ const DashboardPage = () => {
     return suggestedActions;
   };
 
+  // UI Components
   const MetricCard = ({ title, value, trend, trendValue, compareText, icon: Icon }) => (
     <div className="bg-white rounded-xl shadow-sm p-6 transition-all duration-200 hover:shadow-md border border-gray-100">
       <div className="flex items-start justify-between">
@@ -265,16 +294,30 @@ const DashboardPage = () => {
     </div>
   );
 
+  const FeedbackFeed = ({ feedback }) => (
+    <div className="bg-white rounded-xl shadow-sm p-6">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Live Feedback Feed</h2>
+      <div className="space-y-4">
+        {feedback.map((f, index) => (
+          <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
+            <div className="flex items-center justify-between">
+              <p className="text-gray-700">{f.additional_feedback}</p>
+              <span className="text-sm text-gray-400">
+                {new Date(f.timestamp).toLocaleTimeString()}
+              </span>
+            </div>
+          </div>
+        ))}
+        {feedback.length === 0 && (
+          <p className="text-gray-500 text-center">No feedback in the last hour.</p>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Venue Dashboard</h1>
-          <div className="bg-blue-50 px-4 py-2 rounded-lg">
-            <span className="text-blue-600 font-medium">Live Updates Active</span>
-          </div>
-        </div>
-
         {/* Overall Satisfaction */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <SatisfactionCard
@@ -332,7 +375,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Suggested Actions */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-gray-50 rounded-xl p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Suggested Actions</h2>
             <span className="text-sm text-gray-500">Based on recent feedback</span>
@@ -348,6 +391,9 @@ const DashboardPage = () => {
             ))}
           </div>
         </div>
+
+        {/* Live Feedback Feed */}
+        <FeedbackFeed feedback={lastHourFeedback} />
       </div>
     </DashboardFrame>
   );
