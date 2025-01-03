@@ -23,8 +23,8 @@ const Navbar = () => {
 function App() {
   const location = useLocation(); // Get the current route
 
-  // Conditionally render the navbar if the route is not a feedback page
-  const showNavbar = !location.pathname.startsWith('/feedback');
+  // Conditionally render the navbar if the route is not a feedback page or dashboard
+  const showNavbar = !location.pathname.startsWith('/feedback') && !location.pathname.startsWith('/dashboard');
 
   return (
     <div>
