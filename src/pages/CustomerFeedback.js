@@ -10,11 +10,11 @@ const CustomerFeedbackPage = () => {
   const [questions, setQuestions] = useState([]);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Hide the navbar when this page is active
+  // Disable scrolling when this page is active
   useEffect(() => {
-    document.body.classList.add('no-navbar');
+    document.body.classList.add('no-scroll'); // Add a class to disable scrolling
     return () => {
-      document.body.classList.remove('no-navbar');
+      document.body.classList.remove('no-scroll'); // Remove the class on unmount
     };
   }, []);
 
@@ -79,7 +79,7 @@ const CustomerFeedbackPage = () => {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4">
+    <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4 overflow-hidden">
       {/* Question Section with Slide Animation */}
       <AnimatePresence mode="wait">
         <motion.div
