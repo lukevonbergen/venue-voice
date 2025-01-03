@@ -41,6 +41,7 @@ const DashboardPage = () => {
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
       fetchFeedback(venueData.id);
+      setupRealtimeUpdates(venueData.id); // Set up real-time updates
     }
   };
 
@@ -73,6 +74,25 @@ const DashboardPage = () => {
       console.log('Feedback fetched successfully:', data);
       setFeedback(data);
     }
+  };
+
+  // Set up real-time updates for feedback
+  const setupRealtimeUpdates = (venueId) => {
+    const feedbackSubscription = supabase
+      .channel('feedback')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
+        (payload) => {
+          console.log('New feedback received:', payload.new);
+          setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(feedbackSubscription);
+    };
   };
 
   // Calculate average rating for a specific question
@@ -162,9 +182,9 @@ const DashboardPage = () => {
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Venue Dashboard</h1>
 
       {/* Top Row: Overall Satisfaction and Per-Question Averages */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {/* Overall Satisfaction Tile */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Overall Satisfaction</h3>
           <p className="text-4xl font-bold text-gray-800">{calculateOverallAverageRating()}/5</p>
           <p
@@ -179,7 +199,7 @@ const DashboardPage = () => {
 
         {/* Per-Question Average Tiles */}
         {questions.map((q) => (
-          <div key={q.id} className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <div key={q.id} className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
             <h3 className="text-lg font-semibold mb-2 text-gray-800">{q.question}</h3>
             <p className="text-4xl font-bold text-gray-800">{calculateAverageRating(q.id)}/5</p>
             <p
@@ -197,7 +217,7 @@ const DashboardPage = () => {
       {/* Middle Row: Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Responses in the Last 30 Minutes */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Last 30 mins</h3>
           <p className="text-4xl font-bold text-gray-800">{countResponses('30min')}</p>
           <p
@@ -211,7 +231,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Responses in the Last Hour */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Last Hour</h3>
           <p className="text-4xl font-bold text-gray-800">{countResponses('1hour')}</p>
           <p
@@ -225,7 +245,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Total Responses Today */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Today</h3>
           <p className="text-4xl font-bold text-gray-800">{countResponses('today')}</p>
           <p
@@ -239,7 +259,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Total Responses in the Last 7 Days */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Last 7 Days</h3>
           <p className="text-4xl font-bold text-gray-800">{countResponses('7days')}</p>
           <p
