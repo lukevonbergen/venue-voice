@@ -9,7 +9,7 @@ const CustomerFeedbackPage = () => {
   const [questions, setQuestions] = useState([]);
   const [isFinished, setIsFinished] = useState(false);
   const [additionalFeedback, setAdditionalFeedback] = useState('');
-  const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false); // New state
+  const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false);
 
   // Disable scrolling when this page is active
   useEffect(() => {
@@ -65,7 +65,7 @@ const CustomerFeedbackPage = () => {
       setShowAdditionalFeedback(true); // Show the additional feedback section
     }
   };
-  
+
   const handleAdditionalFeedback = async () => {
     // Save additional feedback to the database
     if (additionalFeedback.trim() !== '') {
@@ -74,20 +74,20 @@ const CustomerFeedbackPage = () => {
         .insert([
           {
             venue_id: venueId,
-            question_id: null, // Optional: Set to null or a placeholder value
-            sentiment: null,   // Optional: Set to null or a placeholder value
-            rating: null,      // Optional: Set to null or a placeholder value
+            question_id: null, // Use null or a special value (e.g., -1) for additional feedback
+            sentiment: null,   // No emoji for additional feedback
+            rating: null,      // No rating for additional feedback
             additional_feedback: additionalFeedback,
           },
         ]);
-  
+
       if (error) {
         console.error('Error inserting additional feedback:', error);
       } else {
         console.log('Additional feedback inserted successfully:', data);
       }
     }
-  
+
     // Show the "Thank You" message
     setIsFinished(true);
   };
@@ -146,7 +146,7 @@ const CustomerFeedbackPage = () => {
       {/* Additional Feedback Section */}
       {showAdditionalFeedback && (
         <div className="flex flex-col items-center gap-4">
-          <h2 className="text-2xl font-bold mb-4">Any additional feedback?</h2>
+          <h2 className="text-2xl font-bold mb-4">Do you have any additional feedback?</h2>
           <p className="text-gray-600 mb-4">This is optional, but we'd love to hear more!</p>
           <textarea
             className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -155,12 +155,20 @@ const CustomerFeedbackPage = () => {
             value={additionalFeedback}
             onChange={(e) => setAdditionalFeedback(e.target.value)}
           />
-          <button
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            onClick={handleAdditionalFeedback}
-          >
-            Submit
-          </button>
+          <div className="flex gap-4">
+            <button
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={handleAdditionalFeedback}
+            >
+              Submit
+            </button>
+            <button
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+              onClick={() => setIsFinished(true)} // Skip additional feedback
+            >
+              Skip
+            </button>
+          </div>
         </div>
       )}
     </div>
