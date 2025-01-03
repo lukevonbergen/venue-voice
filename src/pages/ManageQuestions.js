@@ -144,6 +144,8 @@ const ManageQuestions = () => {
     // Update the order in the database
     const updates = reorderedQuestions.map((q, index) => ({
       id: q.id,
+      question: q.question, // Include the question text
+      venue_id: q.venue_id, // Include the venue_id
       order: index + 1, // Ensure order starts from 1
     }));
   
