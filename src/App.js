@@ -5,6 +5,7 @@ import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
 import './index.css';
 import SignUpPage from './pages/SignUp';
+import ManageQuestions from './pages/ManageQuestions';
 import SignInPage from './pages/SignIn';
 
 // Navbar component (moved outside of App for clarity)
@@ -34,6 +35,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/feedback" element={<CustomerFeedbackPage />} />
         <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
+        <Route path="/dashboard/questions" element={<ManageQuestions />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signin" element={<SignInPage />} />
       </Routes>
