@@ -84,24 +84,24 @@ const ManageQuestions = () => {
       setIsReplaceModalOpen(true); // Open the replace modal if the limit is reached
       return;
     }
-
+  
     // Validate the new question
     if (!newQuestion.trim()) {
       alert('Question cannot be empty.');
       return;
     }
-
+  
     if (newQuestion.length > 100) {
       alert('Question cannot exceed 100 characters.');
       return;
     }
-
+  
     // Add the new question to the database
     const { data, error } = await supabase
       .from('questions')
       .insert([{ venue_id: venueId, question: newQuestion, order: questions.length, active: true }])
       .select();
-
+  
     if (error) {
       console.error('Error adding question:', error);
     } else {
@@ -138,8 +138,29 @@ const ManageQuestions = () => {
 
   // Open the replace modal
   const openReplaceModal = (inactiveQuestion) => {
-    setSelectedInactiveQuestion(inactiveQuestion);
-    setIsReplaceModalOpen(true);
+    if (questions.length >= 5) {
+      setSelectedInactiveQuestion(inactiveQuestion);
+      setIsReplaceModalOpen(true);
+    } else {
+      // If the limit is not met, directly add the inactive question
+      handleAddInactiveQuestion(inactiveQuestion);
+    }
+  };
+  
+  const handleAddInactiveQuestion = async (inactiveQuestion) => {
+    // Mark the inactive question as active
+    const { error } = await supabase
+      .from('questions')
+      .update({ active: true, order: questions.length + 1 })
+      .eq('id', inactiveQuestion.id);
+  
+    if (error) {
+      console.error('Error re-adding inactive question:', error);
+    } else {
+      // Refresh both active and inactive questions
+      fetchQuestions(venueId);
+      fetchInactiveQuestions(venueId);
+    }
   };
 
   // Close the replace modal
@@ -413,13 +434,13 @@ const ManageQuestions = () => {
                   <p className="text-gray-700">{q.question}</p>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent the parent div's onClick from firing
-                      openReplaceModal(q);
+                        e.stopPropagation(); // Prevent the parent div's onClick from firing
+                        openReplaceModal(q);
                     }}
                     className="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-                  >
+                    >
                     <Plus className="w-5 h-5 text-blue-600" />
-                  </button>
+                    </button>
                 </div>
               </div>
             ))}
