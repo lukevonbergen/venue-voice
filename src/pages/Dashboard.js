@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame'; // Import the DashboardFrame
+import DashboardFrame from './DashboardFrame';
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -136,7 +136,7 @@ const DashboardPage = () => {
   const countResponses = (timeInterval) => {
     const now = new Date();
     let startTime;
-  
+
     switch (timeInterval) {
       case '30min':
         startTime = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
@@ -153,9 +153,15 @@ const DashboardPage = () => {
       default:
         throw new Error('Invalid time interval');
     }
-  
+
     const filteredFeedback = feedback.filter((f) => f.timestamp >= startTime);
     return filteredFeedback.length;
+  };
+
+  // Calculate percentage change compared to the previous time interval
+  const calculatePercentageChange = (currentCount, previousCount) => {
+    if (previousCount === 0) return 0; // Avoid division by zero
+    return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
   };
 
   // Generate the feedback URL for the venue
@@ -168,47 +174,64 @@ const DashboardPage = () => {
       {/* Top Row: Overall Satisfaction and Per-Question Averages */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         {/* Overall Satisfaction Tile */}
-        <div className="bg-blue-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <div className="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
           <h3 className="text-lg font-semibold mb-2">Overall Satisfaction</h3>
           <p className="text-4xl font-bold">{calculateOverallAverageRating()}/5</p>
+          <p className="text-sm text-gray-600 mt-2">
+            ↑ 0.3 from last hour {/* Placeholder for now */}
+          </p>
         </div>
 
         {/* Per-Question Average Tiles */}
         {questions.map((q) => (
-          <div key={q.id} className="bg-green-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <div key={q.id} className="bg-green-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
             <h3 className="text-lg font-semibold mb-2">{q.question}</h3>
             <p className="text-4xl font-bold">{calculateAverageRating(q.id)}/5</p>
+            <p className="text-sm text-gray-600 mt-2">
+              ↑ 0.2 from last hour {/* Placeholder for now */}
+            </p>
           </div>
         ))}
       </div>
 
-
-        {/* Middle Row: Key Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Middle Row: Key Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Responses in the Last 30 Minutes */}
-        <div className="bg-purple-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold mb-2">Last 30 mins</h3>
-            <p className="text-4xl font-bold">{countResponses('30min')}</p>
+        <div className="bg-purple-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2">Last 30 mins</h3>
+          <p className="text-4xl font-bold">{countResponses('30min')}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            ↑ 10% from last hour {/* Placeholder for now */}
+          </p>
         </div>
 
         {/* Responses in the Last Hour */}
-        <div className="bg-yellow-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold mb-2">Last Hour</h3>
-            <p className="text-4xl font-bold">{countResponses('1hour')}</p>
+        <div className="bg-yellow-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2">Last Hour</h3>
+          <p className="text-4xl font-bold">{countResponses('1hour')}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            ↓ 5% from yesterday {/* Placeholder for now */}
+          </p>
         </div>
 
         {/* Total Responses Today */}
-        <div className="bg-pink-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold mb-2">Today</h3>
-            <p className="text-4xl font-bold">{countResponses('today')}</p>
+        <div className="bg-pink-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2">Today</h3>
+          <p className="text-4xl font-bold">{countResponses('today')}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            ↑ 15% from yesterday {/* Placeholder for now */}
+          </p>
         </div>
 
         {/* Total Responses in the Last 7 Days */}
-        <div className="bg-indigo-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold mb-2">Last 7 Days</h3>
-            <p className="text-4xl font-bold">{countResponses('7days')}</p>
+        <div className="bg-indigo-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2">Last 7 Days</h3>
+          <p className="text-4xl font-bold">{countResponses('7days')}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            ↑ 20% from last week {/* Placeholder for now */}
+          </p>
         </div>
-        </div>
+      </div>
 
       {/* Bottom Row: Question Management */}
       <div className="bg-white p-6 rounded-lg shadow-md">
