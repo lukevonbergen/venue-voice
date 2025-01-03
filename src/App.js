@@ -1,58 +1,30 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
-import './index.css';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import SignInPage from './pages/SignIn';
 
-
 function App() {
-  const location = useLocation(); // Get the current route
-
-  // Conditionally render the navbar if the route is not a feedback page or dashboard
-  const showNavbar = !location.pathname.startsWith('/feedback') && !location.pathname.startsWith('/dashboard');
-
   return (
-    <div>
-      {showNavbar && <Navbar />} {/* Render navbar only if showNavbar is true */}
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/feedback" element={<CustomerFeedbackPage />} />
-        <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
-        <Route path="/dashboard/questions" element={<ManageQuestions />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/signin" element={<SignInPage />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/feedback" element={<CustomerFeedbackPage />} />
+      <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
+      <Route path="/dashboard/questions" element={<ManageQuestions />} />
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/signin" element={<SignInPage />} />
+    </Routes>
   );
 }
 
-// Wrap the App component with Router
 const AppWrapper = () => (
   <Router>
     <App />
   </Router>
 );
-
-const styles = {
-  navbar: {
-    padding: '10px',
-    backgroundColor: '#f8f9fa',
-    borderBottom: '1px solid #ddd',
-    textAlign: 'center',
-  },
-  link: {
-    margin: '0 10px',
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    textDecoration: 'none',
-    borderRadius: '5px',
-  },
-};
 
 export default AppWrapper;

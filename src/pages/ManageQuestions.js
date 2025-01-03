@@ -111,9 +111,9 @@ const ManageQuestions = () => {
       const updatedQuestions = questions.map((q) =>
         q.id === editingQuestionId ? { ...q, question: editingQuestionText } : q
       );
-      setQuestions(updatedQuestions);
-      setEditingQuestionId(null);
-      setEditingQuestionText('');
+      setQuestions(updatedQuestions); // Update the state
+      setEditingQuestionId(null); // Exit editing mode
+      setEditingQuestionText(''); // Clear the editing text
     }
   };
 
