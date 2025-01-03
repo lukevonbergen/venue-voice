@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100">
       {/* Floating Navbar */}
       <nav className="fixed w-full top-4 z-50 px-4">
         <div className="max-w-7xl mx-auto">
