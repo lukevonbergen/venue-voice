@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, Clock, Users, Calendar, AlertTriangle } from 'lucide-react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import FeedbackGraph from '../components/FeedbackGraph';
@@ -206,113 +207,145 @@ const DashboardPage = () => {
     return suggestedActions;
   };
 
+  const MetricCard = ({ title, value, trend, trendValue, compareText, icon: Icon }) => (
+    <div className="bg-white rounded-xl shadow-sm p-6 transition-all duration-200 hover:shadow-md border border-gray-100">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <span className="text-gray-500 text-sm font-medium">{title}</span>
+          <div className="flex items-baseline space-x-2">
+            <h2 className="text-3xl font-bold text-gray-900">{value}</h2>
+            <div className={`flex items-center ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+              {trend === 'up' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              <span className="ml-1 text-sm font-medium">{trendValue}%</span>
+            </div>
+          </div>
+          <p className="text-gray-400 text-xs">{compareText}</p>
+        </div>
+        <div className="p-2 bg-blue-50 rounded-lg">
+          <Icon className="w-6 h-6 text-blue-600" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const SatisfactionCard = ({ title, rating, trend, difference }) => (
+    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+      <h3 className="text-gray-500 text-sm font-medium mb-4">{title}</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-baseline">
+          <span className="text-4xl font-bold text-gray-900">{rating}</span>
+          <span className="text-xl text-gray-400 ml-1">/5</span>
+        </div>
+        <div className={`flex items-center ${parseFloat(rating) > 4.0 ? 'text-green-600' : 'text-red-600'}`}>
+          {parseFloat(rating) > 4.0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+          <span className="ml-1 text-sm font-medium">{difference} from last hour</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ActionCard = ({ question, rating, suggestion }) => (
+    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+      <div className="flex items-start space-x-4">
+        <div className="p-2 bg-amber-50 rounded-lg">
+          <AlertTriangle className="w-6 h-6 text-amber-600" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">{question}</h3>
+          <div className="flex items-center mb-2">
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-500 mr-2">Current Rating:</span>
+              <span className="text-sm font-bold text-gray-900">{rating}/5</span>
+            </div>
+          </div>
+          <p className="text-gray-600 text-sm">{suggestion}</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <DashboardFrame>
-      <h1 className="text-3xl font-bold mb-8 text-gray-800">Venue Dashboard</h1>
-
-      {/* Top Row: Overall Satisfaction and Per-Question Averages */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-        {/* Overall Satisfaction Tile */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Overall Satisfaction</h3>
-          <p className="text-4xl font-bold text-gray-800">{calculateOverallAverageRating()}/5</p>
-          <p
-            className={`text-sm mt-2 ${
-              calculateOverallAverageRating() > 4.2 ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {calculateOverallAverageRating() > 4.2 ? '↑' : '↓'}{' '}
-            {Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)} from last hour
-          </p>
-        </div>
-
-        {/* Per-Question Average Tiles */}
-        {questions.map((q) => (
-          <div key={q.id} className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">{q.question}</h3>
-            <p className="text-4xl font-bold text-gray-800">{calculateAverageRating(q.id)}/5</p>
-            <p
-              className={`text-sm mt-2 ${
-                calculateAverageRating(q.id) > 4.0 ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {calculateAverageRating(q.id) > 4.0 ? '↑' : '↓'}{' '}
-              {Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)} from last hour
-            </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Venue Dashboard</h1>
+          <div className="bg-blue-50 px-4 py-2 rounded-lg">
+            <span className="text-blue-600 font-medium">Live Updates Active</span>
           </div>
-        ))}
-      </div>
-
-      {/* Middle Row: Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Responses in the Last 30 Minutes */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Last 30 mins</h3>
-          <p className="text-4xl font-bold text-gray-800">{countResponses('30min')}</p>
-          <p
-            className={`text-sm mt-2 ${
-              countResponses('30min') > getPreviousCount('30min') ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {countResponses('30min') > getPreviousCount('30min') ? '↑' : '↓'}{' '}
-            {Math.abs(calculatePercentageChange(countResponses('30min'), getPreviousCount('30min')))}% from last hour
-          </p>
         </div>
 
-        {/* Responses in the Last Hour */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Last Hour</h3>
-          <p className="text-4xl font-bold text-gray-800">{countResponses('1hour')}</p>
-          <p
-            className={`text-sm mt-2 ${
-              countResponses('1hour') > getPreviousCount('1hour') ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {countResponses('1hour') > getPreviousCount('1hour') ? '↑' : '↓'}{' '}
-            {Math.abs(calculatePercentageChange(countResponses('1hour'), getPreviousCount('1hour')))}% from yesterday
-          </p>
-        </div>
-
-        {/* Total Responses Today */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Today</h3>
-          <p className="text-4xl font-bold text-gray-800">{countResponses('today')}</p>
-          <p
-            className={`text-sm mt-2 ${
-              countResponses('today') > getPreviousCount('today') ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {countResponses('today') > getPreviousCount('today') ? '↑' : '↓'}{' '}
-            {Math.abs(calculatePercentageChange(countResponses('today'), getPreviousCount('today')))}% from yesterday
-          </p>
-        </div>
-
-        {/* Total Responses in the Last 7 Days */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Last 7 Days</h3>
-          <p className="text-4xl font-bold text-gray-800">{countResponses('7days')}</p>
-          <p
-            className={`text-sm mt-2 ${
-              countResponses('7days') > getPreviousCount('7days') ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {countResponses('7days') > getPreviousCount('7days') ? '↑' : '↓'}{' '}
-            {Math.abs(calculatePercentageChange(countResponses('7days'), getPreviousCount('7days')))}% from last week
-          </p>
-        </div>
-      </div>
-
-      {/* Suggested Actions Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Suggested Actions</h2>
-        <div className="space-y-4">
-          {generateSuggestedActions().map((action, index) => (
-            <div key={index} className="p-4 border rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-800">{action.question}</h3>
-              <p className="text-gray-600">Average Rating: {action.rating}/5</p>
-              <p className="text-gray-600">Suggestion: {action.suggestion}</p>
-            </div>
+        {/* Overall Satisfaction */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <SatisfactionCard
+            title="Overall Satisfaction"
+            rating={calculateOverallAverageRating()}
+            trend={calculateOverallAverageRating() > 4.2 ? 'up' : 'down'}
+            difference={Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}
+          />
+          
+          {questions.map((q) => (
+            <SatisfactionCard
+              key={q.id}
+              title={q.question}
+              rating={calculateAverageRating(q.id)}
+              trend={calculateAverageRating(q.id) > 4.0 ? 'up' : 'down'}
+              difference={Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)}
+            />
           ))}
+        </div>
+
+        {/* Response Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <MetricCard
+            title="Last 30 Minutes"
+            value={countResponses('30min')}
+            trend={countResponses('30min') > getPreviousCount('30min') ? 'up' : 'down'}
+            trendValue={Math.abs(calculatePercentageChange(countResponses('30min'), getPreviousCount('30min')))}
+            compareText="Compared to previous 30 mins"
+            icon={Clock}
+          />
+          <MetricCard
+            title="Last Hour"
+            value={countResponses('1hour')}
+            trend={countResponses('1hour') > getPreviousCount('1hour') ? 'up' : 'down'}
+            trendValue={Math.abs(calculatePercentageChange(countResponses('1hour'), getPreviousCount('1hour')))}
+            compareText="Compared to previous hour"
+            icon={Users}
+          />
+          <MetricCard
+            title="Today"
+            value={countResponses('today')}
+            trend={countResponses('today') > getPreviousCount('today') ? 'up' : 'down'}
+            trendValue={Math.abs(calculatePercentageChange(countResponses('today'), getPreviousCount('today')))}
+            compareText="Compared to yesterday"
+            icon={Calendar}
+          />
+          <MetricCard
+            title="Last 7 Days"
+            value={countResponses('7days')}
+            trend={countResponses('7days') > getPreviousCount('7days') ? 'up' : 'down'}
+            trendValue={Math.abs(calculatePercentageChange(countResponses('7days'), getPreviousCount('7days')))}
+            compareText="Compared to previous week"
+            icon={TrendingUp}
+          />
+        </div>
+
+        {/* Suggested Actions */}
+        <div className="bg-gray-50 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Suggested Actions</h2>
+            <span className="text-sm text-gray-500">Based on recent feedback</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {generateSuggestedActions().map((action, index) => (
+              <ActionCard
+                key={index}
+                question={action.question}
+                rating={action.rating}
+                suggestion={action.suggestion}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </DashboardFrame>
