@@ -1,33 +1,52 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
 import './index.css';
-import SignUpPage from './pages/SignUp'; // Import SignUpPage
-import SignInPage from './pages/SignIn'; // Import SignInPage
+import SignUpPage from './pages/SignUp';
+import SignInPage from './pages/SignIn';
+
+// Navbar component (moved outside of App for clarity)
+const Navbar = () => {
+  return (
+    <div style={styles.navbar}>
+      <Link to="/" style={styles.link}>Home</Link>
+      <Link to="/dashboard" style={styles.link}>Dashboard</Link>
+      <Link to="/feedback" style={styles.link}>Feedback</Link>
+      <Link to="/signup" style={styles.link}>Sign Up</Link>
+      <Link to="/signin" style={styles.link}>Sign In</Link>
+    </div>
+  );
+};
 
 function App() {
+  const location = useLocation(); // Get the current route
+
+  // Conditionally render the navbar if the route is not a feedback page
+  const showNavbar = !location.pathname.startsWith('/feedback');
+
   return (
-    <Router>
-      <div style={styles.navbar}>
-        <Link to="/" style={styles.link}>Home</Link>
-        <Link to="/dashboard" style={styles.link}>Dashboard</Link>
-        <Link to="/feedback" style={styles.link}>Feedback</Link>
-        <Link to="/signup" style={styles.link}>Sign Up</Link> {/* Add Sign Up link */}
-        <Link to="/signin" style={styles.link}>Sign In</Link> {/* Add Sign In link */}
-      </div>
+    <div>
+      {showNavbar && <Navbar />} {/* Render navbar only if showNavbar is true */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/feedback" element={<CustomerFeedbackPage />} />
         <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
-        <Route path="/signup" element={<SignUpPage />} /> {/* Add Sign Up route */}
-        <Route path="/signin" element={<SignInPage />} /> {/* Add Sign In route */}
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/signin" element={<SignInPage />} />
       </Routes>
-    </Router>
+    </div>
   );
 }
+
+// Wrap the App component with Router
+const AppWrapper = () => (
+  <Router>
+    <App />
+  </Router>
+);
 
 const styles = {
   navbar: {
@@ -46,4 +65,4 @@ const styles = {
   },
 };
 
-export default App;
+export default AppWrapper;
