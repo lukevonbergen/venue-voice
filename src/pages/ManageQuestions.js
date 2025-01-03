@@ -213,15 +213,20 @@ const ManageQuestions = () => {
       order: index + 1, // Update the order based on the new position
     }));
   
-    const { error } = await supabase
-      .from('questions')
-      .upsert(updates, { onConflict: ['id'] }); // Only update the `order` field
+    // Use `update` instead of `upsert`
+    for (const update of updates) {
+      const { error } = await supabase
+        .from('questions')
+        .update({ order: update.order })
+        .eq('id', update.id);
   
-    if (error) {
-      console.error('Error updating question order:', error);
-    } else {
-      setQuestions(reorderedQuestions); // Update the state with the new order
+      if (error) {
+        console.error('Error updating question order:', error);
+        return; // Stop further updates if an error occurs
+      }
     }
+  
+    setQuestions(reorderedQuestions); // Update the state with the new order
   };
 
   // Start editing a question
