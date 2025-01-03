@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CustomerFeedbackPage = () => {
   const { venueId } = useParams();
-  const location = useLocation();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [isFinished, setIsFinished] = useState(false);
-  const [additionalFeedback, setAdditionalFeedback] = useState(''); // State for additional feedback
+  const [additionalFeedback, setAdditionalFeedback] = useState('');
+  const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false); // New state
 
   // Disable scrolling when this page is active
   useEffect(() => {
-    document.body.classList.add('no-scroll'); // Add a class to disable scrolling
+    document.body.classList.add('no-scroll');
     return () => {
-      document.body.classList.remove('no-scroll'); // Remove the class on unmount
+      document.body.classList.remove('no-scroll');
     };
   }, []);
 
@@ -58,14 +58,11 @@ const CustomerFeedbackPage = () => {
         },
       ]);
 
-    // Move to the next question or finish
+    // Move to the next question or show additional feedback
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Show the additional feedback input if it's the last question
-      if (currentQuestionIndex === questions.length - 1) {
-        setIsFinished(true); // Show the "Thank You" message after submitting additional feedback
-      }
+      setShowAdditionalFeedback(true); // Show the additional feedback section
     }
   };
 
@@ -102,26 +99,28 @@ const CustomerFeedbackPage = () => {
   return (
     <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4 overflow-hidden">
       {/* Question Section with Slide Animation */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentQuestionIndex}
-          initial={{ opacity: 0, x: 100 }} // Slide in from the right
-          animate={{ opacity: 1, x: 0 }} // Center position
-          exit={{ opacity: 0, x: -100 }} // Slide out to the left
-          transition={{ type: 'tween', duration: 0.3 }} // Smooth transition
-          className="flex flex-col justify-center items-center text-center mb-8"
-        >
-          <h2 className="text-2xl font-bold mb-4">
-            {questions[currentQuestionIndex].question}
-          </h2>
-          <p className="text-gray-600">
-            Question {currentQuestionIndex + 1} of {questions.length}
-          </p>
-        </motion.div>
-      </AnimatePresence>
+      {!showAdditionalFeedback && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestionIndex}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ type: 'tween', duration: 0.3 }}
+            className="flex flex-col justify-center items-center text-center mb-8"
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              {questions[currentQuestionIndex].question}
+            </h2>
+            <p className="text-gray-600">
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       {/* Emoji Buttons */}
-      {currentQuestionIndex < questions.length && (
+      {!showAdditionalFeedback && (
         <div className="flex justify-center gap-4">
           {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
             <button
@@ -136,7 +135,7 @@ const CustomerFeedbackPage = () => {
       )}
 
       {/* Additional Feedback Section */}
-      {currentQuestionIndex === questions.length && (
+      {showAdditionalFeedback && (
         <div className="flex flex-col items-center gap-4">
           <h2 className="text-2xl font-bold mb-4">Any additional feedback?</h2>
           <p className="text-gray-600 mb-4">This is optional, but we'd love to hear more!</p>
