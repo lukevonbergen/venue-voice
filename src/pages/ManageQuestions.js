@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import { QRCodeSVG } from 'qrcode.react'; // Correct import
+import { QRCodeSVG } from 'qrcode.react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -43,7 +44,8 @@ const ManageQuestions = () => {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
-      .eq('venue_id', venueId);
+      .eq('venue_id', venueId)
+      .order('order', { ascending: true }); // Fetch questions in order
 
     if (error) {
       console.error('Error fetching questions:', error);
@@ -71,7 +73,7 @@ const ManageQuestions = () => {
 
     const { data, error } = await supabase
       .from('questions')
-      .insert([{ venue_id: venueId, question: newQuestion }])
+      .insert([{ venue_id: venueId, question: newQuestion, order: questions.length }]) // Add order
       .select();
 
     if (error) {
@@ -128,6 +130,31 @@ const ManageQuestions = () => {
       console.error('Error deleting question:', error);
     } else {
       setQuestions(questions.filter((q) => q.id !== questionId));
+    }
+  };
+
+  // Handle drag-and-drop reordering
+  const onDragEnd = async (result) => {
+    if (!result.destination) return; // Dropped outside the list
+
+    const reorderedQuestions = Array.from(questions);
+    const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
+    reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
+
+    // Update the order in the database
+    const updates = reorderedQuestions.map((q, index) => ({
+      id: q.id,
+      order: index,
+    }));
+
+    const { error } = await supabase
+      .from('questions')
+      .upsert(updates);
+
+    if (error) {
+      console.error('Error updating question order:', error);
+    } else {
+      setQuestions(reorderedQuestions);
     }
   };
 
@@ -226,53 +253,69 @@ const ManageQuestions = () => {
         {/* Current Questions */}
         <div>
           <h2 className="text-xl font-bold mb-4 text-gray-900">Current Questions</h2>
-          <div className="space-y-4">
-            {questions.map((q) => (
-              <div key={q.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                {editingQuestionId === q.id ? (
-                  <div className="flex gap-4">
-                    <input
-                      type="text"
-                      value={editingQuestionText}
-                      onChange={(e) => setEditingQuestionText(e.target.value)}
-                      className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      maxLength={100}
-                    />
-                    <button
-                      onClick={saveEditedQuestion}
-                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setEditingQuestionId(null)}
-                      className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center">
-                    <p className="text-gray-700 text-lg">{q.question}</p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => startEditingQuestion(q.id, q.question)}
-                        className="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition-colors duration-200"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteQuestion(q.id)}
-                        className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="questions">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+                  {questions.map((q, index) => (
+                    <Draggable key={q.id} draggableId={q.id.toString()} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+                        >
+                          {editingQuestionId === q.id ? (
+                            <div className="flex gap-4">
+                              <input
+                                type="text"
+                                value={editingQuestionText}
+                                onChange={(e) => setEditingQuestionText(e.target.value)}
+                                className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                maxLength={100}
+                              />
+                              <button
+                                onClick={saveEditedQuestion}
+                                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingQuestionId(null)}
+                                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between items-center">
+                              <p className="text-gray-700 text-lg">{q.question}</p>
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={() => startEditingQuestion(q.id, q.question)}
+                                  className="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition-colors duration-200"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteQuestion(q.id)}
+                                  className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
     </DashboardFrame>
