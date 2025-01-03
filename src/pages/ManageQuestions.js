@@ -258,6 +258,7 @@ const ManageQuestions = () => {
         {/* Current Questions */}
         <div>
           <h2 className="text-xl font-bold mb-4 text-gray-900">Current Questions</h2>
+          <p className="text-sm text-gray-400">You can drag and drop these questions in the order your customers will answer them</p>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="questions">
               {(provided) => (

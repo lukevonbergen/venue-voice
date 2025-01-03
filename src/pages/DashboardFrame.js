@@ -52,7 +52,7 @@ const DashboardFrame = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <div className="w-64 bg-white border-r border-gray-200 px-4 py-6 flex flex-col">
-        <div className="px-4">
+        <div className="px-4 border-b border-gray-200 space-y-4">
           <h2 className="text-xl font-bold text-gray-900 mb-1">Dashboard</h2>
           <p className="text-sm text-gray-500 mb-6">Manage your venue feedback</p>
           <div className="text-sm">
