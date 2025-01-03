@@ -12,9 +12,9 @@ const CustomerFeedbackPage = () => {
 
   // Disable scrolling when this page is active
   useEffect(() => {
-    document.body.classList.add('no-scroll'); // Add a class to disable scrolling
+    document.body.classList.add('no-scroll');
     return () => {
-      document.body.classList.remove('no-scroll'); // Remove the class on unmount
+      document.body.classList.remove('no-scroll');
     };
   }, []);
 
@@ -65,6 +65,17 @@ const CustomerFeedbackPage = () => {
     }
   };
 
+  // Function to attempt closing the tab
+  const closeTab = () => {
+    if (window.opener) {
+      // If the tab was opened via JavaScript, close it
+      window.close();
+    } else {
+      // Otherwise, instruct the user to manually close the tab
+      alert('Please manually close this tab.');
+    }
+  };
+
   if (questions.length === 0) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -73,7 +84,16 @@ const CustomerFeedbackPage = () => {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4">
         <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
-        <p className="text-gray-600">You can close this tab now.</p>
+        <p className="text-gray-600 mb-4">
+          You can now close this tab.
+        </p>
+        {/* Button to close the tab */}
+        <button
+          onClick={closeTab}
+          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Close Tab
+        </button>
       </div>
     );
   }
