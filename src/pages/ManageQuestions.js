@@ -3,6 +3,7 @@ import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import { QRCodeSVG } from 'qrcode.react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Modal from 'react-modal'; // For the modal dialog
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -10,6 +11,10 @@ const ManageQuestions = () => {
   const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [editingQuestionText, setEditingQuestionText] = useState('');
   const [venueId, setVenueId] = useState(null);
+  const [inactiveQuestions, setInactiveQuestions] = useState([]); // Previously used questions
+  const [searchTerm, setSearchTerm] = useState(''); // Search term for inactive questions
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const [selectedQuestionToReplace, setSelectedQuestionToReplace] = useState(null); // Question to replace
 
   // Fetch venue ID and questions
   useEffect(() => {
@@ -36,21 +41,38 @@ const ManageQuestions = () => {
     } else {
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
+      fetchInactiveQuestions(venueData.id); // Fetch inactive questions
     }
   };
 
-  // Fetch questions for the venue
+  // Fetch active questions for the venue
   const fetchQuestions = async (venueId) => {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
       .eq('venue_id', venueId)
-      .order('order', { ascending: true }); // Fetch questions in order
+      .eq('active', true) // Only fetch active questions
+      .order('order', { ascending: true });
 
     if (error) {
       console.error('Error fetching questions:', error);
     } else {
       setQuestions(data);
+    }
+  };
+
+  // Fetch inactive questions for the venue
+  const fetchInactiveQuestions = async (venueId) => {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('venue_id', venueId)
+      .eq('active', false); // Only fetch inactive questions
+
+    if (error) {
+      console.error('Error fetching inactive questions:', error);
+    } else {
+      setInactiveQuestions(data);
     }
   };
 
@@ -73,7 +95,7 @@ const ManageQuestions = () => {
 
     const { data, error } = await supabase
       .from('questions')
-      .insert([{ venue_id: venueId, question: newQuestion, order: questions.length }]) // Add order
+      .insert([{ venue_id: venueId, question: newQuestion, order: questions.length, active: true }])
       .select();
 
     if (error) {
@@ -113,55 +135,85 @@ const ManageQuestions = () => {
       const updatedQuestions = questions.map((q) =>
         q.id === editingQuestionId ? { ...q, question: editingQuestionText } : q
       );
-      setQuestions(updatedQuestions); // Update the state
-      setEditingQuestionId(null); // Exit editing mode
-      setEditingQuestionText(''); // Clear the editing text
+      setQuestions(updatedQuestions);
+      setEditingQuestionId(null);
+      setEditingQuestionText('');
     }
   };
 
-  // Delete a question
+  // Mark a question as inactive
   const handleDeleteQuestion = async (questionId) => {
     const { error } = await supabase
       .from('questions')
-      .delete()
+      .update({ active: false })
       .eq('id', questionId);
 
     if (error) {
-      console.error('Error deleting question:', error);
+      console.error('Error marking question as inactive:', error);
     } else {
       setQuestions(questions.filter((q) => q.id !== questionId));
+      fetchInactiveQuestions(venueId); // Refresh inactive questions
     }
   };
 
   // Handle drag-and-drop reordering
   const onDragEnd = async (result) => {
     if (!result.destination) return; // Dropped outside the list
-  
+
     const reorderedQuestions = Array.from(questions);
     const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
     reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
-  
+
     // Update the order in the database
     const updates = reorderedQuestions.map((q, index) => ({
       id: q.id,
-      question: q.question, // Include the question text
-      venue_id: q.venue_id, // Include the venue_id
-      order: index + 1, // Ensure order starts from 1
+      question: q.question,
+      venue_id: q.venue_id,
+      order: index + 1,
+      active: q.active,
     }));
-  
-    console.log('Updates to be sent:', updates); // Log the updates
-  
+
     const { error } = await supabase
       .from('questions')
       .upsert(updates);
-  
+
     if (error) {
       console.error('Error updating question order:', error);
     } else {
-      console.log('Questions reordered successfully');
-      setQuestions(reorderedQuestions); // Update the state immediately
+      setQuestions(reorderedQuestions);
     }
   };
+
+  // Open modal to replace a question
+  const openReplaceModal = (questionId) => {
+    setSelectedQuestionToReplace(questionId);
+    setIsModalOpen(true);
+  };
+
+  // Replace an active question with an inactive one
+  const replaceQuestion = async (inactiveQuestionId) => {
+    // Mark the selected active question as inactive
+    await supabase
+      .from('questions')
+      .update({ active: false })
+      .eq('id', selectedQuestionToReplace);
+
+    // Mark the selected inactive question as active
+    await supabase
+      .from('questions')
+      .update({ active: true })
+      .eq('id', inactiveQuestionId);
+
+    // Refresh both active and inactive questions
+    fetchQuestions(venueId);
+    fetchInactiveQuestions(venueId);
+    setIsModalOpen(false);
+  };
+
+  // Filter inactive questions based on search term
+  const filteredInactiveQuestions = inactiveQuestions.filter((q) =>
+    q.question.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Suggested questions for easy adding
   const suggestedQuestions = [
@@ -178,13 +230,6 @@ const ManageQuestions = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Manage Questions</h1>
-          <div className="bg-blue-50 px-4 py-2 rounded-lg">
-            <span className="text-blue-600 font-medium">Questions Active: {questions.length}/5</span>
-          </div>
-        </div>
-
         {/* QR Code Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Feedback QR Code</h2>
@@ -196,10 +241,10 @@ const ManageQuestions = () => {
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Feedback Link</h3>
                 <p className="text-gray-600 mb-4">Scan this QR code or share the link below to collect customer feedback.</p>
-                <a 
-                  href={feedbackUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={feedbackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 break-all"
                 >
                   {feedbackUrl}
@@ -323,6 +368,58 @@ const ManageQuestions = () => {
             </Droppable>
           </DragDropContext>
         </div>
+
+        {/* Previously Used Questions */}
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Previously Used Questions</h2>
+          <input
+            type="text"
+            placeholder="Search previously used questions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none mb-4"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredInactiveQuestions.map((q) => (
+              <div
+                key={q.id}
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
+                onClick={() => openReplaceModal(q.id)}
+              >
+                <p className="text-gray-700">{q.question}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Modal for Replacing Questions */}
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={() => setIsModalOpen(false)}
+          contentLabel="Replace Question Modal"
+          className="modal"
+          overlayClassName="modal-overlay"
+        >
+          <h2 className="text-xl font-bold mb-4">Replace Question</h2>
+          <p className="mb-4">Select a question to replace:</p>
+          <div className="space-y-4">
+            {questions.map((q) => (
+              <div
+                key={q.id}
+                className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
+                onClick={() => replaceQuestion(q.id)}
+              >
+                <p className="text-gray-700">{q.question}</p>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="mt-4 bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+          >
+            Cancel
+          </button>
+        </Modal>
       </div>
     </DashboardFrame>
   );
