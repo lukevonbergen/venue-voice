@@ -54,9 +54,9 @@ const ManageQuestions = () => {
       .from('questions')
       .select('*')
       .eq('venue_id', venueId)
-      .eq('active', true) // Only fetch active questions
+      .eq('active', true)
       .order('order', { ascending: true });
-
+  
     if (error) {
       console.error('Error fetching questions:', error);
     } else {
@@ -202,25 +202,25 @@ const ManageQuestions = () => {
   // Handle drag-and-drop reordering
   const onDragEnd = async (result) => {
     if (!result.destination) return; // Dropped outside the list
-
+  
     const reorderedQuestions = Array.from(questions);
     const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
     reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
-
+  
     // Update the order in the database
     const updates = reorderedQuestions.map((q, index) => ({
       id: q.id,
-      order: index + 1,
+      order: index + 1, // Update the order based on the new position
     }));
-
+  
     const { error } = await supabase
       .from('questions')
-      .upsert(updates);
-
+      .upsert(updates, { onConflict: ['id'] }); // Only update the `order` field
+  
     if (error) {
       console.error('Error updating question order:', error);
     } else {
-      setQuestions(reorderedQuestions);
+      setQuestions(reorderedQuestions); // Update the state with the new order
     }
   };
 
