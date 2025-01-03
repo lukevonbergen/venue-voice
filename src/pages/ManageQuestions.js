@@ -136,25 +136,28 @@ const ManageQuestions = () => {
   // Handle drag-and-drop reordering
   const onDragEnd = async (result) => {
     if (!result.destination) return; // Dropped outside the list
-
+  
     const reorderedQuestions = Array.from(questions);
     const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
     reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
-
+  
     // Update the order in the database
     const updates = reorderedQuestions.map((q, index) => ({
       id: q.id,
-      order: index,
+      order: index + 1, // Ensure order starts from 1
     }));
-
+  
+    console.log('Updates to be sent:', updates); // Log the updates
+  
     const { error } = await supabase
       .from('questions')
       .upsert(updates);
-
+  
     if (error) {
       console.error('Error updating question order:', error);
     } else {
-      setQuestions(reorderedQuestions);
+      console.log('Questions reordered successfully');
+      setQuestions(reorderedQuestions); // Update the state immediately
     }
   };
 
