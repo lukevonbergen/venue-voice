@@ -158,7 +158,7 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         {/* Overall Satisfaction Tile */}
         <div className="bg-blue-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Overaldddl Satisfaction</h3>
+          <h3 className="text-lg font-semibold mb-2">Overall Satisfaction</h3>
           <p className="text-4xl font-bold">{calculateOverallAverageRating()}/5</p>
         </div>
   

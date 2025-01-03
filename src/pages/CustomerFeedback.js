@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import supabase from '../utils/supabase'; 
+import supabase from '../utils/supabase';
 import { useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CustomerFeedbackPage = () => {
   const { venueId } = useParams();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
-  const [points, setPoints] = useState(100);
+  const [isFinished, setIsFinished] = useState(false);
 
   // Fetch questions for the venue
   useEffect(() => {
@@ -34,7 +35,7 @@ const CustomerFeedbackPage = () => {
       '😍': 5,
     };
     const rating = emojiToRating[emoji];
-  
+
     // Save feedback to the database
     await supabase
       .from('feedback')
@@ -43,87 +44,66 @@ const CustomerFeedbackPage = () => {
           venue_id: venueId,
           question_id: questions[currentQuestionIndex].id,
           sentiment: emoji,
-          rating: rating, // Include the rating
+          rating: rating,
         },
       ]);
-  
-    // Move to the next question
+
+    // Move to the next question or finish
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      alert('Thank you for your feedback! You earned 30 points.');
-      setCurrentQuestionIndex(0); // Reset to the first question
+      setIsFinished(true); // Show the "Thank You" message
     }
   };
 
   if (questions.length === 0) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
+  if (isFinished) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4">
+        <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
+        <p className="text-gray-600">You can close this tab now.</p>
+      </div>
+    );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.question}>
-        <h2>{questions[currentQuestionIndex].question}</h2>
-      </div>
-      <div style={styles.progress}>
-        Question {currentQuestionIndex + 1} of {questions.length}
-      </div>
-      <div style={styles.buttonContainer}>
+    <div className="flex flex-col justify-between h-screen p-4 bg-gray-100">
+      {/* Question Section with Slide Animation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentQuestionIndex}
+          initial={{ opacity: 0, x: 100 }} // Slide in from the right
+          animate={{ opacity: 1, x: 0 }} // Center position
+          exit={{ opacity: 0, x: -100 }} // Slide out to the left
+          transition={{ type: 'tween', duration: 0.3 }} // Smooth transition
+          className="flex-1 flex flex-col justify-center items-center"
+        >
+          <h2 className="text-2xl font-bold text-center mb-4">
+            {questions[currentQuestionIndex].question}
+          </h2>
+          <p className="text-gray-600">
+            Question {currentQuestionIndex + 1} of {questions.length}
+          </p>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Emoji Buttons */}
+      <div className="flex justify-center gap-4 mb-8">
         {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
           <button
             key={index}
-            style={styles.button}
+            className="text-4xl transition-transform hover:scale-125 active:scale-100"
             onClick={() => handleFeedback(emoji)}
-            onMouseEnter={(e) => (e.target.style.transform = 'scale(1.2)')}
-            onMouseLeave={(e) => (e.target.style.transform = 'scale(1)')}
           >
             {emoji}
           </button>
         ))}
       </div>
-      <div style={styles.rewards}>
-        <h3>Your Rewards</h3>
-        <p>Points: {points}</p>
-        <p>Redeem for free drinks, queue skip, or VIP perks!</p>
-      </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    textAlign: 'center',
-    padding: '20px',
-    fontFamily: 'Arial, sans-serif',
-  },
-  question: {
-    transition: 'opacity 0.5s ease-in-out',
-  },
-  progress: {
-    marginTop: '10px',
-    fontSize: '1rem',
-    color: '#666',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-    margin: '20px 0',
-  },
-  button: {
-    fontSize: '2rem',
-    border: 'none',
-    background: 'none',
-    cursor: 'pointer',
-    transition: 'transform 0.2s',
-  },
-  rewards: {
-    marginTop: '20px',
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    backgroundColor: '#f9f9f9',
-  },
 };
 
 export default CustomerFeedbackPage;
