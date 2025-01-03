@@ -9,6 +9,7 @@ const CustomerFeedbackPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [isFinished, setIsFinished] = useState(false);
+  const [additionalFeedback, setAdditionalFeedback] = useState(''); // State for additional feedback
 
   // Disable scrolling when this page is active
   useEffect(() => {
@@ -61,8 +62,28 @@ const CustomerFeedbackPage = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setIsFinished(true); // Show the "Thank You" message
+      // Show the additional feedback input if it's the last question
+      if (currentQuestionIndex === questions.length - 1) {
+        setIsFinished(true); // Show the "Thank You" message after submitting additional feedback
+      }
     }
+  };
+
+  const handleAdditionalFeedback = async () => {
+    // Save additional feedback to the database
+    if (additionalFeedback.trim() !== '') {
+      await supabase
+        .from('feedback')
+        .insert([
+          {
+            venue_id: venueId,
+            additional_feedback: additionalFeedback,
+          },
+        ]);
+    }
+
+    // Show the "Thank You" message
+    setIsFinished(true);
   };
 
   if (questions.length === 0) {
@@ -100,17 +121,40 @@ const CustomerFeedbackPage = () => {
       </AnimatePresence>
 
       {/* Emoji Buttons */}
-      <div className="flex justify-center gap-4">
-        {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
+      {currentQuestionIndex < questions.length && (
+        <div className="flex justify-center gap-4">
+          {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
+            <button
+              key={index}
+              className="text-4xl transition-transform hover:scale-125 active:scale-100"
+              onClick={() => handleFeedback(emoji)}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Additional Feedback Section */}
+      {currentQuestionIndex === questions.length && (
+        <div className="flex flex-col items-center gap-4">
+          <h2 className="text-2xl font-bold mb-4">Any additional feedback?</h2>
+          <p className="text-gray-600 mb-4">This is optional, but we'd love to hear more!</p>
+          <textarea
+            className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="4"
+            placeholder="Type your feedback here..."
+            value={additionalFeedback}
+            onChange={(e) => setAdditionalFeedback(e.target.value)}
+          />
           <button
-            key={index}
-            className="text-4xl transition-transform hover:scale-125 active:scale-100"
-            onClick={() => handleFeedback(emoji)}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            onClick={handleAdditionalFeedback}
           >
-            {emoji}
+            Submit
           </button>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
