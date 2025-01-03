@@ -18,6 +18,7 @@ const ManageQuestions = () => {
   const [selectedInactiveQuestion, setSelectedInactiveQuestion] = useState(null); // Inactive question to re-add
   const [pendingNewQuestion, setPendingNewQuestion] = useState('');
   const [replacementSource, setReplacementSource] = useState(null); // 'new' or 'inactive'
+  const [duplicateError, setDuplicateError] = useState('');
 
   // Fetch venue ID and questions
   useEffect(() => {
@@ -100,6 +101,13 @@ const ManageQuestions = () => {
       return;
     }
   
+    // Check for duplicate question
+    const isDuplicate = await checkForDuplicateQuestion(newQuestion);
+    if (isDuplicate) {
+      alert('This question already exists.');
+      return;
+    }
+  
     // Add the new question to the database
     const { data, error } = await supabase
       .from('questions')
@@ -123,6 +131,14 @@ const ManageQuestions = () => {
   
     if (replacementSource === 'inactive' && !selectedInactiveQuestion) {
       alert('Please select a question to re-add.');
+      return;
+    }
+  
+    // Check for duplicate question
+    const questionToAdd = replacementSource === 'new' ? pendingNewQuestion : selectedInactiveQuestion.question;
+    const isDuplicate = await checkForDuplicateQuestion(questionToAdd);
+    if (isDuplicate) {
+      alert('This question already exists. Please select a unique question.');
       return;
     }
   
@@ -191,6 +207,21 @@ const ManageQuestions = () => {
       fetchQuestions(venueId);
       fetchInactiveQuestions(venueId);
     }
+  };
+
+  const checkForDuplicateQuestion = async (questionText) => {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('venue_id', venueId)
+      .eq('question', questionText);
+  
+    if (error) {
+      console.error('Error checking for duplicate question:', error);
+      return false; // Assume no duplicate if there's an error
+    }
+  
+    return data.length > 0; // Return true if a duplicate is found
   };
 
   // Close the replace modal
@@ -348,35 +379,38 @@ const ManageQuestions = () => {
 
         {/* Add New Question */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">Add New Question</h2>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex gap-4">
-              <input
-                type="text"
-                placeholder="Enter a new question"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                maxLength={100}
-              />
-              <button
-                onClick={handleAddQuestion}
-                className={`${
-                  questions.length >= 5
-                    ? 'bg-gray-500 hover:bg-gray-600'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                } text-white px-6 py-3 rounded-lg transition-colors duration-200`}
-              >
-                {questions.length >= 5 ? 'Replace...' : 'Add Question'}
-              </button>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Add New Question</h2>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex gap-4">
+                <input
+                    type="text"
+                    placeholder="Enter a new question"
+                    value={newQuestion}
+                    onChange={handleNewQuestionChange}
+                    className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    maxLength={100}
+                />
+                <button
+                    onClick={handleAddQuestion}
+                    className={`${
+                    questions.length >= 5
+                        ? 'bg-gray-500 hover:bg-gray-600'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    } text-white px-6 py-3 rounded-lg transition-colors duration-200`}
+                >
+                    {questions.length >= 5 ? 'Replace...' : 'Add Question'}
+                </button>
+                </div>
+                <div className="flex justify-between mt-2">
+                <p className="text-sm text-gray-500">{newQuestion.length}/100 characters</p>
+                {duplicateError && (
+                    <p className="text-sm text-red-500">{duplicateError}</p>
+                )}
+                {questions.length >= 5 && (
+                    <p className="text-sm text-red-500">Maximum questions limit reached (5/5)</p>
+                )}
+                </div>
             </div>
-            <div className="flex justify-between mt-2">
-              <p className="text-sm text-gray-500">{newQuestion.length}/100 characters</p>
-              {questions.length >= 5 && (
-                <p className="text-sm text-red-500">Maximum questions limit reached (5/5)</p>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Current Questions */}
