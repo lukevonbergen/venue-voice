@@ -132,19 +132,30 @@ const DashboardPage = () => {
     return (totalRating / feedback.length).toFixed(1);
   };
 
-  // Count responses in the last hour
-  const countResponsesLastHour = () => {
+  // Count responses in timeframes
+  const countResponses = (timeInterval) => {
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-    const recentFeedback = feedback.filter((f) => f.timestamp >= oneHourAgo);
-    return recentFeedback.length;
-  };
-
-  // Count total responses today
-  const countTodaysResponses = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const todaysFeedback = feedback.filter((f) => f.timestamp.startsWith(today));
-    return todaysFeedback.length;
+    let startTime;
+  
+    switch (timeInterval) {
+      case '30min':
+        startTime = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+        break;
+      case '1hour':
+        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+        break;
+      case 'today':
+        startTime = new Date(now.toISOString().split('T')[0]).toISOString();
+        break;
+      case '7days':
+        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        break;
+      default:
+        throw new Error('Invalid time interval');
+    }
+  
+    const filteredFeedback = feedback.filter((f) => f.timestamp >= startTime);
+    return filteredFeedback.length;
   };
 
   // Generate the feedback URL for the venue
@@ -171,32 +182,33 @@ const DashboardPage = () => {
         ))}
       </div>
 
-      {/* Middle Row: Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Responses in the Last Hour */}
+
+        {/* Middle Row: Key Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Responses in the Last 30 Minutes */}
         <div className="bg-purple-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Responses (Last Hour)</h3>
-          <p className="text-4xl font-bold">{countResponsesLastHour()}</p>
+            <h3 className="text-lg font-semibold mb-2">Last 30 mins</h3>
+            <p className="text-4xl font-bold">{countResponses('30min')}</p>
+        </div>
+
+        {/* Responses in the Last Hour */}
+        <div className="bg-yellow-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+            <h3 className="text-lg font-semibold mb-2">Last Hour</h3>
+            <p className="text-4xl font-bold">{countResponses('1hour')}</p>
         </div>
 
         {/* Total Responses Today */}
-        <div className="bg-yellow-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Total Responses (Today)</h3>
-          <p className="text-4xl font-bold">{countTodaysResponses()}</p>
-        </div>
-
-        {/* Placeholder Tile 1 */}
         <div className="bg-pink-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Placeholder 1</h3>
-          <p className="text-4xl font-bold">-</p>
+            <h3 className="text-lg font-semibold mb-2">Today</h3>
+            <p className="text-4xl font-bold">{countResponses('today')}</p>
         </div>
 
-        {/* Placeholder Tile 2 */}
+        {/* Total Responses in the Last 7 Days */}
         <div className="bg-indigo-100 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Placeholder 2</h3>
-          <p className="text-4xl font-bold">-</p>
+            <h3 className="text-lg font-semibold mb-2">Last 7 Days</h3>
+            <p className="text-4xl font-bold">{countResponses('7days')}</p>
         </div>
-      </div>
+        </div>
 
       {/* Bottom Row: Question Management */}
       <div className="bg-white p-6 rounded-lg shadow-md">
