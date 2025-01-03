@@ -177,6 +177,33 @@ const DashboardPage = () => {
     return filteredFeedback.length;
   };
 
+  // Map questions to actionable suggestions
+  const questionToSuggestionMap = {
+    'Do you like the music?': 'Consider updating the playlist or adjusting the volume.',
+    'How was the service?': 'Provide additional staff training to improve service quality.',
+    'Was the venue clean?': 'Increase the frequency of cleaning schedules.',
+    // Add more mappings as needed
+  };
+
+  // Generate suggested actions based on low-rated questions
+  const generateSuggestedActions = () => {
+    const suggestedActions = [];
+    const ratingThreshold = 3.5; // Threshold for low ratings
+
+    questions.forEach((q) => {
+      const averageRating = calculateAverageRating(q.id);
+      if (averageRating < ratingThreshold && questionToSuggestionMap[q.question]) {
+        suggestedActions.push({
+          question: q.question,
+          rating: averageRating,
+          suggestion: questionToSuggestionMap[q.question],
+        });
+      }
+    });
+
+    return suggestedActions;
+  };
+
   return (
     <DashboardFrame>
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Venue Dashboard</h1>
@@ -270,6 +297,20 @@ const DashboardPage = () => {
             {countResponses('7days') > getPreviousCount('7days') ? '↑' : '↓'}{' '}
             {Math.abs(calculatePercentageChange(countResponses('7days'), getPreviousCount('7days')))}% from last week
           </p>
+        </div>
+      </div>
+
+      {/* Suggested Actions Section */}
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-bold mb-4 text-gray-800">Suggested Actions</h2>
+        <div className="space-y-4">
+          {generateSuggestedActions().map((action, index) => (
+            <div key={index} className="p-4 border rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800">{action.question}</h3>
+              <p className="text-gray-600">Average Rating: {action.rating}/5</p>
+              <p className="text-gray-600">Suggestion: {action.suggestion}</p>
+            </div>
+          ))}
         </div>
       </div>
     </DashboardFrame>
