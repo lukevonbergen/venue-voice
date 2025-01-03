@@ -13,7 +13,7 @@ const LandingPage = () => {
                 <div className="flex items-center space-x-2">
                   <div className="h-8 w-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg"></div>
                   <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    FeedbackFlow
+                    Feedie.app
                   </span>
                 </div>
                 <div className="flex items-center space-x-6">
