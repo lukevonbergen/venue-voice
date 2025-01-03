@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
+import QRCode from 'qrcode.react'; // Import QRCode library
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -139,103 +140,120 @@ const ManageQuestions = () => {
     'How clean was the venue?',
   ];
 
+  // Generate the feedback URL for the venue
+  const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
+
   return (
     <DashboardFrame>
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-8">Manage Questions</h1>
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <h1 className="text-3xl font-bold mb-8">Manage Questions</h1>
 
-      {/* Suggested Questions */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">Suggested Questions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {suggestedQuestions.map((question, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:bg-gray-100"
-              onClick={() => setNewQuestion(question)}
+        {/* QR Code Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Feedback QR Code</h2>
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+            <QRCode value={feedbackUrl} size={200} /> {/* Generate QR code */}
+            <p className="text-gray-600 mt-4">Scan this QR code to provide feedback.</p>
+            <p className="text-sm text-gray-500 mt-2">
+              <a href={feedbackUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                {feedbackUrl}
+              </a>
+            </p>
+          </div>
+        </div>
+
+        {/* Suggested Questions */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Suggested Questions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {suggestedQuestions.map((question, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:bg-gray-100"
+                onClick={() => setNewQuestion(question)}
+              >
+                <p className="text-gray-700">{question}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Add New Question */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Add New Question</h2>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Enter a new question"
+              value={newQuestion}
+              onChange={(e) => setNewQuestion(e.target.value)}
+              className="flex-1 p-2 border rounded-lg"
+              maxLength={100}
+            />
+            <button
+              onClick={handleAddQuestion}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
             >
-              <p className="text-gray-700">{question}</p>
-            </div>
-          ))}
+              Add
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mt-2">
+            {newQuestion.length}/100 characters
+          </p>
         </div>
-      </div>
 
-      {/* Add New Question */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">Add New Question</h2>
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Enter a new question"
-            value={newQuestion}
-            onChange={(e) => setNewQuestion(e.target.value)}
-            className="flex-1 p-2 border rounded-lg"
-            maxLength={100}
-          />
-          <button
-            onClick={handleAddQuestion}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Add
-          </button>
-        </div>
-        <p className="text-sm text-gray-500 mt-2">
-          {newQuestion.length}/100 characters
-        </p>
-      </div>
-
-      {/* Current Questions */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">Current Questions</h2>
-        <div className="space-y-4">
-          {questions.map((q) => (
-            <div key={q.id} className="bg-white p-4 rounded-lg shadow-md">
-              {editingQuestionId === q.id ? (
-                <div className="flex gap-4">
-                  <input
-                    type="text"
-                    value={editingQuestionText}
-                    onChange={(e) => setEditingQuestionText(e.target.value)}
-                    className="flex-1 p-2 border rounded-lg"
-                    maxLength={100}
-                  />
-                  <button
-                    onClick={saveEditedQuestion}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingQuestionId(null)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <p className="text-gray-700">{q.question}</p>
-                  <div className="flex gap-2">
+        {/* Current Questions */}
+        <div>
+          <h2 className="text-xl font-bold mb-4">Current Questions</h2>
+          <div className="space-y-4">
+            {questions.map((q) => (
+              <div key={q.id} className="bg-white p-4 rounded-lg shadow-md">
+                {editingQuestionId === q.id ? (
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      value={editingQuestionText}
+                      onChange={(e) => setEditingQuestionText(e.target.value)}
+                      className="flex-1 p-2 border rounded-lg"
+                      maxLength={100}
+                    />
                     <button
-                      onClick={() => startEditingQuestion(q.id, q.question)}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+                      onClick={saveEditedQuestion}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                     >
-                      Edit
+                      Save
                     </button>
                     <button
-                      onClick={() => handleDeleteQuestion(q.id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                      onClick={() => setEditingQuestionId(null)}
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                     >
-                      Delete
+                      Cancel
                     </button>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <p className="text-gray-700">{q.question}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startEditingQuestion(q.id, q.question)}
+                        className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteQuestion(q.id)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
     </DashboardFrame>
   );
 };

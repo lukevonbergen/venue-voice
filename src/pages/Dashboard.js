@@ -182,6 +182,7 @@ const DashboardPage = () => {
     'Do you like the music?': 'Consider updating the playlist or adjusting the volume.',
     'How was the service?': 'Provide additional staff training to improve service quality.',
     'Was the venue clean?': 'Increase the frequency of cleaning schedules.',
+    'How was the food?': 'Consider revising the menu or improving food quality.',
     // Add more mappings as needed
   };
 
