@@ -65,20 +65,29 @@ const CustomerFeedbackPage = () => {
       setShowAdditionalFeedback(true); // Show the additional feedback section
     }
   };
-
+  
   const handleAdditionalFeedback = async () => {
     // Save additional feedback to the database
     if (additionalFeedback.trim() !== '') {
-      await supabase
+      const { data, error } = await supabase
         .from('feedback')
         .insert([
           {
             venue_id: venueId,
+            question_id: null, // Optional: Set to null or a placeholder value
+            sentiment: null,   // Optional: Set to null or a placeholder value
+            rating: null,      // Optional: Set to null or a placeholder value
             additional_feedback: additionalFeedback,
           },
         ]);
+  
+      if (error) {
+        console.error('Error inserting additional feedback:', error);
+      } else {
+        console.log('Additional feedback inserted successfully:', data);
+      }
     }
-
+  
     // Show the "Thank You" message
     setIsFinished(true);
   };
