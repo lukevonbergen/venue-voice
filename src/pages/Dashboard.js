@@ -5,7 +5,6 @@ import DashboardFrame from './DashboardFrame';
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
-  const [newQuestion, setNewQuestion] = useState('');
   const [venueId, setVenueId] = useState(null);
   const [feedback, setFeedback] = useState([]);
   const navigate = useNavigate();
@@ -73,45 +72,6 @@ const DashboardPage = () => {
     } else {
       console.log('Feedback fetched successfully:', data);
       setFeedback(data);
-    }
-  };
-
-  // Add a new question
-  const handleAddQuestion = async () => {
-    if (questions.length >= 5) {
-      alert('You can only add up to 5 questions.');
-      return;
-    }
-
-    if (!newQuestion.trim()) {
-      alert('Question cannot be empty.');
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('questions')
-      .insert([{ venue_id: venueId, question: newQuestion }])
-      .select();
-
-    if (error) {
-      console.error('Error adding question:', error);
-    } else {
-      setQuestions([...questions, data[0]]);
-      setNewQuestion('');
-    }
-  };
-
-  // Delete a question
-  const handleDeleteQuestion = async (questionId) => {
-    const { error } = await supabase
-      .from('questions')
-      .delete()
-      .eq('id', questionId);
-
-    if (error) {
-      console.error('Error deleting question:', error);
-    } else {
-      setQuestions(questions.filter((q) => q.id !== questionId));
     }
   };
 
@@ -197,33 +157,38 @@ const DashboardPage = () => {
     return filteredFeedback.length;
   };
 
-  // Generate the feedback URL for the venue
-  const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
-
   return (
     <DashboardFrame>
-      <h1 className="text-3xl font-bold mb-8">Venue Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">Venue Dashboard</h1>
 
       {/* Top Row: Overall Satisfaction and Per-Question Averages */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         {/* Overall Satisfaction Tile */}
-        <div className="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Overall Satisfaction</h3>
-          <p className="text-4xl font-bold">{calculateOverallAverageRating()}/5</p>
-          <p className="text-sm text-gray-600 mt-2">
-            {calculateOverallAverageRating() > 0 ? '↑' : '↓'}{' '}
-            {Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}% from last hour
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">Overall Satisfaction</h3>
+          <p className="text-4xl font-bold text-gray-800">{calculateOverallAverageRating()}/5</p>
+          <p
+            className={`text-sm mt-2 ${
+              calculateOverallAverageRating() > 4.2 ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
+            {calculateOverallAverageRating() > 4.2 ? '↑' : '↓'}{' '}
+            {Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)} from last hour
           </p>
         </div>
 
         {/* Per-Question Average Tiles */}
         {questions.map((q) => (
-          <div key={q.id} className="bg-green-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold mb-2">{q.question}</h3>
-            <p className="text-4xl font-bold">{calculateAverageRating(q.id)}/5</p>
-            <p className="text-sm text-gray-600 mt-2">
-              {calculateAverageRating(q.id) > 0 ? '↑' : '↓'}{' '}
-              {Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)}% from last hour
+          <div key={q.id} className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+            <h3 className="text-lg font-semibold mb-2 text-gray-800">{q.question}</h3>
+            <p className="text-4xl font-bold text-gray-800">{calculateAverageRating(q.id)}/5</p>
+            <p
+              className={`text-sm mt-2 ${
+                calculateAverageRating(q.id) > 4.0 ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
+              {calculateAverageRating(q.id) > 4.0 ? '↑' : '↓'}{' '}
+              {Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)} from last hour
             </p>
           </div>
         ))}
@@ -232,76 +197,59 @@ const DashboardPage = () => {
       {/* Middle Row: Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Responses in the Last 30 Minutes */}
-        <div className="bg-purple-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Last 30 mins</h3>
-          <p className="text-4xl font-bold">{countResponses('30min')}</p>
-          <p className="text-sm text-gray-600 mt-2">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">Last 30 mins</h3>
+          <p className="text-4xl font-bold text-gray-800">{countResponses('30min')}</p>
+          <p
+            className={`text-sm mt-2 ${
+              countResponses('30min') > getPreviousCount('30min') ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {countResponses('30min') > getPreviousCount('30min') ? '↑' : '↓'}{' '}
             {Math.abs(calculatePercentageChange(countResponses('30min'), getPreviousCount('30min')))}% from last hour
           </p>
         </div>
 
         {/* Responses in the Last Hour */}
-        <div className="bg-yellow-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Last Hour</h3>
-          <p className="text-4xl font-bold">{countResponses('1hour')}</p>
-          <p className="text-sm text-gray-600 mt-2">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">Last Hour</h3>
+          <p className="text-4xl font-bold text-gray-800">{countResponses('1hour')}</p>
+          <p
+            className={`text-sm mt-2 ${
+              countResponses('1hour') > getPreviousCount('1hour') ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {countResponses('1hour') > getPreviousCount('1hour') ? '↑' : '↓'}{' '}
             {Math.abs(calculatePercentageChange(countResponses('1hour'), getPreviousCount('1hour')))}% from yesterday
           </p>
         </div>
 
         {/* Total Responses Today */}
-        <div className="bg-pink-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Today</h3>
-          <p className="text-4xl font-bold">{countResponses('today')}</p>
-          <p className="text-sm text-gray-600 mt-2">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">Today</h3>
+          <p className="text-4xl font-bold text-gray-800">{countResponses('today')}</p>
+          <p
+            className={`text-sm mt-2 ${
+              countResponses('today') > getPreviousCount('today') ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {countResponses('today') > getPreviousCount('today') ? '↑' : '↓'}{' '}
             {Math.abs(calculatePercentageChange(countResponses('today'), getPreviousCount('today')))}% from yesterday
           </p>
         </div>
 
         {/* Total Responses in the Last 7 Days */}
-        <div className="bg-indigo-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
-          <h3 className="text-lg font-semibold mb-2">Last 7 Days</h3>
-          <p className="text-4xl font-bold">{countResponses('7days')}</p>
-          <p className="text-sm text-gray-600 mt-2">
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800">Last 7 Days</h3>
+          <p className="text-4xl font-bold text-gray-800">{countResponses('7days')}</p>
+          <p
+            className={`text-sm mt-2 ${
+              countResponses('7days') > getPreviousCount('7days') ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {countResponses('7days') > getPreviousCount('7days') ? '↑' : '↓'}{' '}
             {Math.abs(calculatePercentageChange(countResponses('7days'), getPreviousCount('7days')))}% from last week
           </p>
-        </div>
-      </div>
-
-      {/* Bottom Row: Question Management */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4">Manage Questions</h2>
-        <div className="space-y-4">
-          {questions.map((q) => (
-            <div key={q.id} className="flex justify-between items-center p-4 border rounded-lg">
-              <p className="text-lg">{q.question}</p>
-              <button
-                onClick={() => handleDeleteQuestion(q.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-4 mt-4">
-          <input
-            type="text"
-            placeholder="Enter a new question"
-            value={newQuestion}
-            onChange={(e) => setNewQuestion(e.target.value)}
-            className="flex-1 p-2 border rounded-lg"
-          />
-          <button
-            onClick={handleAddQuestion}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Add Question
-          </button>
         </div>
       </div>
     </DashboardFrame>
