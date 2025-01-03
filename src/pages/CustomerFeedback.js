@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import supabase from '../utils/supabase';
-import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CustomerFeedbackPage = () => {
   const { venueId } = useParams();
+  const location = useLocation();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [isFinished, setIsFinished] = useState(false);
+
+  // Hide the navbar when this page is active
+  useEffect(() => {
+    document.body.classList.add('no-navbar');
+    return () => {
+      document.body.classList.remove('no-navbar');
+    };
+  }, []);
 
   // Fetch questions for the venue
   useEffect(() => {
@@ -70,7 +79,7 @@ const CustomerFeedbackPage = () => {
   }
 
   return (
-    <div className="flex flex-col justify-between h-screen p-4 bg-gray-100">
+    <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4">
       {/* Question Section with Slide Animation */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -79,9 +88,9 @@ const CustomerFeedbackPage = () => {
           animate={{ opacity: 1, x: 0 }} // Center position
           exit={{ opacity: 0, x: -100 }} // Slide out to the left
           transition={{ type: 'tween', duration: 0.3 }} // Smooth transition
-          className="flex-1 flex flex-col justify-center items-center"
+          className="flex flex-col justify-center items-center text-center mb-8"
         >
-          <h2 className="text-2xl font-bold text-center mb-4">
+          <h2 className="text-2xl font-bold mb-4">
             {questions[currentQuestionIndex].question}
           </h2>
           <p className="text-gray-600">
@@ -91,7 +100,7 @@ const CustomerFeedbackPage = () => {
       </AnimatePresence>
 
       {/* Emoji Buttons */}
-      <div className="flex justify-center gap-4 mb-8">
+      <div className="flex justify-center gap-4">
         {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
           <button
             key={index}
