@@ -1,8 +1,15 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import supabase from '../utils/supabase';
 
 const DashboardFrame = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/signin');
+  };
 
   const NavLink = ({ to, children }) => {
     const isActive = location.pathname === to;
@@ -23,12 +30,12 @@ const DashboardFrame = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 px-4 py-6">
+      <div className="w-64 bg-white border-r border-gray-200 px-4 py-6 flex flex-col">
         <div className="px-4">
           <h2 className="text-xl font-bold text-gray-900 mb-1">Dashboard</h2>
           <p className="text-sm text-gray-500 mb-6">Manage your venue feedback</p>
         </div>
-        <nav>
+        <nav className="flex-1">
           <ul className="space-y-1">
             <li>
               <NavLink to="/dashboard">Overview</NavLink>
@@ -41,6 +48,14 @@ const DashboardFrame = ({ children }) => {
             </li>
           </ul>
         </nav>
+        <div className="pt-6 px-4 border-t border-gray-200">
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+          >
+            Log Out
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
