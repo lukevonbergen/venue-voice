@@ -6,6 +6,7 @@ import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import SignInPage from './pages/SignIn';
+import './index.css'
 
 function App() {
   return (
