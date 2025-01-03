@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
+import FeedbackGraph from '../components/FeedbackGraph';
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -300,6 +301,9 @@ const DashboardPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Feedback Graph */}
+      <FeedbackGraph feedback={feedback} questions={questions} />
 
       {/* Suggested Actions Section */}
       <div className="bg-white p-6 rounded-lg shadow-md">
