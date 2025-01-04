@@ -4,7 +4,7 @@ import { ArrowRight, Check, BarChart2, Users, Zap, Globe, Lock, MessageSquare } 
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
       {/* Dotted Background */}
       <div className="absolute inset-0 bg-dotted-pattern bg-[length:40px_40px] opacity-10"></div>
 
@@ -15,10 +15,10 @@ const LandingPage = () => {
             <div className="px-6 py-4">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <div className="h-8 w-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                     Feedie.app
                   </span>
                 </div>
@@ -30,7 +30,7 @@ const LandingPage = () => {
                     <Link to="/signin" className="px-4 py-2 text-gray-700 hover:text-gray-900">
                       Sign in
                     </Link>
-                    <Link to="/signup" className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+                    <Link to="/signup" className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
                       <span>Start Free</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -46,13 +46,13 @@ const LandingPage = () => {
       <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="mb-8 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-purple-100">
-              <span className="bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
+            <div className="mb-8 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-emerald-100">
+              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
               <span className="text-sm text-gray-600">Introducing AI-powered feedback analysis</span>
             </div>
             <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 space-y-3 tracking-tight">
               <span className="block">Customer Feedback that</span>
-              <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Drives Growth
               </span>
             </h1>
@@ -62,14 +62,14 @@ const LandingPage = () => {
             </p>
             <div className="mt-8 flex justify-center space-x-4">
               <Link to="/signup" 
-                className="px-8 py-3 text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+                className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2">
                 <span>Start Free Trial</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a href="#demo" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center space-x-2">
                 <span>Watch Demo</span>
-                <div className="h-5 w-5 rounded-full bg-indigo-600 flex items-center justify-center">
+                <div className="h-5 w-5 rounded-full bg-green-600 flex items-center justify-center">
                   <ArrowRight className="h-3 w-3 text-white" />
                 </div>
               </a>
@@ -93,7 +93,7 @@ const LandingPage = () => {
       </div>
 
       {/* Product Screenshot Section */}
-      <div className="bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 py-16">
+      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Feedback, Visualized</h2>
@@ -154,11 +154,11 @@ const LandingPage = () => {
               }
             ].map((feature, i) => (
               <div key={i} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
                 <div className="relative p-6 bg-white rounded-2xl border border-gray-100">
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50">
-                      <feature.icon className="h-5 w-5 text-indigo-600" />
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
+                      <feature.icon className="h-5 w-5 text-green-600" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
                   </div>
@@ -171,7 +171,7 @@ const LandingPage = () => {
       </div>
 
       {/* Book a Demo Section */}
-      <div className="bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 py-16">
+      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">See Feedie.app in Action</h2>
@@ -185,17 +185,17 @@ const LandingPage = () => {
                 <input
                   type="text"
                   placeholder="Your Name"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <input
                   type="email"
                   placeholder="Your Email"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 Schedule a Demo
               </button>
@@ -210,10 +210,10 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
                   <MessageSquare className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   Feedie.app
                 </span>
               </div>
