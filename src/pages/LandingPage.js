@@ -63,12 +63,12 @@ const LandingPage = () => {
             <div className="mt-8 flex justify-center space-x-4">
               <Link to="/signup" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2">
-                <span>Start Free Trial</span>
+                <span>Request Demo</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a href="#demo" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center space-x-2">
-                <span>Watch Demo</span>
+                <span>Pricing</span>
                 <div className="h-5 w-5 rounded-full bg-green-600 flex items-center justify-center">
                   <ArrowRight className="h-3 w-3 text-white" />
                 </div>
