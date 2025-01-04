@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, BarChart2, Users, Zap, Globe, Lock, MessageSquare } from 'lucide-react';
+import { ArrowRight, Check, BarChart2, Users, Zap, Globe, Lock, MessageSquare, Menu, X } from 'lucide-react';
 
 const LandingPage = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
       {/* Dotted Background */}
@@ -22,7 +28,9 @@ const LandingPage = () => {
                     Feedie.app
                   </span>
                 </div>
-                <div className="flex items-center space-x-8">
+
+                {/* Desktop Navigation Links (Hidden on Mobile) */}
+                <div className="hidden md:flex items-center space-x-8">
                   <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
                   <Link to="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
                   <Link to="/docs" className="text-gray-600 hover:text-gray-900">Docs</Link>
@@ -36,12 +44,43 @@ const LandingPage = () => {
                     </Link>
                   </div>
                 </div>
+
+                {/* Mobile Menu Toggle Button (Visible on Mobile) */}
+                <button
+                  onClick={toggleMobileMenu}
+                  className="md:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="h-6 w-6" />
+                  ) : (
+                    <Menu className="h-6 w-6" />
+                  )}
+                </button>
               </div>
+
+              {/* Mobile Menu (Dropdown) */}
+              {isMobileMenuOpen && (
+                <div className="md:hidden mt-4 space-y-4">
+                  <Link to="/pricing" className="block text-gray-600 hover:text-gray-900">Pricing</Link>
+                  <Link to="/features" className="block text-gray-600 hover:text-gray-900">Features</Link>
+                  <Link to="/docs" className="block text-gray-600 hover:text-gray-900">Docs</Link>
+                  <div className="flex flex-col space-y-3">
+                    <Link to="/signin" className="px-4 py-2 text-gray-700 hover:text-gray-900">
+                      Sign in
+                    </Link>
+                    <Link to="/signup" className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                      <span>Start Free</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </nav>
 
+      {/* Rest of the Landing Page Content */}
       {/* Hero Section */}
       <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,12 +102,12 @@ const LandingPage = () => {
             <div className="mt-8 flex justify-center space-x-4">
               <Link to="/signup" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2">
-                <span>Request Demo</span>
+                <span>Start Free Trial</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a href="#demo" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center space-x-2">
-                <span>Pricing</span>
+                <span>Watch Demo</span>
                 <div className="h-5 w-5 rounded-full bg-green-600 flex items-center justify-center">
                   <ArrowRight className="h-3 w-3 text-white" />
                 </div>
