@@ -35,11 +35,8 @@ const LandingPage = () => {
                   <Link to="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
                   <Link to="/docs" className="text-gray-600 hover:text-gray-900">Docs</Link>
                   <div className="flex items-center space-x-3">
-                    <Link to="/signin" className="px-4 py-2 text-gray-700 hover:text-gray-900">
-                      Sign in
-                    </Link>
-                    <Link to="/signup" className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-                      <span>Start Free</span>
+                    <Link to="/signin" className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                      <span>Login</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
