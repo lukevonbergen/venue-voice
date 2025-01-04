@@ -60,11 +60,19 @@ const DashboardFrame = ({ children }) => {
 
         {/* Venue Info Section */}
         <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-gray-600">Connected Venue:</p>
-            <p className="text-base font-semibold text-gray-900">{venueName}</p>
-            <p className="text-xs text-gray-500">Venue ID: {venueId}</p>
-          </div>
+            <div className="space-y-1">
+                <h3 className="text-sm font-medium text-gray-600">
+                Connected Venue:
+                </h3>
+                <div className="venue-info">
+                <strong className="text-base font-semibold text-gray-900">
+                    {venueName}
+                </strong>
+                <span className="block text-xs text-gray-500">
+                    Venue ID: {venueId}
+                </span>
+                </div>
+            </div>
         </div>
 
         {/* Navigation Section */}
