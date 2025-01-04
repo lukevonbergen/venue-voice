@@ -43,7 +43,7 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative pt-32 pb-16 sm:pt-40">
+      <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-8 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-purple-100">
@@ -92,178 +92,115 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      {/* Product Screenshot Section */}
+      <div className="bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Feedback, Visualized</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              See how Feedie.app transforms raw feedback into actionable insights with beautiful, easy-to-understand dashboards.
+            </p>
+          </div>
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <img
+              src="https://placehold.co/1200x600" // Replace with your actual screenshot
+              alt="Feedie.app Dashboard"
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Features Tiles Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Succeed</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Powerful features that help you collect, analyze, and act on customer feedback efficiently.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { stat: '93%', desc: 'Customer Satisfaction', icon: Users },
-              { stat: '2.5x', desc: 'Revenue Growth', icon: BarChart2 },
-              { stat: '10min', desc: 'Setup Time', icon: Zap },
-              { stat: '24/7', desc: 'Real-time Insights', icon: Globe }
-            ].map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-100 hover:border-indigo-200 transition-colors">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 mb-4">
-                  <item.icon className="h-6 w-6 text-indigo-600" />
+              {
+                title: 'QR Code Integration',
+                desc: 'Generate custom QR codes for instant feedback collection at your venue',
+                icon: Globe
+              },
+              {
+                title: 'Real-time Analytics',
+                desc: 'Track customer satisfaction metrics and identify trends as they happen',
+                icon: BarChart2
+              },
+              {
+                title: 'Smart AI Insights',
+                desc: 'AI-powered recommendations to improve customer experience',
+                icon: Zap
+              },
+              {
+                title: 'Custom Forms',
+                desc: 'Create tailored surveys that match your business needs',
+                icon: MessageSquare
+              },
+              {
+                title: 'Team Collaboration',
+                desc: 'Share insights and coordinate responses across your team',
+                icon: Users
+              },
+              {
+                title: 'Enterprise Security',
+                desc: 'Bank-grade security with SOC 2 Type II compliance',
+                icon: Lock
+              }
+            ].map((feature, i) => (
+              <div key={i} className="group relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+                <div className="relative p-6 bg-white rounded-2xl border border-gray-100">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50">
+                      <feature.icon className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
+                  </div>
+                  <p className="text-gray-600">{feature.desc}</p>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{item.stat}</div>
-                <div className="text-gray-600">{item.desc}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Features Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything you need to succeed</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Powerful features that help you collect, analyze, and act on customer feedback efficiently.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              title: 'QR Code Integration',
-              desc: 'Generate custom QR codes for instant feedback collection at your venue',
-              icon: Globe
-            },
-            {
-              title: 'Real-time Analytics',
-              desc: 'Track customer satisfaction metrics and identify trends as they happen',
-              icon: BarChart2
-            },
-            {
-              title: 'Smart AI Insights',
-              desc: 'AI-powered recommendations to improve customer experience',
-              icon: Zap
-            },
-            {
-              title: 'Custom Forms',
-              desc: 'Create tailored surveys that match your business needs',
-              icon: MessageSquare
-            },
-            {
-              title: 'Team Collaboration',
-              desc: 'Share insights and coordinate responses across your team',
-              icon: Users
-            },
-            {
-              title: 'Enterprise Security',
-              desc: 'Bank-grade security with SOC 2 Type II compliance',
-              icon: Lock
-            }
-          ].map((feature, i) => (
-            <div key={i} className="group relative">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
-              <div className="relative p-6 bg-white rounded-2xl border border-gray-100">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-50">
-                    <feature.icon className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
-                </div>
-                <p className="text-gray-600">{feature.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900">Loved by Industry Leaders</h2>
-          <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-            Join thousands of businesses already transforming their customer feedback experience.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              quote: "Feedie.app transformed how we understand our customers. The AI insights have been invaluable for our growth.",
-              author: "Sarah Johnson",
-              role: "Restaurant Owner",
-              company: "The Fresh Fork"
-            },
-            {
-              quote: "The real-time insights helped us improve our service quality by 40% in just two months. Outstanding ROI.",
-              author: "Michael Chen",
-              role: "Hotel Manager",
-              company: "Grand Plaza Hotels"
-            },
-            {
-              quote: "Setup was incredibly easy and the results were immediate. Their support team is exceptional.",
-              author: "Emma Davis",
-              role: "Café Owner",
-              company: "Morning Brew Co."
-            }
-          ].map((testimonial, i) => (
-            <div key={i} className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <div className="flex items-center space-x-2 mb-6">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-600 mb-6">"{testimonial.quote}"</p>
-              <div className="border-t border-gray-100 pt-4">
-                <div className="text-gray-900 font-semibold">{testimonial.author}</div>
-                <div className="text-gray-500 text-sm">{testimonial.role}</div>
-                <div className="text-indigo-600 text-sm font-medium">{testimonial.company}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-12 text-center shadow-xl relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid-white/10"></div>
-          <div className="relative">
-            <h2 className="text-3xl font-bold text-white mb-4">Ready to transform your customer feedback?</h2>
-            <p className="text-indigo-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of businesses using Feedie.app to improve customer satisfaction and drive growth.
+      {/* Book a Demo Section */}
+      <div className="bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">See Feedie.app in Action</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Book a demo with our team and discover how Feedie.app can transform your customer feedback process.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link to="/signup" 
-                className="px-8 py-3 text-base font-medium rounded-xl bg-white text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center space-x-2">
-                <span>Start Your Free Trial</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link to="/demo"
-                className="px-8 py-3 text-base font-medium rounded-xl border-2 border-white/20 text-white hover:bg-white/10 transition-colors">
-                Schedule a Demo
-              </Link>
-            </div>
-            <div className="mt-6 flex justify-center items-center space-x-8 text-sm text-indigo-100">
-              <div className="flex items-center space-x-2">
-                <Check className="h-4 w-4" />
-                <span>Free 14-day trial</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Check className="h-4 w-4" />
-                <span>No credit card required</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Check className="h-4 w-4" />
-                <span>Full feature access</span>
-              </div>
-            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Trust Badges */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
-        <div className="text-center text-sm text-gray-500 mb-8">Trusted by companies worldwide</div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-50">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-12 w-full bg-gray-200 rounded-lg"></div>
-          ))}
+          <div className="bg-white rounded-3xl p-8 shadow-xl max-w-2xl mx-auto">
+            <form className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Schedule a Demo
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
