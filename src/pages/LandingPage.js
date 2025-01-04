@@ -86,8 +86,8 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="mb-8 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-emerald-100">
-              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
-              <span className="text-sm text-gray-600">Introducing AI-powered feedback analysis</span>
+              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">Coming soon</span>
+              <span className="text-sm text-gray-600">AI-powered feedback analysis</span>
             </div>
             <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 space-y-3 tracking-tight">
               <span className="block">Customer Feedback that</span>
@@ -97,7 +97,7 @@ const LandingPage = () => {
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-600">
               Turn customer feedback into actionable insights. Automate collection, 
-              analyze sentiment, and make data-driven decisions in real-time.
+              analyse sentiment, and make data-driven decisions in real-time.
             </p>
             <div className="mt-8 flex justify-center space-x-4">
               <Link to="/signup" 
@@ -156,7 +156,7 @@ const LandingPage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Succeed</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Powerful features that help you collect, analyze, and act on customer feedback efficiently.
+              Powerful features that help you collect, analyse, and act on customer feedback efficiently.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -257,7 +257,7 @@ const LandingPage = () => {
                 </span>
               </div>
               <p className="text-sm text-gray-500">
-                Turn customer feedback into actionable insights. Automate collection, analyze sentiment, and make data-driven decisions in real-time.
+                Turn customer feedback into actionable insights. Automate collection, analyse sentiment, and make data-driven decisions in real-time.
               </p>
             </div>
             <div className="space-y-4">
