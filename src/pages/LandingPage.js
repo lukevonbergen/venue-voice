@@ -10,7 +10,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative">
       {/* Dotted Background */}
       <div className="absolute inset-0 bg-dotted-pattern bg-[length:40px_40px] opacity-10"></div>
 
@@ -94,12 +94,12 @@ const LandingPage = () => {
               analyse sentiment, and make data-driven decisions in real-time.
             </p>
             <div className="mt-8 flex justify-center space-x-4">
-              <Link to="/signup" 
+              <Link to="/demo"
                 className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2">
                 <span>Book a demo</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <a href="#demo" 
+              <a href="/pricing" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center space-x-2">
                 <span>Pricing</span>
                 <div className="h-5 w-5 rounded-full bg-green-600 flex items-center justify-center">
