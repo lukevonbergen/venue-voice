@@ -103,7 +103,7 @@ const LandingPage = () => {
           </div>
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
             <img
-              src="./public/img/lp-img-vv.png"
+              src="/img/lp-img-vv.png"
               alt="Feedie.app Dashboard"
               className="w-full h-auto"
             />
