@@ -65,7 +65,7 @@ const Navbar = () => {
                 <Link to="/features" className="block text-gray-600 hover:text-gray-900">
                   Features
                 </Link>
-                <Link to="/docs" className="block text-gray-600 hover:text-gray-900">
+                <Link to="#" className="block text-gray-600 hover:text-gray-900">
                   Docs
                 </Link>
                 <div className="flex flex-col space-y-3">

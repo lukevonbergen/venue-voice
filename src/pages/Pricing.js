@@ -26,8 +26,6 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
-      {/* Dotted Background */}
-      <div className="absolute inset-0 bg-dotted-pattern bg-[length:40px_40px] opacity-10"></div>
 
       {/* Use the Navbar component */}
       <Navbar />

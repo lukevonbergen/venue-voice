@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Zap, Users, Globe, Lock, MessageSquare, BarChart2, Mail, Settings, Shield } from 'lucide-react';
+import Navbar from './Navbar'; // Import the Navbar component
 
 const FeaturesPage = () => {
   const features = [
@@ -53,41 +54,8 @@ const FeaturesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
-      {/* Dotted Background */}
-      <div className="absolute inset-0 bg-dotted-pattern bg-[length:40px_40px] opacity-10"></div>
 
-      {/* Floating Navbar */}
-      <nav className="fixed w-full top-4 z-50 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white/95 rounded-2xl shadow-lg backdrop-blur-sm border border-gray-200/50">
-            <div className="px-6 py-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
-                    <MessageSquare className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    Feedie.app
-                  </span>
-                </div>
-                <div className="hidden md:flex items-center space-x-8">
-                  <Link to="/features" className="text-gray-600 hover:text-gray-900 font-semibold">Features</Link>
-                  <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
-                  <Link to="/docs" className="text-gray-600 hover:text-gray-900">Docs</Link>
-                  <div className="flex items-center space-x-3">
-                    <Link to="/signin" className="px-4 py-2 text-gray-700 hover:text-gray-900">
-                      Sign in
-                    </Link>
-                    <Link to="/signup" className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-                      <span>Start Free</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+        <Navbar />
 
       {/* Features Section */}
       <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
