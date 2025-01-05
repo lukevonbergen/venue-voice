@@ -5,8 +5,8 @@ import { buffer } from 'micro';
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Initialize Supabase
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+// Initialize Supabase with service_role key
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 export const config = {
   api: {
@@ -63,21 +63,6 @@ export default async function handler(req, res) {
       }
 
       console.log('Customer email found:', session.customer_email);
-
-      // Log the JWT token (if available)
-      const { data: authData, error: authError } = await supabase.auth.getSession();
-      if (authError) {
-        console.error('Error fetching JWT token:', authError);
-      } else {
-        const token = authData.session?.access_token;
-        console.log('JWT Token:', token);
-
-        // Decode the JWT token (optional)
-        if (token) {
-          const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-          console.log('Decoded JWT:', decoded);
-        }
-      }
 
       // Update the venues table with is_paid: true
       console.log('Updating venue for email:', session.customer_email);
