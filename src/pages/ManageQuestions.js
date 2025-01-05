@@ -335,17 +335,18 @@ const ManageQuestions = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Manage Questions</h1>
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Manage Questions</h1>
           <div className="bg-blue-50 px-4 py-2 rounded-lg">
             <span className="text-blue-600 font-medium">Questions Active: {questions.length}/5</span>
           </div>
         </div>
-
+  
         {/* QR Code Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Feedback QR Code</h2>
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex-shrink-0">
                 <QRCodeSVG value={feedbackUrl} size={200} />
@@ -365,7 +366,7 @@ const ManageQuestions = () => {
             </div>
           </div>
         </div>
-
+  
         {/* Suggested Questions */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Suggested Questions</h2>
@@ -381,47 +382,47 @@ const ManageQuestions = () => {
             ))}
           </div>
         </div>
-
+  
         {/* Add New Question */}
         <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4 text-gray-900">Add New Question</h2>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex gap-4">
-            <input
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Add New Question</h2>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <input
                 type="text"
                 placeholder="Enter a new question"
                 value={newQuestion}
-                onChange={handleNewQuestionChange} // Use the defined function here
+                onChange={handleNewQuestionChange}
                 className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 maxLength={100}
-            />
-            <button
+              />
+              <button
                 onClick={handleAddQuestion}
                 className={`${
-                questions.length >= 5
+                  questions.length >= 5
                     ? 'bg-gray-500 hover:bg-gray-600'
                     : 'bg-blue-600 hover:bg-blue-700'
                 } text-white px-6 py-3 rounded-lg transition-colors duration-200`}
-            >
+              >
                 {questions.length >= 5 ? 'Replace...' : 'Add Question'}
-            </button>
+              </button>
             </div>
             <div className="flex justify-between mt-2">
-            <p className="text-sm text-gray-500">{newQuestion.length}/100 characters</p>
-            {duplicateError && (
-                <p className="text-sm text-red-500">{duplicateError}</p>
-            )}
-            {questions.length >= 5 && (
+              <p className="text-sm text-gray-500">{newQuestion.length}/100 characters</p>
+              {duplicateError && <p className="text-sm text-red-500">{duplicateError}</p>}
+              {questions.length >= 5 && (
                 <p className="text-sm text-red-500">Maximum questions limit reached (5/5)</p>
-            )}
+              )}
             </div>
+          </div>
         </div>
-        </div>
-
+  
         {/* Current Questions */}
         <div>
           <h2 className="text-xl font-bold mb-4 text-gray-900">Current Questions</h2>
-          <p className="text-sm text-gray-400">You can drag and drop these questions in the order your customers will answer them</p>
+          <p className="text-sm text-gray-400 mb-4">
+            You can drag and drop these questions in the order your customers will answer them.
+          </p>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="questions">
               {(provided) => (
@@ -436,7 +437,7 @@ const ManageQuestions = () => {
                           className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
                         >
                           {editingQuestionId === q.id ? (
-                            <div className="flex gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
                               <input
                                 type="text"
                                 value={editingQuestionText}
@@ -444,21 +445,23 @@ const ManageQuestions = () => {
                                 className="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                 maxLength={100}
                               />
-                              <button
-                                onClick={saveEditedQuestion}
-                                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={() => setEditingQuestionId(null)}
-                                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-                              >
-                                Cancel
-                              </button>
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={saveEditedQuestion}
+                                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => setEditingQuestionId(null)}
+                                  className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
                             </div>
                           ) : (
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                               <p className="text-gray-700 text-lg">{q.question}</p>
                               <div className="flex gap-3">
                                 <button
@@ -486,7 +489,7 @@ const ManageQuestions = () => {
             </Droppable>
           </DragDropContext>
         </div>
-
+  
         {/* Previously Used Questions */}
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Previously Used Questions</h2>
@@ -508,52 +511,52 @@ const ManageQuestions = () => {
                   <p className="text-gray-700">{q.question}</p>
                   <button
                     onClick={(e) => {
-                        e.stopPropagation(); // Prevent the parent div's onClick from firing
-                        openReplaceModal(q);
+                      e.stopPropagation();
+                      openReplaceModal(q);
                     }}
                     className="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-                    >
+                  >
                     <Plus className="w-5 h-5 text-blue-600" />
-                    </button>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
+  
         {/* Replace Modal */}
         <Modal
-        isOpen={isReplaceModalOpen}
-        onRequestClose={closeReplaceModal}
-        contentLabel="Replace Question Modal"
-        className="modal"
-        overlayClassName="modal-overlay"
+          isOpen={isReplaceModalOpen}
+          onRequestClose={closeReplaceModal}
+          contentLabel="Replace Question Modal"
+          className="modal"
+          overlayClassName="modal-overlay"
         >
-        <h2 className="text-xl font-bold mb-4">Replace Question</h2>
-        {replacementSource === 'new' && (
+          <h2 className="text-xl font-bold mb-4">Replace Question</h2>
+          {replacementSource === 'new' && (
             <p className="mb-4">You are adding: "{pendingNewQuestion}"</p>
-        )}
-        {replacementSource === 'inactive' && (
+          )}
+          {replacementSource === 'inactive' && (
             <p className="mb-4">You are re-adding: "{selectedInactiveQuestion?.question}"</p>
-        )}
-        <p className="mb-4">Select a question to replace:</p>
-        <div className="space-y-4">
+          )}
+          <p className="mb-4">Select a question to replace:</p>
+          <div className="space-y-4">
             {questions.map((q) => (
-            <div
+              <div
                 key={q.id}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:border-blue-500 transition-colors duration-200"
                 onClick={() => handleReplaceQuestion(q.id)}
-            >
+              >
                 <p className="text-gray-700">{q.question}</p>
-            </div>
+              </div>
             ))}
-        </div>
-        <button
+          </div>
+          <button
             onClick={closeReplaceModal}
             className="mt-4 bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-        >
+          >
             Cancel
-        </button>
+          </button>
         </Modal>
       </div>
     </DashboardFrame>
