@@ -1,4 +1,3 @@
-// api/create-checkout-session.js
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -11,20 +10,30 @@ export default async function handler(req, res) {
   const { email } = req.body;
 
   try {
+    // Validate the email
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Create a Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price: process.env.STRIPE_PRICE_ID, // Replace with your Stripe price ID
+        price: process.env.STRIPE_PRICE_ID,
         quantity: 1,
       }],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`, // Redirect after successful payment
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/signup`, // Redirect if payment is canceled
-      customer_email: email, // Pre-fill the customer's email
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/signup`,
+      customer_email: email,
     });
 
+    // Return the session ID
     res.status(200).json({ id: session.id });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Stripe API Error:', error);
+
+    // Return a JSON error response
+    res.status(500).json({ error: error.message || 'An error occurred while creating the checkout session' });
   }
 }

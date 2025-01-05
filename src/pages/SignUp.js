@@ -61,10 +61,11 @@ const SignUpPage = () => {
         body: JSON.stringify({ email }),
       });
   
+      // Check if the response is OK
       if (!response.ok) {
         const errorData = await response.json(); // Parse the error response
         console.error('Stripe Checkout Error:', errorData);
-        throw new Error('Failed to create Stripe checkout session.');
+        throw new Error(errorData.error || 'Failed to create Stripe checkout session');
       }
   
       const { id } = await response.json();
