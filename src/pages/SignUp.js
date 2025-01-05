@@ -8,25 +8,28 @@ const SignUpPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-  
+
     // Debug log for form data
-    console.log('Form data:', { email, password, confirmPassword, name });
-  
+    console.log('Form data:', { email, password, confirmPassword, firstName, lastName, name });
+
     // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       setIsLoading(false);
       return;
     }
-  
+
     try {
       // Step 1: Sign up the user with Supabase Auth
       console.log('Signing up user with Supabase Auth...');
@@ -34,29 +37,29 @@ const SignUpPage = () => {
         email,
         password,
       });
-  
+
       if (authError) {
         console.error('Supabase Auth Error:', authError);
         throw new Error(authError.message);
       }
-  
+
       console.log('User signed up successfully:', authData.user);
-  
+
       // Step 2: Create a record in the venues table
       console.log('Creating venue record in Supabase...');
       const { data: venueData, error: venueError } = await supabase
         .from('venues')
-        .insert([{ name, email }])
+        .insert([{ name, email, first_name: firstName, last_name: lastName }])
         .select()
         .single();
-  
+
       if (venueError) {
         console.error('Supabase Venue Error:', venueError);
         throw new Error(venueError.message);
       }
-  
+
       console.log('Venue created successfully:', venueData);
-  
+
       // Step 3: Redirect to Stripe checkout
       console.log('Creating Stripe checkout session...');
       const response = await fetch('/api/create-checkout-session', {
@@ -64,31 +67,27 @@ const SignUpPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Stripe Checkout Error:', errorData);
         throw new Error(errorData.error || 'Failed to create Stripe checkout session');
       }
-  
+
       const { id } = await response.json();
       console.log('Stripe checkout session created successfully. Redirecting...');
-  
-      // Debug log for the publishable key
-      console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-  
+
       // Initialize Stripe.js with the publishable key
-      console.log('Initializing Stripe with key:', 'pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-console.log('Stripe initialized:', stripe);
+      const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
+      console.log('Stripe initialized:', stripe);
 
       if (!stripe) {
         throw new Error('Stripe.js failed to initialize');
       }
-  
+
       // Redirect to the Stripe checkout page
       const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: id });
-  
+
       if (stripeError) {
         console.error('Stripe Checkout Redirect Error:', stripeError);
         throw new Error(stripeError.message);
@@ -135,6 +134,39 @@ console.log('Stripe initialized:', stripe);
           )}
 
           <form onSubmit={handleSignUp} className="space-y-6">
+            {/* First Name and Last Name Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  placeholder="Enter your first name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  placeholder="Enter your last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Venue Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Venue Name
@@ -150,6 +182,7 @@ console.log('Stripe initialized:', stripe);
               />
             </div>
 
+            {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -165,36 +198,39 @@ console.log('Stripe initialized:', stripe);
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
+            {/* Password Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
-            </div>
-
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -211,8 +247,9 @@ console.log('Stripe initialized:', stripe);
             </button>
           </form>
 
+          {/* Sign In Link */}
           <div className="mt-6 text-center text-sm text-gray-600">
-            You Already have an account?{' '}
+            You already have an account?{' '}
             <Link to="/signin" className="text-green-600 hover:text-green-700">
               Sign in
             </Link>
