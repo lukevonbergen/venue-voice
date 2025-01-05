@@ -1,17 +1,23 @@
 // pages/api/webhook.js
-import { supabase } from './supabase';
+import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
+// Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Initialize Supabase
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 export default async function handler(req, res) {
   console.log('Webhook request received:', req.method, req.url);
 
+  // Only allow POST requests
   if (req.method !== 'POST') {
     console.error('Invalid request method:', req.method);
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
+  // Get the Stripe signature and webhook secret
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -21,11 +27,11 @@ export default async function handler(req, res) {
   let event;
 
   try {
-    // Debug: Log raw request body
-    console.log('Raw request body:', req.body);
+    // Access the raw request body
+    const rawBody = req.body; // Ensure the raw body is passed (see note below)
 
-    // Construct the event
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    // Verify the webhook signature
+    event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
     console.log('Webhook event constructed successfully:', event.type);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
