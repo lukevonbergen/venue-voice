@@ -40,7 +40,7 @@ const PricingPage = () => {
               </span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-600">
-              Choose a plan that fits your business needs. Start small, scale as you grow.
+              With one, low cost price, it's one plan for everyone!
             </p>
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-1 gap-8">
