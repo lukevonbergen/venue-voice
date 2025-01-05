@@ -143,7 +143,7 @@ const SignUpPage = () => {
                 <input
                   type="text"
                   id="firstName"
-                  placeholder="Enter your first name"
+                  placeholder="John"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -157,7 +157,7 @@ const SignUpPage = () => {
                 <input
                   type="text"
                   id="lastName"
-                  placeholder="Enter your last name"
+                  placeholder="Doe"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -174,7 +174,7 @@ const SignUpPage = () => {
               <input
                 type="text"
                 id="name"
-                placeholder="Enter your venue name"
+                placeholder="The Kings Arms"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -190,7 +190,7 @@ const SignUpPage = () => {
               <input
                 type="email"
                 id="email"
-                placeholder="Enter your email"
+                placeholder="john@doe.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -240,7 +240,7 @@ const SignUpPage = () => {
                 <span>Loading...</span>
               ) : (
                 <>
-                  <span>Sign Up</span>
+                  <span>Payment</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
