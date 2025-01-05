@@ -13,6 +13,8 @@ import SecurityPage from './pages/SecurityPage';
 import TermsAndConditionsPage from './pages/Terms';
 import PrivacyPolicyPage from './pages/Privacy';
 import AboutPage from './pages/AboutPage';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import './index.css';
 
 function App() {
@@ -32,6 +34,8 @@ function App() {
       <Route path="/terms" element={<TermsAndConditionsPage />} />
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
   );
 }
