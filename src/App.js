@@ -10,6 +10,8 @@ import PricingPage from './pages/Pricing';
 import FeaturesPage from './pages/Features';
 import ContactPage from './pages/ContactPage';
 import SecurityPage from './pages/SecurityPage';
+import TermsAndConditionsPage from './pages/Terms';
+import PrivacyPolicyPage from './pages/Privacy';
 import './index.css';
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
       <Route path="/features" element={<FeaturesPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/security" element={<SecurityPage />} />
+      <Route path="/terms" element={<TermsAndConditionsPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
     </Routes>
   );
 }
