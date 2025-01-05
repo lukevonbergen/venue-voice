@@ -71,8 +71,15 @@ const SignUpPage = () => {
       const { id } = await response.json();
       console.log('Stripe checkout session created successfully. Redirecting...');
   
+      // Log the publishable key
+      console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  
       // Initialize Stripe.js with the publishable key
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  
+      if (!stripe) {
+        throw new Error('Stripe.js failed to initialize');
+      }
   
       // Redirect to the Stripe checkout page
       const { error } = await stripe.redirectToCheckout({ sessionId: id });
