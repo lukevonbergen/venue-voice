@@ -1,5 +1,5 @@
 // api/webhook.js
-import { supabase } from '../../src/utils/supabase';
+import { supabase } from '../../../src/utils/supabase';
 import Stripe from 'stripe';
 
 // Debug: Log environment variables
