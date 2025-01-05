@@ -11,57 +11,67 @@ const SignUpPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
   const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
+  
     // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       setIsLoading(false);
       return;
     }
-
+  
     try {
       // Step 1: Sign up the user with Supabase Auth
+      console.log('Signing up user with Supabase Auth...');
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
-
+  
       if (authError) {
+        console.error('Supabase Auth Error:', authError);
         throw new Error(authError.message);
       }
-
+  
+      console.log('User signed up successfully:', authData.user);
+  
       // Step 2: Create a record in the venues table
+      console.log('Creating venue record in Supabase...');
       const { data: venueData, error: venueError } = await supabase
         .from('venues')
         .insert([{ name, email }])
         .select()
         .single();
-
+  
       if (venueError) {
+        console.error('Supabase Venue Error:', venueError);
         throw new Error(venueError.message);
       }
-
-      console.log('User and venue created successfully:', authData.user, venueData);
-
+  
+      console.log('Venue created successfully:', venueData);
+  
       // Step 3: Redirect to Stripe checkout
+      console.log('Creating Stripe checkout session...');
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-
+  
       if (!response.ok) {
+        const errorData = await response.json(); // Parse the error response
+        console.error('Stripe Checkout Error:', errorData);
         throw new Error('Failed to create Stripe checkout session.');
       }
-
+  
       const { id } = await response.json();
+      console.log('Stripe checkout session created successfully. Redirecting...');
       window.location.href = `https://checkout.stripe.com/pay/${id}`;
     } catch (error) {
+      console.error('Signup Error:', error);
       setError(error.message);
     } finally {
       setIsLoading(false);
