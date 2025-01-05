@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
-import { buffer } from 'micro'; // Import buffer to read raw body
+import { buffer } from 'micro';
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
   try {
     // Read the raw body from the request
-    const rawBody = await buffer(req); // Use buffer to read raw body
+    const rawBody = await buffer(req);
     console.log('Raw request body:', rawBody.toString());
 
     // Verify the webhook signature
@@ -69,14 +69,14 @@ export default async function handler(req, res) {
       const { data, error } = await supabase
         .from('venues')
         .update({ is_paid: true })
-        .eq('email', session.customer_email);
+        .ilike('email', session.customer_email); // Use ilike for case-insensitive matching
 
       if (error) {
         console.error('Error updating venue:', error);
         return res.status(500).json({ message: 'Database error' });
       }
 
-      console.log('Venue updated successfully:', data);
+      console.log('Venue update result:', data);
       break;
 
     default:
