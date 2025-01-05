@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import Navbar from './Navbar'; // Import the Navbar component
+import Footer from './Footer'; // Import the Footer component
 
 const ContactPage = () => {
   return (
@@ -82,49 +82,39 @@ const ContactPage = () => {
             </div>
 
             {/* Contact Info */}
-            <div className="space-y-8">
-              <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
-                      <Mail className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Email us at</p>
-                      <p className="text-lg font-medium text-gray-900">support@feedie.app</p>
-                    </div>
+            <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-green-600" />
                   </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
-                      <Phone className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Call us at</p>
-                      <p className="text-lg font-medium text-gray-900">+44 123 456 7890</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
-                      <MapPin className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Visit us at</p>
-                      <p className="text-lg font-medium text-gray-900">
-                        123 Feedback Lane
-                        <br />
-                        London, UK
-                      </p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email us at</p>
+                    <p className="text-lg font-medium text-gray-900">support@feedie.app</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Map Placeholder */}
-              <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Location</h2>
-                <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500">Map placeholder</p>
+                <div className="flex items-start space-x-4">
+                  <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Call us at</p>
+                    <p className="text-lg font-medium text-gray-900">+44 123 456 7890</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Visit us at</p>
+                    <p className="text-lg font-medium text-gray-900">
+                      123 Feedback Lane
+                      <br />
+                      London, UK
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -132,9 +122,8 @@ const ContactPage = () => {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Use the Footer component */}
       <Footer />
-      
     </div>
   );
 };
