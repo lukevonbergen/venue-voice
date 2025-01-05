@@ -1,13 +1,18 @@
-// Navbar.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation
 import { MessageSquare, Menu, X, ArrowRight } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation(); // Get the current route location
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Helper function to check if a link is active
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
@@ -17,25 +22,40 @@ const Navbar = () => {
           <div className="px-6 py-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
-              <Link to="/">
-                <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
+                <Link to="/">
+                  <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-white" />
-                </div>
+                  </div>
                 </Link>
                 <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Feedie
+                  Feedie.app
                 </span>
               </div>
 
               {/* Desktop Navigation Links (Hidden on Mobile) */}
               <div className="hidden md:flex items-center space-x-8">
-                <Link to="/pricing" className="text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/pricing"
+                  className={`text-gray-600 hover:text-gray-900 ${
+                    isActive('/pricing') ? 'font-semibold' : ''
+                  }`}
+                >
                   Pricing
                 </Link>
-                <Link to="/features" className="text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/features"
+                  className={`text-gray-600 hover:text-gray-900 ${
+                    isActive('/features') ? 'font-semibold' : ''
+                  }`}
+                >
                   Features
                 </Link>
-                <Link to="/docs" className="text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/docs"
+                  className={`text-gray-600 hover:text-gray-900 ${
+                    isActive('/docs') ? 'font-semibold' : ''
+                  }`}
+                >
                   Docs
                 </Link>
                 <div className="flex items-center space-x-3">
@@ -61,13 +81,28 @@ const Navbar = () => {
             {/* Mobile Menu (Dropdown) */}
             {isMobileMenuOpen && (
               <div className="md:hidden mt-4 space-y-4">
-                <Link to="/pricing" className="block text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/pricing"
+                  className={`block text-gray-600 hover:text-gray-900 ${
+                    isActive('/pricing') ? 'font-semibold' : ''
+                  }`}
+                >
                   Pricing
                 </Link>
-                <Link to="/features" className="block text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/features"
+                  className={`block text-gray-600 hover:text-gray-900 ${
+                    isActive('/features') ? 'font-semibold' : ''
+                  }`}
+                >
                   Features
                 </Link>
-                <Link to="#" className="block text-gray-600 hover:text-gray-900">
+                <Link
+                  to="/docs"
+                  className={`block text-gray-600 hover:text-gray-900 ${
+                    isActive('/docs') ? 'font-semibold' : ''
+                  }`}
+                >
                   Docs
                 </Link>
                 <div className="flex flex-col space-y-3">
