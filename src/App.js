@@ -12,7 +12,7 @@ import ContactPage from './pages/ContactPage';
 import SecurityPage from './pages/SecurityPage';
 import TermsAndConditionsPage from './pages/Terms';
 import PrivacyPolicyPage from './pages/Privacy';
-import AboutPage from './pages/About';
+import AboutPage from './pages/AboutPage';
 import './index.css';
 
 function App() {
