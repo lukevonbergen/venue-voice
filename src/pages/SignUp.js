@@ -179,7 +179,7 @@ const SignUpPage = () => {
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
-            Already have an account?{' '}
+            You Already have an account?{' '}
             <Link to="/signin" className="text-green-600 hover:text-green-700">
               Sign in
             </Link>
