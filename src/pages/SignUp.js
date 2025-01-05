@@ -107,16 +107,16 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full flex bg-white rounded-3xl shadow-xl overflow-hidden">
+      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         {/* Form Section */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-6 md:p-8">
           <div className="text-center">
-            <div className="mb-8 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-emerald-100">
+            <div className="mb-6 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-emerald-100">
               <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
               <span className="text-sm text-gray-600">Create your account</span>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Sign Up</h2>
-            <p className="text-gray-600 mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Sign Up</h2>
+            <p className="text-gray-600 mb-6 text-sm md:text-base">
               Join Feedie.app and start transforming customer feedback into actionable insights.
             </p>
           </div>
@@ -127,7 +127,7 @@ const SignUpPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSignUp} className="space-y-6">
+          <form onSubmit={handleSignUp} className="space-y-4">
             <AnimatePresence mode="wait">
               {steps.map(
                 (stepData) =>
@@ -153,7 +153,7 @@ const SignUpPage = () => {
                               value={field.value}
                               onChange={(e) => field.onChange(e.target.value)}
                               onKeyDown={handleKeyDown}
-                              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                              className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
                               required
                             />
                           </div>
@@ -171,7 +171,7 @@ const SignUpPage = () => {
                             value={stepData.value}
                             onChange={(e) => stepData.onChange(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
                             required
                           />
                         </div>
@@ -187,7 +187,7 @@ const SignUpPage = () => {
                 <button
                   type="button"
                   onClick={handlePrevious}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm md:text-base"
                 >
                   Previous
                 </button>
@@ -196,7 +196,7 @@ const SignUpPage = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
                 >
                   Next
                 </button>
@@ -204,17 +204,29 @@ const SignUpPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
                 >
                   {isLoading ? 'Loading...' : 'Sign Up'}
                 </button>
               )}
             </div>
           </form>
+
+          {/* Confirmation Summary (Visible on Mobile) */}
+          <div className="mt-6 md:hidden">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Your Information</h3>
+            <div className="space-y-2 text-sm">
+              {firstName && <p><strong>First Name:</strong> {firstName}</p>}
+              {lastName && <p><strong>Last Name:</strong> {lastName}</p>}
+              {name && <p><strong>Venue Name:</strong> {name}</p>}
+              {email && <p><strong>Email:</strong> {email}</p>}
+              {password && <p><strong>Password:</strong> ********</p>}
+            </div>
+          </div>
         </div>
 
-        {/* Confirmation Section */}
-        <div className="w-1/3 bg-emerald-50 p-8 border-l border-emerald-100">
+        {/* Confirmation Section (Visible on Desktop) */}
+        <div className="hidden md:block w-1/3 bg-emerald-50 p-6 md:p-8 border-l border-emerald-100">
           <h3 className="text-xl font-bold text-gray-900 mb-6">Your Information</h3>
           <div className="space-y-4">
             {firstName && <p><strong>First Name:</strong> {firstName}</p>}
