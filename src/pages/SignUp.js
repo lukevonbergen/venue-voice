@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import supabase from '../utils/supabase';
 import { loadStripe } from '@stripe/stripe-js';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const SignUpPage = () => {
   const [email, setEmail] = useState('');
@@ -13,17 +14,35 @@ const SignUpPage = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState(1); // Track current step
   const navigate = useNavigate();
+
+  const steps = [
+    { id: 1, label: 'First Name', value: firstName, onChange: setFirstName },
+    { id: 2, label: 'Last Name', value: lastName, onChange: setLastName },
+    { id: 3, label: 'Venue Name', value: name, onChange: setName },
+    { id: 4, label: 'Email', value: email, onChange: setEmail },
+    { id: 5, label: 'Password', value: password, onChange: setPassword },
+    { id: 6, label: 'Confirm Password', value: confirmPassword, onChange: setConfirmPassword },
+  ];
+
+  const handleNext = () => {
+    if (step < steps.length) {
+      setStep(step + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    // Debug log for form data
-    console.log('Form data:', { email, password, confirmPassword, firstName, lastName, name });
-
-    // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       setIsLoading(false);
@@ -31,37 +50,24 @@ const SignUpPage = () => {
     }
 
     try {
-      // Step 1: Sign up the user with Supabase Auth
-      console.log('Signing up user with Supabase Auth...');
+      // Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (authError) {
-        console.error('Supabase Auth Error:', authError);
-        throw new Error(authError.message);
-      }
+      if (authError) throw new Error(authError.message);
 
-      console.log('User signed up successfully:', authData.user);
-
-      // Step 2: Create a record in the venues table
-      console.log('Creating venue record in Supabase...');
+      // Create venue record
       const { data: venueData, error: venueError } = await supabase
         .from('venues')
         .insert([{ name, email, first_name: firstName, last_name: lastName }])
         .select()
         .single();
 
-      if (venueError) {
-        console.error('Supabase Venue Error:', venueError);
-        throw new Error(venueError.message);
-      }
+      if (venueError) throw new Error(venueError.message);
 
-      console.log('Venue created successfully:', venueData);
-
-      // Step 3: Redirect to Stripe checkout
-      console.log('Creating Stripe checkout session...');
+      // Stripe Checkout
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,28 +76,14 @@ const SignUpPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Stripe Checkout Error:', errorData);
         throw new Error(errorData.error || 'Failed to create Stripe checkout session');
       }
 
       const { id } = await response.json();
-      console.log('Stripe checkout session created successfully. Redirecting...');
-
-      // Initialize Stripe.js with the publishable key
       const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-      console.log('Stripe initialized:', stripe);
-
-      if (!stripe) {
-        throw new Error('Stripe.js failed to initialize');
-      }
-
-      // Redirect to the Stripe checkout page
       const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: id });
 
-      if (stripeError) {
-        console.error('Stripe Checkout Redirect Error:', stripeError);
-        throw new Error(stripeError.message);
-      }
+      if (stripeError) throw new Error(stripeError.message);
     } catch (error) {
       console.error('Signup Error:', error);
       setError(error.message);
@@ -134,125 +126,70 @@ const SignUpPage = () => {
           )}
 
           <form onSubmit={handleSignUp} className="space-y-6">
-            {/* First Name and Last Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  placeholder="John"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  placeholder="Doe"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Venue Name Field */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Venue Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                placeholder="The Kings Arms"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
-            </div>
-
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                placeholder="john@doe.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
-            </div>
-
-            {/* Password Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
-            >
-              {isLoading ? (
-                <span>Loading...</span>
-              ) : (
-                <>
-                  <span>Payment</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
+            <AnimatePresence mode="wait">
+              {steps.map(
+                (stepData) =>
+                  step === stepData.id && (
+                    <motion.div
+                      key={stepData.id}
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -50 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div>
+                        <label htmlFor={stepData.label.toLowerCase().replace(' ', '-')} className="block text-sm font-medium text-gray-700 mb-2">
+                          {stepData.label}
+                        </label>
+                        <input
+                          type={stepData.label.includes('Password') ? 'password' : 'text'}
+                          id={stepData.label.toLowerCase().replace(' ', '-')}
+                          placeholder={`Enter your ${stepData.label.toLowerCase()}`}
+                          value={stepData.value}
+                          onChange={(e) => stepData.onChange(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          required
+                        />
+                      </div>
+                    </motion.div>
+                  )
               )}
-            </button>
+            </AnimatePresence>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
+              {step > 1 && (
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Previous
+                </button>
+              )}
+              {step < steps.length ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  {isLoading ? 'Loading...' : 'Sign Up'}
+                </button>
+              )}
+            </div>
           </form>
 
-          {/* Sign In Link */}
+          {/* Progress Indicator */}
           <div className="mt-6 text-center text-sm text-gray-600">
-            You already have an account?{' '}
-            <Link to="/signin" className="text-green-600 hover:text-green-700">
-              Sign in
-            </Link>
+            Step {step} of {steps.length}
           </div>
         </div>
       </div>
