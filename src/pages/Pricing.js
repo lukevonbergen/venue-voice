@@ -1,4 +1,3 @@
-// PricingPage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Check, MessageSquare } from 'lucide-react';
@@ -26,7 +25,6 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
-
       {/* Use the Navbar component */}
       <Navbar />
 
@@ -44,7 +42,7 @@ const PricingPage = () => {
               Choose a plan that fits your business needs. Start small, scale as you grow.
             </p>
           </div>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-1 gap-8">
             {pricingPlans.map((plan, index) => (
               <div
                 key={index}
@@ -71,7 +69,7 @@ const PricingPage = () => {
                   </div>
                   <ul className="mt-8 space-y-4">
                     {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center space-x-3">
+                      <li key={i} className="flex items-center justify-center space-x-3">
                         <Check className="h-5 w-5 text-green-500" />
                         <span className="text-gray-600">{feature}</span>
                       </li>
