@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // Add useEffect
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { loadStripe } from '@stripe/stripe-js'; // Import loadStripe
 
 const PrivacyPolicyPage = () => {
+  // Add the Stripe test code inside a useEffect hook
+  useEffect(() => {
+    const TestStripe = async () => {
+      console.log('Initializing Stripe with key:', 'pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
+      const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
+      console.log('Stripe initialized:', stripe);
+    };
+
+    TestStripe();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
       <Navbar />
