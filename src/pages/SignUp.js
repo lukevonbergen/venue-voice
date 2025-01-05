@@ -79,8 +79,8 @@ const SignUpPage = () => {
   
       // Initialize Stripe.js with the publishable key
       console.log('Initializing Stripe with key:', 'pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-        const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-        console.log('Stripe initialized:', stripe);
+const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
+console.log('Stripe initialized:', stripe);
 
       if (!stripe) {
         throw new Error('Stripe.js failed to initialize');
