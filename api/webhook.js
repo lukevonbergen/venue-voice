@@ -64,6 +64,21 @@ export default async function handler(req, res) {
 
       console.log('Customer email found:', session.customer_email);
 
+      // Log the JWT token (if available)
+      const { data: authData, error: authError } = await supabase.auth.getSession();
+      if (authError) {
+        console.error('Error fetching JWT token:', authError);
+      } else {
+        const token = authData.session?.access_token;
+        console.log('JWT Token:', token);
+
+        // Decode the JWT token (optional)
+        if (token) {
+          const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+          console.log('Decoded JWT:', decoded);
+        }
+      }
+
       // Update the venues table with is_paid: true
       console.log('Updating venue for email:', session.customer_email);
       const { data, error } = await supabase
