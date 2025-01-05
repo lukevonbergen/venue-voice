@@ -20,7 +20,7 @@ const PricingPage = () => {
     },
     {
       title: 'Growth',
-      price: '$49',
+      price: '£29',
       description: 'For growing businesses with more feedback needs',
       features: [
         'Up to 1,000 feedback submissions/month',
@@ -32,6 +32,7 @@ const PricingPage = () => {
       cta: 'Start Free Trial',
       ctaLink: '/signup',
       popular: true,
+      annualPrice: '£23/month (billed annually)',
     },
     {
       title: 'Enterprise',
@@ -123,6 +124,9 @@ const PricingPage = () => {
                     <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                     {plan.price !== 'Free' && plan.price !== 'Custom' && (
                       <span className="text-gray-500">/month</span>
+                    )}
+                    {plan.annualPrice && (
+                      <p className="text-sm text-gray-500 mt-2">{plan.annualPrice}</p>
                     )}
                   </div>
                   <ul className="mt-8 space-y-4">
