@@ -1,5 +1,5 @@
 // pages/api/webhook.js
-import { supabase } from '../../../src/utils/supabase';
+import { supabase } from './supabase';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
