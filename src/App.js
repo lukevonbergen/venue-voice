@@ -9,6 +9,7 @@ import SignInPage from './pages/SignIn';
 import PricingPage from './pages/Pricing';
 import FeaturesPage from './pages/Features';
 import ContactPage from './pages/ContactPage';
+import SecurityPage from './pages/SecurityPage';
 import './index.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/features" element={<FeaturesPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/security" element={<SecurityPage />} />
     </Routes>
   );
 }
