@@ -17,6 +17,9 @@ const SignUpPage = () => {
     setIsLoading(true);
     setError('');
   
+    // Debug log for form data
+    console.log('Form data:', { email, password, confirmPassword, name });
+  
     // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
@@ -95,7 +98,7 @@ const SignUpPage = () => {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
