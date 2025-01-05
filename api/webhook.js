@@ -1,12 +1,6 @@
-// api/webhook.js
-import { supabase } from '../../../src/utils/supabase';
+// pages/api/webhook.js
+import { supabase } from './utils/supabase'; // Ensure this path is correct
 import Stripe from 'stripe';
-
-// Debug: Log environment variables
-console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? '***' : 'MISSING');
-console.log('STRIPE_WEBHOOK_SECRET:', process.env.STRIPE_WEBHOOK_SECRET ? '***' : 'MISSING');
-console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '***' : 'MISSING');
-console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '***' : 'MISSING');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -76,5 +70,6 @@ export default async function handler(req, res) {
       console.log(`Unhandled event type: ${event.type}`);
   }
 
+  // Return a valid JSON response
   res.status(200).json({ received: true });
 }
