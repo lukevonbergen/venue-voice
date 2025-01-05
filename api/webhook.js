@@ -1,6 +1,6 @@
 // api/webhook.js
 import Stripe from 'stripe';
-import { supabase } from '../../utils/supabase'; // Adjust the path as needed
+import { supabase } from '../../src/utils/supabase'; // Adjust the path as needed
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
