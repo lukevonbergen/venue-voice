@@ -1,7 +1,7 @@
 // PricingPage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check, MessageSquare } from 'lucide-react';
 import Navbar from './Navbar'; // Import the Navbar component
 
 const PricingPage = () => {

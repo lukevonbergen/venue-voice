@@ -20,7 +20,6 @@ function App() {
       <Route path="/dashboard/questions" element={<ManageQuestions />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/signin" element={<SignInPage />} />
-      {/* Add Pricing and Features routes */}
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/features" element={<FeaturesPage />} />
     </Routes>
