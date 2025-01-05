@@ -21,9 +21,15 @@ const SignUpPage = () => {
     { id: 1, label: 'First Name', value: firstName, onChange: setFirstName },
     { id: 2, label: 'Last Name', value: lastName, onChange: setLastName },
     { id: 3, label: 'Venue Name', value: name, onChange: setName },
-    { id: 4, label: 'Email', value: email, onChange: setEmail },
-    { id: 5, label: 'Password', value: password, onChange: setPassword },
-    { id: 6, label: 'Confirm Password', value: confirmPassword, onChange: setConfirmPassword },
+    {
+      id: 4,
+      label: 'Account Details',
+      fields: [
+        { label: 'Email', value: email, onChange: setEmail, type: 'email' },
+        { label: 'Password', value: password, onChange: setPassword, type: 'password' },
+        { label: 'Confirm Password', value: confirmPassword, onChange: setConfirmPassword, type: 'password' },
+      ],
+    },
   ];
 
   const handleNext = () => {
@@ -35,6 +41,13 @@ const SignUpPage = () => {
   const handlePrevious = () => {
     if (step > 1) {
       setStep(step - 1);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent form submission
+      handleNext();
     }
   };
 
@@ -94,20 +107,9 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Back to Homepage Link */}
-        <div className="mb-4">
-          <Link
-            to="/"
-            className="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-1"
-          >
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            <span>Back to homepage</span>
-          </Link>
-        </div>
-
-        {/* White Box */}
-        <div className="bg-white rounded-3xl shadow-xl p-8">
+      <div className="max-w-4xl w-full flex bg-white rounded-3xl shadow-xl overflow-hidden">
+        {/* Form Section */}
+        <div className="flex-1 p-8">
           <div className="text-center">
             <div className="mb-8 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-emerald-100">
               <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
@@ -137,20 +139,43 @@ const SignUpPage = () => {
                       exit={{ opacity: 0, x: -50 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <div>
-                        <label htmlFor={stepData.label.toLowerCase().replace(' ', '-')} className="block text-sm font-medium text-gray-700 mb-2">
-                          {stepData.label}
-                        </label>
-                        <input
-                          type={stepData.label.includes('Password') ? 'password' : 'text'}
-                          id={stepData.label.toLowerCase().replace(' ', '-')}
-                          placeholder={`Enter your ${stepData.label.toLowerCase()}`}
-                          value={stepData.value}
-                          onChange={(e) => stepData.onChange(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                          required
-                        />
-                      </div>
+                      {stepData.fields ? (
+                        // Render multiple fields for step 4
+                        stepData.fields.map((field) => (
+                          <div key={field.label} className="mb-4">
+                            <label htmlFor={field.label.toLowerCase().replace(' ', '-')} className="block text-sm font-medium text-gray-700 mb-2">
+                              {field.label}
+                            </label>
+                            <input
+                              type={field.type}
+                              id={field.label.toLowerCase().replace(' ', '-')}
+                              placeholder={`Enter your ${field.label.toLowerCase()}`}
+                              value={field.value}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              onKeyDown={handleKeyDown}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                              required
+                            />
+                          </div>
+                        ))
+                      ) : (
+                        // Render single field for other steps
+                        <div>
+                          <label htmlFor={stepData.label.toLowerCase().replace(' ', '-')} className="block text-sm font-medium text-gray-700 mb-2">
+                            {stepData.label}
+                          </label>
+                          <input
+                            type="text"
+                            id={stepData.label.toLowerCase().replace(' ', '-')}
+                            placeholder={`Enter your ${stepData.label.toLowerCase()}`}
+                            value={stepData.value}
+                            onChange={(e) => stepData.onChange(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            required
+                          />
+                        </div>
+                      )}
                     </motion.div>
                   )
               )}
@@ -186,10 +211,17 @@ const SignUpPage = () => {
               )}
             </div>
           </form>
+        </div>
 
-          {/* Progress Indicator */}
-          <div className="mt-6 text-center text-sm text-gray-600">
-            Step {step} of {steps.length}
+        {/* Confirmation Section */}
+        <div className="w-1/3 bg-emerald-50 p-8 border-l border-emerald-100">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Your Information</h3>
+          <div className="space-y-4">
+            {firstName && <p><strong>First Name:</strong> {firstName}</p>}
+            {lastName && <p><strong>Last Name:</strong> {lastName}</p>}
+            {name && <p><strong>Venue Name:</strong> {name}</p>}
+            {email && <p><strong>Email:</strong> {email}</p>}
+            {password && <p><strong>Password:</strong> ********</p>}
           </div>
         </div>
       </div>
