@@ -334,10 +334,10 @@ const DashboardPage = () => {
 
   return (
     <DashboardFrame>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Page Title and Live Updates Toggle */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Venue Dashboard</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Venue Dashboard</h1>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-500">Live Updates</span>
             <button
@@ -354,16 +354,15 @@ const DashboardPage = () => {
             </button>
           </div>
         </div>
-
+  
         {/* Overall Satisfaction */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <SatisfactionCard
             title="Overall Satisfaction"
             rating={calculateOverallAverageRating()}
             trend={calculateOverallAverageRating() > 4.2 ? 'up' : 'down'}
             difference={Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}
           />
-          
           {questions.map((q) => (
             <SatisfactionCard
               key={q.id}
@@ -374,9 +373,9 @@ const DashboardPage = () => {
             />
           ))}
         </div>
-
+  
         {/* Response Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <MetricCard
             title="Last 30 Minutes"
             value={countResponses('30min')}
@@ -410,14 +409,14 @@ const DashboardPage = () => {
             icon={TrendingUp}
           />
         </div>
-
+  
         {/* Suggested Actions */}
-        <div className="bg-gray-50 rounded-xl p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Suggested Actions</h2>
+        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2 sm:mb-0">Suggested Actions</h2>
             <span className="text-sm text-gray-500">Based on recent feedback</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {generateSuggestedActions().map((action, index) => (
               <ActionCard
                 key={index}
@@ -428,7 +427,7 @@ const DashboardPage = () => {
             ))}
           </div>
         </div>
-
+  
         {/* Live Feedback Feed */}
         <FeedbackFeed feedback={lastHourFeedback} />
       </div>
