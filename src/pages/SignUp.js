@@ -74,11 +74,11 @@ const SignUpPage = () => {
       const { id } = await response.json();
       console.log('Stripe checkout session created successfully. Redirecting...');
   
-      // Log the publishable key
+      // Debug log for the publishable key
       console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
   
       // Initialize Stripe.js with the publishable key
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+      const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
   
       if (!stripe) {
         throw new Error('Stripe.js failed to initialize');
@@ -98,7 +98,7 @@ const SignUpPage = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
