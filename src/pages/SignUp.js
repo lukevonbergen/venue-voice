@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import supabase from '../utils/supabase';
+import { loadStripe } from '@stripe/stripe-js';
 
 const SignUpPage = () => {
   const [email, setEmail] = useState('');
@@ -61,16 +62,25 @@ const SignUpPage = () => {
         body: JSON.stringify({ email }),
       });
   
-      // Check if the response is OK
       if (!response.ok) {
-        const errorData = await response.json(); // Parse the error response
+        const errorData = await response.json();
         console.error('Stripe Checkout Error:', errorData);
         throw new Error(errorData.error || 'Failed to create Stripe checkout session');
       }
   
       const { id } = await response.json();
       console.log('Stripe checkout session created successfully. Redirecting...');
-      window.location.href = `https://checkout.stripe.com/pay/${id}`;
+  
+      // Initialize Stripe.js with the publishable key
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  
+      // Redirect to the Stripe checkout page
+      const { error } = await stripe.redirectToCheckout({ sessionId: id });
+  
+      if (error) {
+        console.error('Stripe Checkout Redirect Error:', error);
+        throw new Error(error.message);
+      }
     } catch (error) {
       console.error('Signup Error:', error);
       setError(error.message);
