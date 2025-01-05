@@ -17,11 +17,13 @@ const Navbar = () => {
           <div className="px-6 py-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
+              <Link to="/">
                 <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
-                  <MessageSquare className="h-4 w-4 text-white" />
+                    <MessageSquare className="h-4 w-4 text-white" />
                 </div>
+                </Link>
                 <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Feedie.app
+                  Feedie
                 </span>
               </div>
 
