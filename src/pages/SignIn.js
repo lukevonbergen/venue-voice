@@ -119,6 +119,13 @@ const SignInPage = () => {
               Sign up
             </Link>
           </div>
+
+          {/* Forgot Password Link */}
+          <div className="mt-4 text-center text-sm text-gray-600">
+            <Link to="/forgot-password" className="text-green-600 hover:text-green-700">
+              Forgot your password?
+            </Link>
+          </div>
         </div>
       </div>
     </div>
