@@ -53,7 +53,7 @@ const LandingPage = () => {
             <div className="mt-8 flex justify-center items-center space-x-4 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
                 <Check className="h-4 w-4 text-green-500" />
-                <span>10 minute setup</span>
+                <span>Quick setup</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Check className="h-4 w-4 text-green-500" />
