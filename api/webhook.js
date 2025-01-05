@@ -1,12 +1,18 @@
-// pages/api/webhook.js
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { buffer } from 'micro'; // Import buffer to read raw body
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+export const config = {
+  api: {
+    bodyParser: false, // Disable body parsing
+  },
+};
 
 export default async function handler(req, res) {
   console.log('Webhook request received:', req.method, req.url);
@@ -27,8 +33,9 @@ export default async function handler(req, res) {
   let event;
 
   try {
-    // Access the raw request body
-    const rawBody = req.body; // Ensure the raw body is passed (see note below)
+    // Read the raw body from the request
+    const rawBody = await buffer(req); // Use buffer to read raw body
+    console.log('Raw request body:', rawBody.toString());
 
     // Verify the webhook signature
     event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
