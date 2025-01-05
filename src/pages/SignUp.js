@@ -47,7 +47,20 @@ const SignUpPage = () => {
       }
 
       console.log('User and venue created successfully:', authData.user, venueData);
-      navigate('/dashboard'); // Redirect to the dashboard after successful sign-up
+
+      // Step 3: Redirect to Stripe checkout
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create Stripe checkout session.');
+      }
+
+      const { id } = await response.json();
+      window.location.href = `https://checkout.stripe.com/pay/${id}`;
     } catch (error) {
       setError(error.message);
     } finally {

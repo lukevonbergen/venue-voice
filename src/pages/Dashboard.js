@@ -12,18 +12,17 @@ const DashboardPage = () => {
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true); // State for live updates toggle
   const navigate = useNavigate();
 
-  // Check if the user is authenticated
   useEffect(() => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/signin');
+        navigate('/signin'); // Redirect to sign-in if not authenticated
       } else {
         console.log('Logged-in user email:', user.email);
-        fetchVenueId(user.email);
+        fetchVenueId(user.email); // Fetch venue ID and check payment status
       }
     };
-
+  
     fetchSession();
   }, [navigate]);
 
@@ -32,15 +31,22 @@ const DashboardPage = () => {
     console.log('Fetching venue ID for email:', email);
 
     const { data: venueData, error: venueError } = await supabase
-      .from('venues')
-      .select('id')
-      .eq('email', email)
-      .single();
+    .from('venues')
+    .select('id, is_paid') // Fetch both id and is_paid
+    .eq('email', email)
+    .single();
 
     if (venueError) {
       console.error('Error fetching venue ID:', venueError);
     } else {
       console.log('Venue ID fetched successfully:', venueData.id);
+
+      // Check if the venue has paid
+      if (!venueData.is_paid) {
+        navigate('/pricing'); // Redirect to the pricing page if not paid
+        return;
+      }
+
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
       fetchFeedback(venueData.id);
@@ -51,6 +57,7 @@ const DashboardPage = () => {
       }
     }
   };
+
 
   // Fetch active questions for the venue
   const fetchQuestions = async (venueId) => {
