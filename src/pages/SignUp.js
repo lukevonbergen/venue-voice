@@ -82,11 +82,11 @@ const SignUpPage = () => {
       }
   
       // Redirect to the Stripe checkout page
-      const { error } = await stripe.redirectToCheckout({ sessionId: id });
+      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: id });
   
-      if (error) {
-        console.error('Stripe Checkout Redirect Error:', error);
-        throw new Error(error.message);
+      if (stripeError) {
+        console.error('Stripe Checkout Redirect Error:', stripeError);
+        throw new Error(stripeError.message);
       }
     } catch (error) {
       console.error('Signup Error:', error);
