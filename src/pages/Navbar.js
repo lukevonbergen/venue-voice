@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom'; // Import useLocation
-import { MessageSquare, Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,15 +21,15 @@ const Navbar = () => {
         <div className="bg-white/95 rounded-2xl shadow-lg backdrop-blur-sm border border-gray-200/50">
           <div className="px-6 py-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
+              {/* Logo */}
+              <div className="flex items-center">
                 <Link to="/">
-                  <div className="h-8 w-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
-                    <MessageSquare className="h-4 w-4 text-white" />
-                  </div>
+                  <img
+                    src="/img/getchatter_logo.svg" // Path to your logo in the public folder
+                    alt="Chatter Logo"
+                    className="h-8" // Adjust the height as needed
+                  />
                 </Link>
-                <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Feedie.app
-                </span>
               </div>
 
               {/* Desktop Navigation Links (Hidden on Mobile) */}
