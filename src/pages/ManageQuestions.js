@@ -3,7 +3,7 @@ import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import { QRCodeSVG } from 'qrcode.react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Plus } from 'lucide-react';
+import { Plus, Download } from 'lucide-react';
 import Modal from 'react-modal';
 
 const ManageQuestions = () => {
@@ -348,7 +348,7 @@ const ManageQuestions = () => {
           <h2 className="text-xl font-bold mb-4 text-gray-900">Feedback QR Code</h2>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0" ref={qrCodeRef}>
                 <QRCodeSVG value={feedbackUrl} size={200} />
               </div>
               <div className="flex-1 text-center md:text-left">
@@ -364,6 +364,14 @@ const ManageQuestions = () => {
                 </a>
               </div>
             </div>
+            {/* Download QR Code Button */}
+            <button
+              onClick={downloadQRCode}
+              className="mt-4 flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+            >
+              <Download className="w-5 h-5" />
+              <span>Download QR Code</span>
+            </button>
           </div>
         </div>
   
