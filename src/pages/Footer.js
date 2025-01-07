@@ -11,7 +11,7 @@ const Footer = () => {
             <div className="flex items-center">
               <Link to="/">
                 <img
-                  src="/img/getchatter_logo.svg" // Path to your logo in the public folder
+                  src="/img/getchatters_logo.svg" // Path to your logo in the public folder
                   alt="Chatter Logo"
                   className="h-8" // Adjust the height as needed
                 />
