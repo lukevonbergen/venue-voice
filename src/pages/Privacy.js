@@ -129,7 +129,7 @@ const PrivacyPolicyPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Contact Information</h2>
             <p className="text-gray-600">
-              If you have any questions about this policy, please contact us at <a href="mailto:support@feedie.app" className="text-green-600">support@feedie.app</a>.
+              If you have any questions about this policy, please contact us at <a href="mailto:luke@getchatters.com" className="text-green-600">support@feedie.app</a>.
             </p>
           </div>
         </div>

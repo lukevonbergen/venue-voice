@@ -14,7 +14,7 @@ const SignUpPage = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1); // Track current step
+  const [step, setStep] = useState(1);
   const navigate = useNavigate();
 
   const steps = [
@@ -93,7 +93,7 @@ const SignUpPage = () => {
       }
 
       const { id } = await response.json();
-      const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
+      const stripe = await loadStripe('pk_live_51QdvLmAIlP4JnTHqmk3rZBkK6eFhphYRFP3WOZrI4YZ3IgqvugUBAX16vLH70ZNmVziY908DQMg34hgu8m500xBe00rz1SWx0o');
       const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: id });
 
       if (stripeError) throw new Error(stripeError.message);
