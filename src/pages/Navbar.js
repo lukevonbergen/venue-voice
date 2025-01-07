@@ -51,7 +51,7 @@ const Navbar = () => {
                   Features
                 </Link>
                 <Link
-                  to="/"
+                  to="#"
                   className={`text-gray-600 hover:text-gray-900 ${
                     isActive('/docs') ? 'font-semibold' : ''
                   }`}
