@@ -19,7 +19,7 @@ const TermsAndConditionsPage = () => {
               </span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-600">
-              Please read these terms carefully before using Feedie.app.
+              Please read these terms carefully before using getchatters.com.
             </p>
           </div>
         </div>
@@ -31,14 +31,14 @@ const TermsAndConditionsPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
             <p className="text-gray-600">
-              Welcome to Feedie.app! These Terms & Conditions govern your use of our platform. By accessing or using Feedie.app, you agree to these terms. If you do not agree, please do not use the platform.
+              Welcome to getchatters.com! These Terms & Conditions govern your use of our platform. By accessing or using getchatters.com, you agree to these terms. If you do not agree, please do not use the platform.
             </p>
           </div>
 
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Eligibility</h2>
             <p className="text-gray-600">
-              To use Feedie.app, you must be at least 18 years old or the legal age of majority in your jurisdiction. By using the platform, you represent and warrant that you meet these requirements.
+              To use getchatters.com, you must be at least 18 years old or the legal age of majority in your jurisdiction. By using the platform, you represent and warrant that you meet these requirements.
             </p>
           </div>
 
@@ -52,7 +52,7 @@ const TermsAndConditionsPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">4. User Responsibilities</h2>
             <p className="text-gray-600">
-              You agree to use Feedie.app only for lawful purposes. Prohibited activities include:
+              You agree to use getchatters.com only for lawful purposes. Prohibited activities include:
               <ul className="list-disc list-inside mt-2">
                 <li>Violating any laws or regulations.</li>
                 <li>Uploading malicious software or engaging in hacking.</li>
@@ -64,7 +64,7 @@ const TermsAndConditionsPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Intellectual Property</h2>
             <p className="text-gray-600">
-              All content on Feedie.app, including text, graphics, and logos, is owned by us or our licensors. You may not use, copy, or distribute any content without our prior written consent.
+              All content on getchatters.com, including text, graphics, and logos, is owned by us or our licensors. You may not use, copy, or distribute any content without our prior written consent.
             </p>
           </div>
 
@@ -85,7 +85,7 @@ const TermsAndConditionsPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Limitation of Liability</h2>
             <p className="text-gray-600">
-              Feedie.app is not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our total liability is limited to the amount you paid us in the last 12 months.
+              getchatters.com is not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our total liability is limited to the amount you paid us in the last 12 months.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ const TermsAndConditionsPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Contact Information</h2>
             <p className="text-gray-600">
-              If you have any questions about these terms, please contact us at <a href="mailto:support@feedie.app" className="text-green-600">support@feedie.app</a>.
+              If you have any questions about these terms, please contact us at <a href="mailto:support@getchatters.com" className="text-green-600">support@getchatters.com</a>.
             </p>
           </div>
         </div>

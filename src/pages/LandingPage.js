@@ -74,13 +74,13 @@ const LandingPage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Feedback, Visualized</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              See how Feedie.app transforms raw feedback into actionable insights with beautiful, easy-to-understand dashboards.
+              See how Chatters transforms raw feedback into actionable insights with beautiful, easy-to-understand dashboards.
             </p>
           </div>
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
             <img
               src="/img/lp-img-vv.png"
-              alt="Feedie.app Dashboard"
+              alt="Chatters Dashboard"
               className="w-full h-auto"
             />
           </div>
@@ -150,9 +150,9 @@ const LandingPage = () => {
       <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">See Feedie.app in Action</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">See Chatters in Action</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Book a demo with our team and discover how Feedie.app can transform your customer feedback process.
+              Book a demo with our team and discover how Chatters can transform your customer feedback process.
             </p>
           </div>
           <div className="bg-white rounded-3xl p-8 shadow-xl max-w-2xl mx-auto">

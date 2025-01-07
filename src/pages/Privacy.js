@@ -5,16 +5,6 @@ import Footer from './Footer';
 import { loadStripe } from '@stripe/stripe-js'; // Import loadStripe
 
 const PrivacyPolicyPage = () => {
-  // Add the Stripe test code inside a useEffect hook
-  useEffect(() => {
-    const TestStripe = async () => {
-      console.log('Initializing Stripe with key:', 'pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-      const stripe = await loadStripe('pk_test_51QdvLqPI4GNQuY8VOlP39H4Mx4e4qYJwSvz6JJHfgEWGkuunV2BJLrCrDJnZejna8fX7OX2elgJUJLY8W8NWu9gJ00AL2WIsaI');
-      console.log('Stripe initialized:', stripe);
-    };
-
-    TestStripe();
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
@@ -43,7 +33,7 @@ const PrivacyPolicyPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
             <p className="text-gray-600">
-              This Privacy Policy explains how Feedie.app collects, uses, and protects your personal data. By using our platform, you agree to the practices described in this policy.
+              This Privacy Policy explains how getchatters.com collects, uses, and protects your personal data. By using our platform, you agree to the practices described in this policy.
             </p>
           </div>
 
@@ -94,7 +84,7 @@ const PrivacyPolicyPage = () => {
                 <li>Request correction or deletion of your data.</li>
                 <li>Withdraw consent for data processing.</li>
               </ul>
-              To exercise these rights, contact us at <a href="mailto:support@feedie.app" className="text-green-600">support@feedie.app</a>.
+              To exercise these rights, contact us at <a href="mailto:support@getchatters.com" className="text-green-600">support@getchatters.com</a>.
             </p>
           </div>
 
@@ -115,7 +105,7 @@ const PrivacyPolicyPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Children’s Privacy</h2>
             <p className="text-gray-600">
-              Feedie.app is not intended for children under 13. We do not knowingly collect data from children under 13.
+              getchatters.com is not intended for children under 13. We do not knowingly collect data from children under 13.
             </p>
           </div>
 
@@ -129,7 +119,7 @@ const PrivacyPolicyPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Contact Information</h2>
             <p className="text-gray-600">
-              If you have any questions about this policy, please contact us at <a href="mailto:luke@getchatters.com" className="text-green-600">support@feedie.app</a>.
+              If you have any questions about this policy, please contact us at <a href="mailto:luke@getchatters.com" className="text-green-600">support@getchatters.com</a>.
             </p>
           </div>
         </div>

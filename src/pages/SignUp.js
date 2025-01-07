@@ -117,7 +117,7 @@ const SignUpPage = () => {
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Sign Up</h2>
             <p className="text-gray-600 mb-6 text-sm md:text-base">
-              Join Feedie.app and start transforming customer feedback into actionable insights.
+              Join Chatters and start transforming customer feedback into actionable insights.
             </p>
           </div>
 
