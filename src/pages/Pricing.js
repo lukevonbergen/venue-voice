@@ -107,20 +107,20 @@ const PricingPage = () => {
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               {
-                question: 'Can I switch plans later?',
-                answer: 'Yes, you can upgrade or downgrade your plan at any time.',
+                question: 'Can I cancel my plan?',
+                answer: 'Yes, you can cancel your plan at anytime.',
               },
               {
                 question: 'Is there a free trial?',
-                answer: 'Yes, we offer a 14-day free trial for all paid plans.',
+                answer: 'Yes, we offer a 2 week free trial!',
               },
               {
                 question: 'What payment methods do you accept?',
                 answer: 'We accept all major credit cards and PayPal.',
               },
               {
-                question: 'Do you offer discounts for nonprofits?',
-                answer: 'Yes, we offer special pricing for nonprofits. Contact us for details.',
+                question: 'Where can I access my invoices?',
+                answer: 'Your invoices will automatically be sent to you at the end of each billing cycle.',
               },
             ].map((faq, i) => (
               <div key={i} className="bg-white p-6 rounded-2xl shadow-sm">
