@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import { QRCodeSVG } from 'qrcode.react';
@@ -19,6 +19,8 @@ const ManageQuestions = () => {
   const [pendingNewQuestion, setPendingNewQuestion] = useState('');
   const [replacementSource, setReplacementSource] = useState(null); // 'new' or 'inactive'
   const [duplicateError, setDuplicateError] = useState('');
+
+  const qrCodeRef = useRef(null);
 
   // Fetch venue ID and questions
   useEffect(() => {
@@ -120,6 +122,37 @@ const ManageQuestions = () => {
       setQuestions([...questions, data[0]]); // Update the state with the new question
       setNewQuestion(''); // Clear the input field
     }
+  };
+
+  // Function to download the QR code as an image
+  const downloadQRCode = () => {
+    const qrCodeElement = qrCodeRef.current;
+    if (!qrCodeElement) return;
+
+    // Create a canvas element to render the QR code
+    const canvas = document.createElement('canvas');
+    canvas.width = qrCodeElement.clientWidth;
+    canvas.height = qrCodeElement.clientHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Draw the QR code onto the canvas
+    const svg = qrCodeElement.querySelector('svg');
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
+
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+
+      // Convert the canvas to a data URL and trigger the download
+      const pngFile = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.download = 'feedback-qr-code.png';
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
   };
 
   // Replace an active question with an inactive one
