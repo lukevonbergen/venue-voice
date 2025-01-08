@@ -38,7 +38,7 @@ const AboutUsPage = () => {
                 By the time the feedback was received, it was too late to address the issues. Negative reviews piled up online, and the pub had to compensate unhappy customers with <strong>free drinks, meals, and discounts</strong>. This was not only costly but also damaging to their reputation.
               </p>
               <p className="text-gray-600 mb-4">
-                Luke realized that businesses needed a way to collect and act on feedback <strong>in real-time</strong>. This led to the creation of Chatters—a platform designed to help businesses turn customer feedback into actionable insights instantly.
+                Luke realised that businesses needed a way to collect and act on feedback <strong>in real-time</strong>. This led to the creation of Chatters—a platform designed to help businesses turn customer feedback into actionable insights instantly.
               </p>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
@@ -61,7 +61,7 @@ const AboutUsPage = () => {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">The Solution: Real-Time Feedback</h2>
             <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-              Chatters empowers businesses to collect, analyze, and act on customer feedback in real-time. No more waiting for weeks—address issues immediately and improve customer satisfaction.
+              Chatters empowers businesses to collect, analyse, and act on customer feedback in real-time. No more waiting for weeks—address issues immediately and improve customer satisfaction.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[

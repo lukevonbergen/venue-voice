@@ -14,7 +14,7 @@ const PricingPage = () => {
         'Unlimited feedback submissions/month',
         'Advanced analytics',
         'AI-powered insights (Coming soon)',
-        'Customizable forms',
+        'Customisable forms',
         'Priority email support',
       ],
       cta: 'Start now',
