@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react'; // Import the Analytics component
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
@@ -43,6 +44,7 @@ function App() {
 const AppWrapper = () => (
   <Router>
     <App />
+    <Analytics />
   </Router>
 );
 
