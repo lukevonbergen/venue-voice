@@ -14,7 +14,7 @@ const ContactPage = () => {
       <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 space-y-3 tracking-tight">
+            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 space-y-3 tracking-tight">
               <span className="block">Get in Touch</span>
               <span className="block bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Contact Us
