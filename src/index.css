@@ -5,35 +5,35 @@
 /* Add Gilroy Font */
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Regular.woff') format('woff');
+  src: url('../public/fonts/Gilroy-Regular.woff') format('woff');
   font-weight: 400; /* Regular */
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Medium.woff') format('woff');
+  src: url('../public/fonts/Gilroy-Medium.woff') format('woff');
   font-weight: 500; /* Medium */
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Bold.woff') format('woff');
+  src: url('../public/fonts/Gilroy-Bold.woff') format('woff');
   font-weight: 700; /* Bold */
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Light.woff') format('woff');
+  src: url('../public/fonts/Gilroy-Light.woff') format('woff');
   font-weight: 300; /* Light */
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Gilroy';
-  src: url('/fonts/Gilroy-Heavy.woff') format('woff');
+  src: url('../public/fonts/Gilroy-Heavy.woff') format('woff');
   font-weight: 900; /* Heavy */
   font-style: normal;
 }
