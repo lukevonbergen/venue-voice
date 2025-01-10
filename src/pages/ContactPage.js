@@ -100,7 +100,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Call us at</p>
-                    <p className="text-lg font-medium text-gray-900">+44 123 456 7890</p>
+                    <p className="text-lg font-medium text-gray-900">+44 7932 065 904</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
