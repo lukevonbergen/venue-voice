@@ -14,14 +14,19 @@ import {
 } from 'lucide-react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import { CircularProgressbar } from 'react-circular-progressbar'; // Import CircularProgressbar
-import 'react-circular-progressbar/dist/styles.css'; // Import default styles
+import { CircularProgressbar } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import Modal from 'react-modal'; // Import react-modal
+
+// Set app element for react-modal (required for accessibility)
+Modal.setAppElement('#root');
 
 const ScoresPage = () => {
   const [feedback, setFeedback] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
   const navigate = useNavigate();
 
   // Fetch venue ID and feedback
@@ -135,6 +140,21 @@ const ScoresPage = () => {
     return nps.toFixed(1);
   };
 
+  // Calculate breakdown of Promoters, Passives, and Detractors
+  const calculateNPSBreakdown = () => {
+    const promoters = feedback.filter((f) => f.rating >= 9).length;
+    const passives = feedback.filter((f) => f.rating === 7 || f.rating === 8).length;
+    const detractors = feedback.filter((f) => f.rating <= 6).length;
+    const totalResponses = feedback.length;
+
+    return {
+      promoters,
+      passives,
+      detractors,
+      totalResponses,
+    };
+  };
+
   // Calculate average score for a specific question type
   const calculateAverageScore = (questionType) => {
     const relevantQuestions = questions.filter((q) => q.question.toLowerCase().includes(questionType.toLowerCase()));
@@ -182,8 +202,11 @@ const ScoresPage = () => {
   };
 
   // UI Components
-  const ScoreCard = ({ title, value, maxValue = 100, icon: Icon }) => (
-    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+  const ScoreCard = ({ title, value, maxValue = 100, icon: Icon, onClick }) => (
+    <div
+      className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100 cursor-pointer"
+      onClick={onClick} // Make the card clickable
+    >
       <div className="flex flex-col items-center space-y-4">
         <div className="w-24 h-24">
           <CircularProgressbar
@@ -203,6 +226,25 @@ const ScoresPage = () => {
       </div>
     </div>
   );
+
+  // Modal Styles
+  const modalStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      width: '400px',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
+    overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+  };
 
   return (
     <DashboardFrame>
@@ -233,11 +275,12 @@ const ScoresPage = () => {
             title="NPS Score"
             value={calculateNPS()}
             icon={Smile}
+            onClick={() => setIsModalOpen(true)} // Open modal on click
           />
           <ScoreCard
             title="Service Score"
             value={calculateAverageScore('service')}
-            maxValue={5} // Adjust maxValue for ratings out of 5
+            maxValue={5}
             icon={Star}
           />
           <ScoreCard
@@ -273,6 +316,34 @@ const ScoresPage = () => {
             icon={Users}
           />
         </div>
+
+        {/* NPS Breakdown Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={() => setIsModalOpen(false)}
+          style={modalStyles}
+          contentLabel="NPS Breakdown"
+        >
+          <h2 className="text-xl font-bold mb-4">NPS Breakdown</h2>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <span className="text-gray-700">Promoters (9-10)</span>
+              <span className="font-bold">{calculateNPSBreakdown().promoters}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Passives (7-8)</span>
+              <span className="font-bold">{calculateNPSBreakdown().passives}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Detractors (0-6)</span>
+              <span className="font-bold">{calculateNPSBreakdown().detractors}</span>
+            </div>
+            <div className="flex justify-between border-t pt-4">
+              <span className="text-gray-700">Total Responses</span>
+              <span className="font-bold">{calculateNPSBreakdown().totalResponses}</span>
+            </div>
+          </div>
+        </Modal>
       </div>
     </DashboardFrame>
   );
