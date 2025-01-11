@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Star, Smile, Heart, Coffee, Clock, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, Star, Smile, Heart, Coffee, Clock, Users, ToggleLeft, ToggleRight } from 'lucide-react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 
