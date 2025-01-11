@@ -104,6 +104,11 @@ const DashboardFrame = ({ children }) => {
                 Manage Questions
               </NavLink>
             </li>
+            <li>
+              <NavLink to="/dashboard/scores" icon={MessageSquare}>
+                Scores
+              </NavLink>
+            </li>
           </ul>
         </nav>
 
