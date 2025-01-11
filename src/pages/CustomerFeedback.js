@@ -10,7 +10,6 @@ const CustomerFeedbackPage = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [additionalFeedback, setAdditionalFeedback] = useState('');
   const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false);
-  const [npsRating, setNpsRating] = useState(0); // State for NPS rating
 
   // Disable scrolling when this page is active
   useEffect(() => {
@@ -27,8 +26,8 @@ const CustomerFeedbackPage = () => {
         .from('questions')
         .select('*')
         .eq('venue_id', venueId)
-        .eq('active', true) // Only fetch active questions
-        .order('order', { ascending: true }); // Fetch questions in order
+        .eq('active', true)
+        .order('order', { ascending: true });
 
       if (error) {
         console.error(error);
@@ -75,27 +74,23 @@ const CustomerFeedbackPage = () => {
     }
   };
 
-  const handleNPSRating = async () => {
+  const handleNPSRating = async (rating) => {
     // Save NPS rating to the database
-    if (npsRating >= 1 && npsRating <= 10) {
-      await supabase
-        .from('feedback')
-        .insert([
-          {
-            venue_id: venueId,
-            question_id: questions[currentQuestionIndex].id,
-            rating: npsRating, // Save the NPS rating (1-10)
-          },
-        ]);
+    await supabase
+      .from('feedback')
+      .insert([
+        {
+          venue_id: venueId,
+          question_id: questions[currentQuestionIndex].id,
+          rating: rating, // Save the NPS rating (1-10)
+        },
+      ]);
 
-      // Move to the next question or show additional feedback
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-      } else {
-        setShowAdditionalFeedback(true); // Show the additional feedback section
-      }
+    // Move to the next question or show additional feedback
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      alert('Please select a rating between 1 and 10.');
+      setShowAdditionalFeedback(true); // Show the additional feedback section
     }
   };
 
@@ -166,28 +161,20 @@ const CustomerFeedbackPage = () => {
         <>
           {isNPSQuestion() ? (
             // NPS Rating Input (1-10)
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                  <button
-                    key={rating}
-                    className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors ${
-                      npsRating === rating
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
-                    onClick={() => setNpsRating(rating)}
-                  >
-                    {rating}
-                  </button>
-                ))}
-              </div>
-              <button
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                onClick={handleNPSRating}
-              >
-                Submit Rating
-              </button>
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                <button
+                  key={rating}
+                  className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors ${
+                    rating === rating
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                  onClick={() => handleNPSRating(rating)} // Automatically submit on click
+                >
+                  {rating}
+                </button>
+              ))}
             </div>
           ) : (
             // Emoji Buttons for Non-NPS Questions
@@ -196,7 +183,7 @@ const CustomerFeedbackPage = () => {
                 <button
                   key={index}
                   className="text-4xl transition-transform hover:scale-125 active:scale-100"
-                  onClick={() => handleFeedback(emoji)}
+                  onClick={() => handleFeedback(emoji)} // Automatically submit on click
                 >
                   {emoji}
                 </button>
