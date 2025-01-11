@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Star, Smile, Heart, Coffee, Clock, Users, ToggleLeft, ToggleRight } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Star,
+  Smile,
+  Heart,
+  Coffee,
+  Clock,
+  Users,
+  ToggleRight,
+  ToggleLeft,
+} from 'lucide-react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
+import { CircularProgressbar } from 'react-circular-progressbar'; // Import CircularProgressbar
+import 'react-circular-progressbar/dist/styles.css'; // Import default styles
 
 const ScoresPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -16,7 +29,7 @@ const ScoresPage = () => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/signin'); // Redirect to sign-in if not authenticated
+        navigate('/signin');
       } else {
         fetchVenueId(user.email);
       }
@@ -37,7 +50,7 @@ const ScoresPage = () => {
       console.error('Error fetching venue ID:', venueError);
     } else {
       if (!venueData.is_paid) {
-        navigate('/pricing'); // Redirect to pricing if not paid
+        navigate('/pricing');
         return;
       }
 
@@ -169,23 +182,23 @@ const ScoresPage = () => {
   };
 
   // UI Components
-  const ScoreCard = ({ title, value, trend, trendValue, icon: Icon }) => (
+  const ScoreCard = ({ title, value, maxValue = 100, icon: Icon }) => (
     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <span className="text-gray-500 text-sm font-medium">{title}</span>
-          <div className="flex items-baseline space-x-2">
-            <h2 className="text-3xl font-bold text-gray-900">{value}</h2>
-            {trend && (
-              <div className={`flex items-center ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                {trend === 'up' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                <span className="ml-1 text-sm font-medium">{trendValue}%</span>
-              </div>
-            )}
-          </div>
+      <div className="flex flex-col items-center space-y-4">
+        <div className="w-24 h-24">
+          <CircularProgressbar
+            value={value}
+            maxValue={maxValue}
+            text={`${value}%`}
+            styles={{
+              path: { stroke: '#3B82F6' }, // Blue color for the progress bar
+              text: { fill: '#1F2937', fontSize: '24px', fontWeight: 'bold' }, // Dark gray for text
+            }}
+          />
         </div>
-        <div className="p-2 bg-blue-50 rounded-lg">
+        <div className="flex items-center space-x-2">
           <Icon className="w-6 h-6 text-blue-600" />
+          <span className="text-gray-700 font-medium">{title}</span>
         </div>
       </div>
     </div>
@@ -219,29 +232,24 @@ const ScoresPage = () => {
           <ScoreCard
             title="NPS Score"
             value={calculateNPS()}
-            trend={calculateNPS() > 50 ? 'up' : 'down'}
-            trendValue={Math.abs(calculateNPS() - 50).toFixed(1)}
             icon={Smile}
           />
           <ScoreCard
             title="Service Score"
             value={calculateAverageScore('service')}
-            trend={calculateAverageScore('service') > 4.0 ? 'up' : 'down'}
-            trendValue={Math.abs(calculateAverageScore('service') - 4.0).toFixed(1)}
+            maxValue={5} // Adjust maxValue for ratings out of 5
             icon={Star}
           />
           <ScoreCard
             title="Food Score"
             value={calculateAverageScore('food')}
-            trend={calculateAverageScore('food') > 4.0 ? 'up' : 'down'}
-            trendValue={Math.abs(calculateAverageScore('food') - 4.0).toFixed(1)}
+            maxValue={5}
             icon={Coffee}
           />
           <ScoreCard
             title="Ambiance Score"
             value={calculateAverageScore('ambiance')}
-            trend={calculateAverageScore('ambiance') > 4.0 ? 'up' : 'down'}
-            trendValue={Math.abs(calculateAverageScore('ambiance') - 4.0).toFixed(1)}
+            maxValue={5}
             icon={Heart}
           />
         </div>
@@ -251,6 +259,7 @@ const ScoresPage = () => {
           <ScoreCard
             title="Overall Average"
             value={calculateOverallAverage()}
+            maxValue={5}
             icon={Star}
           />
           <ScoreCard
