@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, LogOut, Menu, X, ChartArea } from 'lucide-react';
 import supabase from '../utils/supabase';
 
 const DashboardFrame = ({ children }) => {
@@ -105,7 +105,7 @@ const DashboardFrame = ({ children }) => {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/dashboard/scores" icon={MessageSquare}>
+              <NavLink to="/dashboard/scores" icon={ChartArea}>
                 Scores
               </NavLink>
             </li>
