@@ -7,6 +7,7 @@ import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import Scores from './pages/Scores';
+import FeedbackFeed from './pages/FeedbackFeed';
 import SignInPage from './pages/SignIn';
 import PricingPage from './pages/Pricing';
 import FeaturesPage from './pages/Features';
@@ -28,6 +29,7 @@ function App() {
       <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
       <Route path="/dashboard/questions" element={<ManageQuestions />} />
       <Route path="/dashboard/scores" element={<Scores />} />
+      <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/pricing" element={<PricingPage />} />
