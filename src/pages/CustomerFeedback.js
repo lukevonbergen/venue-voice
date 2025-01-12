@@ -3,6 +3,16 @@ import { useParams } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Helper function to calculate luminance
+const getLuminance = (color) => {
+  const hex = color.replace(/^#/, '');
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance;
+};
+
 const CustomerFeedbackPage = () => {
   const { venueId } = useParams();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -152,6 +162,9 @@ const CustomerFeedbackPage = () => {
     setIsFinished(true);
   };
 
+  // Calculate text color based on background luminance
+  const textColor = getLuminance(venueBranding.secondaryColor) > 0.5 ? '#000000' : '#ffffff';
+
   if (questions.length === 0) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -195,10 +208,10 @@ const CustomerFeedbackPage = () => {
               transition={{ type: 'tween', duration: 0.3 }}
               className="flex flex-col justify-center items-center text-center mb-8"
             >
-              <h2 className="text-2xl font-bold mb-4">
+              <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
                 {questions[currentQuestionIndex].question}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600" style={{ color: textColor }}>
                 Question {currentQuestionIndex + 1} of {questions.length}
               </p>
             </motion.div>
@@ -245,8 +258,12 @@ const CustomerFeedbackPage = () => {
         {/* Additional Feedback Section */}
         {showAdditionalFeedback && (
           <div className="flex flex-col items-center gap-4">
-            <h2 className="text-2xl font-bold mb-4">Any additional feedback?</h2>
-            <p className="text-gray-600 mb-4">This is optional, but we'd love to hear more!</p>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
+              Any additional feedback?
+            </h2>
+            <p className="text-gray-600 mb-4" style={{ color: textColor }}>
+              This is optional, but we'd love to hear more!
+            </p>
             <textarea
               className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows="4"
@@ -274,7 +291,7 @@ const CustomerFeedbackPage = () => {
 
       {/* Powered by Chatters at the Bottom */}
       <div className="flex justify-center pb-4">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm" style={{ color: textColor }}>
           Powered by <strong>Chatters</strong>
         </div>
       </div>
