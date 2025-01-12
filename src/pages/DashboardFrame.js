@@ -9,6 +9,7 @@ const DashboardFrame = ({ children }) => {
   const [venueName, setVenueName] = useState('');
   const [venueId, setVenueId] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false); // State for logout confirmation modal
 
   useEffect(() => {
     const fetchVenue = async () => {
@@ -126,7 +127,7 @@ const DashboardFrame = ({ children }) => {
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+            onClick={() => setIsLogoutModalOpen(true)} // Open the logout confirmation modal
             className="w-full px-4 py-3 text-left text-red-600 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center group mt-2"
           >
             <LogOut className="w-5 h-5 mr-3 text-red-400 group-hover:text-red-500" />
@@ -139,6 +140,30 @@ const DashboardFrame = ({ children }) => {
       <div className="flex-1 p-4 lg:p-8 mt-16 lg:mt-0 lg:ml-72 overflow-y-auto"> {/* Make the main content scrollable */}
         <div className="max-w-6xl mx-auto">{children}</div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Confirm Logout</h2>
+            <p className="text-gray-600 mb-6">Are you sure you want to sign out?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setIsLogoutModalOpen(false)} // Close the modal
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout} // Confirm logout
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
