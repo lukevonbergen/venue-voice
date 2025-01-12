@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Users, Calendar, TrendingUp } from 'lucide-react';
 import supabase from '../utils/supabase';
-import DashboardFrame from '../components/DashboardFrame';
+import DashboardFrame from './DashboardFrame';
 import FeedbackTrendsChart from '../components/dashboard/FeedbackTrendsChart';
 import FeedbackDistributionChart from '../components/dashboard/FeedbackDistributionChart';
 import MetricCard from '../components/dashboard/MetricCard';
