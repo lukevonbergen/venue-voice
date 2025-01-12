@@ -150,7 +150,7 @@ const ScoresPage = () => {
           <CircularProgressbar
             value={value}
             maxValue={maxValue}
-            text={`${value}%`}
+            text={`${value}`}
             styles={{
               path: { stroke: '#3B82F6' },
               text: { fill: '#1F2937', fontSize: '24px', fontWeight: 'bold' },
