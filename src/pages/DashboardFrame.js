@@ -101,8 +101,8 @@ const DashboardFrame = ({ children }) => {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/dashboard/scores" icon={BarChart}>
-                Scores
+              <NavLink to="/dashboard/nps" icon={BarChart}>
+                NPS Scores
               </NavLink>
             </li>
             <li>

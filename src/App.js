@@ -8,7 +8,7 @@ import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import SettingsPage from './pages/SettingsPage';
-import Scores from './pages/Scores';
+import NPSScores from './pages/nps-scores';
 import QRCodePage_Feature from './pages/Features_QRCode';
 import NPS_Feature from './pages/Features_NPSScore';
 import RealTimeStats_Feature from './pages/Features_RealTimeStats';
@@ -36,7 +36,7 @@ function App() {
       <Route path="/feedback" element={<CustomerFeedbackPage />} />
       <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
       <Route path="/dashboard/questions" element={<ManageQuestions />} />
-      <Route path="/dashboard/scores" element={<Scores />} />
+      <Route path="/dashboard/nps" element={<NPSScores />} />
       <Route path="/dashboard/settings" element={<SettingsPage />} />
       <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
       <Route path="/signup" element={<SignUpPage />} />
