@@ -470,6 +470,7 @@ const ManageQuestions = () => {
           <h2 className="text-xl font-bold mb-4 text-gray-900">Current Questions</h2>
           <p className="text-sm text-gray-400 mb-4">
             You can drag and drop these questions in the order your customers will answer them.
+            We recommend having the "How likely are you to recommend us?" for NPS purposes.
           </p>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="questions">
