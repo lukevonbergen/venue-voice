@@ -20,14 +20,13 @@ import Modal from 'react-modal';
 Modal.setAppElement('#root');
 
 const ScoresPage = () => {
-  const [feedback, setFeedback] = useState([]);
-  const [questions, setQuestions] = useState([]);
+  const [npsScores, setNpsScores] = useState([]); // State for NPS scores
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch venue ID and feedback
+  // Fetch venue ID and NPS scores
   useEffect(() => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -58,59 +57,43 @@ const ScoresPage = () => {
       }
 
       setVenueId(venueData.id);
-      fetchFeedback(venueData.id);
-      fetchQuestions(venueData.id);
+      fetchNpsScores(venueData.id); // Fetch NPS scores for the venue
       if (liveUpdatesEnabled) {
         setupRealtimeUpdates(venueData.id);
       }
     }
   };
 
-  // Fetch feedback for the venue
-  const fetchFeedback = async (venueId) => {
+  // Fetch NPS scores for the venue
+  const fetchNpsScores = async (venueId) => {
     const { data, error } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId);
+      .from('nps_scores') // Fetch from nps_scores table
+      .select('score') // Only fetch the score column
+      .eq('venue_id', venueId); // Filter by venue_id
 
     if (error) {
-      console.error('Error fetching feedback:', error);
+      console.error('Error fetching NPS scores:', error);
     } else {
-      setFeedback(data);
+      setNpsScores(data);
     }
   };
 
-  // Fetch questions for the venue
-  const fetchQuestions = async (venueId) => {
-    const { data, error } = await supabase
-      .from('questions')
-      .select('*')
-      .eq('venue_id', venueId)
-      .eq('active', true);
-
-    if (error) {
-      console.error('Error fetching questions:', error);
-    } else {
-      setQuestions(data);
-    }
-  };
-
-  // Set up real-time updates for feedback
+  // Set up real-time updates for NPS scores
   const setupRealtimeUpdates = (venueId) => {
-    const feedbackSubscription = supabase
-      .channel('feedback')
+    const npsSubscription = supabase
+      .channel('nps_scores')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
+        { event: 'INSERT', schema: 'public', table: 'nps_scores', filter: `venue_id=eq.${venueId}` },
         (payload) => {
-          console.log('New feedback received:', payload.new);
-          setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
+          console.log('New NPS score received:', payload.new);
+          setNpsScores((prevScores) => [...prevScores, payload.new]);
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(feedbackSubscription);
+      supabase.removeChannel(npsSubscription);
     };
   };
 
@@ -128,9 +111,9 @@ const ScoresPage = () => {
 
   // Calculate NPS (Net Promoter Score)
   const calculateNPS = () => {
-    const promoters = feedback.filter((f) => f.rating >= 9).length;
-    const detractors = feedback.filter((f) => f.rating <= 6).length;
-    const totalResponses = feedback.length;
+    const promoters = npsScores.filter((s) => s.score >= 9).length;
+    const detractors = npsScores.filter((s) => s.score <= 6).length;
+    const totalResponses = npsScores.length;
 
     if (totalResponses === 0) return 0;
 
@@ -140,10 +123,10 @@ const ScoresPage = () => {
 
   // Calculate breakdown of Promoters, Passives, and Detractors
   const calculateNPSBreakdown = () => {
-    const promoters = feedback.filter((f) => f.rating >= 9).length;
-    const passives = feedback.filter((f) => f.rating === 7 || f.rating === 8).length;
-    const detractors = feedback.filter((f) => f.rating <= 6).length;
-    const totalResponses = feedback.length;
+    const promoters = npsScores.filter((s) => s.score >= 9).length;
+    const passives = npsScores.filter((s) => s.score === 7 || s.score === 8).length;
+    const detractors = npsScores.filter((s) => s.score <= 6).length;
+    const totalResponses = npsScores.length;
 
     return {
       promoters,
