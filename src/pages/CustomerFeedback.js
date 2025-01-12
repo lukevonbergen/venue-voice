@@ -209,36 +209,41 @@ const CustomerFeedbackPage = () => {
         {!showAdditionalFeedback && (
           <>
             {isNPSQuestion() ? (
-            // NPS Rating Input (1-10) in a Grid Layout
-            <div className="grid grid-cols-5 gap-2"> {/* 5 buttons per row */}
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                <button
-                  key={rating}
-                  className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors text-sm ${
-                    rating === rating
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                  onClick={() => handleNPSRating(rating)} // Automatically submit on click
-                >
-                  {rating}
-                </button>
-              ))}
-            </div>
-          ) : (
-            // Emoji Buttons for Non-NPS Questions
-            <div className="flex justify-center gap-4">
-              {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
-                <button
-                  key={index}
-                  className="text-4xl transition-transform hover:scale-125 active:scale-100"
-                  onClick={() => handleFeedback(emoji)} // Automatically submit on click
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          )}
+              // NPS Rating Slider (1-10)
+              <div className="w-full max-w-md px-4">
+                <div className="relative">
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    defaultValue="5"
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${venueBranding.primaryColor} 0%, ${venueBranding.primaryColor} 50%, #e5e7eb 50%, #e5e7eb 100%)`,
+                    }}
+                    onChange={(e) => handleNPSRating(Number(e.target.value))}
+                  />
+                  <div className="flex justify-between text-sm text-gray-600 mt-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <span key={num}>{num}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Emoji Buttons for Non-NPS Questions
+              <div className="flex justify-center gap-6">
+                {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
+                  <button
+                    key={index}
+                    className="text-5xl transition-transform hover:scale-125 active:scale-100"
+                    onClick={() => handleFeedback(emoji)}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
 
