@@ -84,7 +84,7 @@ const Navbar = () => {
                   </button>
                   {isFeaturesDropdownOpen && (
                     <div
-                      className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200"
+                      className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[500px] bg-white rounded-lg shadow-lg border border-gray-200"
                       onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
                       onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
                     >
