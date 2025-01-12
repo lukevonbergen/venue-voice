@@ -158,52 +158,6 @@ const ScoresPage = () => {
     };
   };
 
-  // Calculate average score for a specific question type
-  const calculateAverageScore = (questionType) => {
-    const relevantQuestions = questions.filter((q) => q.question.toLowerCase().includes(questionType.toLowerCase()));
-    if (relevantQuestions.length === 0) return 0;
-
-    const relevantFeedback = feedback.filter((f) =>
-      relevantQuestions.some((q) => q.id === f.question_id)
-    );
-
-    if (relevantFeedback.length === 0) return 0;
-
-    const totalRating = relevantFeedback.reduce((sum, f) => sum + f.rating, 0);
-    return (totalRating / relevantFeedback.length).toFixed(1);
-  };
-
-  // Calculate overall average score
-  const calculateOverallAverage = () => {
-    if (feedback.length === 0) return 0;
-
-    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
-    return (totalRating / feedback.length).toFixed(1);
-  };
-
-  // Count responses in a specific timeframe
-  const countResponses = (timeInterval) => {
-    const now = new Date();
-    let startTime;
-
-    switch (timeInterval) {
-      case '1hour':
-        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-        break;
-      case 'today':
-        startTime = new Date(now.toISOString().split('T')[0]).toISOString();
-        break;
-      case '7days':
-        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        break;
-      default:
-        throw new Error('Invalid time interval');
-    }
-
-    const filteredFeedback = feedback.filter((f) => f.timestamp >= startTime);
-    return filteredFeedback.length;
-  };
-
   // UI Components
   const ScoreCard = ({ title, value, maxValue = 100, icon: Icon, onClick }) => (
     <div
@@ -226,6 +180,18 @@ const ScoresPage = () => {
           <Icon className="w-6 h-6 text-blue-600" />
           <span className="text-gray-700 font-medium">{title}</span>
         </div>
+      </div>
+    </div>
+  );
+
+  const CategoryCard = ({ title, value, icon: Icon, color }) => (
+    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="flex items-center space-x-2">
+          <Icon className={`w-6 h-6 text-${color}-600`} />
+          <span className="text-gray-700 font-medium">{title}</span>
+        </div>
+        <span className="text-2xl font-bold">{value}</span>
       </div>
     </div>
   );
@@ -280,52 +246,32 @@ const ScoresPage = () => {
             icon={Smile}
             onClick={() => setIsModalOpen(true)}
           />
-          <ScoreCard
-            title="Service Score"
-            value={calculateAverageScore('service')}
-            maxValue={5}
-            icon={Star}
+          <CategoryCard
+            title="Promoters"
+            value={calculateNPSBreakdown().promoters}
+            icon={TrendingUp}
+            color="green"
           />
-          <ScoreCard
-            title="Food Score"
-            value={calculateAverageScore('food')}
-            maxValue={5}
-            icon={Coffee}
+          <CategoryCard
+            title="Passives"
+            value={calculateNPSBreakdown().passives}
+            icon={TrendingDown}
+            color="yellow"
           />
-          <ScoreCard
-            title="Ambiance Score"
-            value={calculateAverageScore('ambiance')}
-            maxValue={5}
-            icon={Heart}
+          <CategoryCard
+            title="Detractors"
+            value={calculateNPSBreakdown().detractors}
+            icon={TrendingDown}
+            color="red"
           />
         </div>
 
-        {/* NPS Breakdown Section */}
+        {/* Total Responses Card */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">NPS Breakdown</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-gray-700">Promoters (9-10)</span>
-              <span className="font-bold">
-                {calculateNPSBreakdown().promoters} ({calculateNPSBreakdown().promoterPercentage}%)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Passives (7-8)</span>
-              <span className="font-bold">
-                {calculateNPSBreakdown().passives} ({calculateNPSBreakdown().passivePercentage}%)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Detractors (0-6)</span>
-              <span className="font-bold">
-                {calculateNPSBreakdown().detractors} ({calculateNPSBreakdown().detractorPercentage}%)
-              </span>
-            </div>
-            <div className="flex justify-between border-t pt-4">
-              <span className="text-gray-700">Total Responses</span>
-              <span className="font-bold">{calculateNPSBreakdown().totalResponses}</span>
-            </div>
+          <h2 className="text-xl font-bold mb-4">Total Responses</h2>
+          <div className="flex justify-between">
+            <span className="text-gray-700">Total</span>
+            <span className="font-bold">{calculateNPSBreakdown().totalResponses}</span>
           </div>
         </div>
 
