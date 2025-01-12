@@ -8,7 +8,7 @@ import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import SettingsPage from './pages/SettingsPage';
-import NPSScores from './pages/nps-scores';
+import NPSScores from './pages/NPSScores';
 import QRCodePage_Feature from './pages/Features_QRCode';
 import NPS_Feature from './pages/Features_NPSScore';
 import RealTimeStats_Feature from './pages/Features_RealTimeStats';
