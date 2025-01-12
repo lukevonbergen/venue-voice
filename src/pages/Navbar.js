@@ -20,12 +20,12 @@ const Navbar = () => {
   };
 
   const features = [
-    { name: 'QR Codes', icon: <QrCode className="h-5 w-5" /> },
-    { name: 'NPS Score', icon: <BarChart className="h-5 w-5" /> },
-    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5" /> },
-    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5" /> },
-    { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5" /> },
-    { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5" /> },
+    { name: 'QR Codes', icon: <QrCode className="h-5 w-5" />, path: '/features/qr-codes' },
+    { name: 'NPS Score', icon: <BarChart className="h-5 w-5" />, path: '/features/nps-score' },
+    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5" />, path: '/features/real-time-stats' },
+    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5" />, path: '/features/custom-branding' },
+    { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5" />, path: '/features/custom-questions' },
+    { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5" />, path: '/features/dashboards' },
   ];
 
   return (
@@ -55,9 +55,12 @@ const Navbar = () => {
                 >
                   Pricing
                 </Link>
-                <div className="relative">
+                <div
+                  className="relative group"
+                  onMouseEnter={() => setIsFeaturesDropdownOpen(true)}
+                  onMouseLeave={() => setIsFeaturesDropdownOpen(false)}
+                >
                   <button
-                    onClick={toggleFeaturesDropdown}
                     className={`text-gray-600 hover:text-gray-900 ${
                       isActive('/features') ? 'font-semibold' : ''
                     }`}
@@ -65,13 +68,17 @@ const Navbar = () => {
                     Features
                   </button>
                   {isFeaturesDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200">
-                      <div className="p-4 space-y-4">
+                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200">
+                      <div className="p-4 flex space-x-6">
                         {features.map((feature, index) => (
-                          <div key={index} className="flex items-center space-x-3">
+                          <Link
+                            key={index}
+                            to={feature.path}
+                            className="flex flex-col items-center space-y-2 text-gray-700 hover:text-gray-900"
+                          >
                             {feature.icon}
-                            <span className="text-gray-700">{feature.name}</span>
-                          </div>
+                            <span>{feature.name}</span>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -127,10 +134,14 @@ const Navbar = () => {
                 {isFeaturesDropdownOpen && (
                   <div className="pl-4 space-y-4">
                     {features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-3">
+                      <Link
+                        key={index}
+                        to={feature.path}
+                        className="flex items-center space-x-3"
+                      >
                         {feature.icon}
                         <span className="text-gray-700">{feature.name}</span>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}
