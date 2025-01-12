@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Users, Calendar, TrendingUp } from 'lucide-react';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
+import DashboardFrame from '../components/DashboardFrame';
 import FeedbackTrendsChart from '../components/dashboard/FeedbackTrendsChart';
 import FeedbackDistributionChart from '../components/dashboard/FeedbackDistributionChart';
 import MetricCard from '../components/dashboard/MetricCard';
@@ -125,16 +125,12 @@ const DashboardPage = () => {
     return (totalRating / feedback.length).toFixed(1);
   };
 
-  const filterFeedbackByTime = () => {
-    const now = new Date();
-    const startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Default to last hour
-    return feedback.filter((f) => f.timestamp >= startTime);
+  const filterFeedbackByTime = (startTime, endTime = new Date().toISOString()) => {
+    return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime);
   };
 
-  const filteredFeedback = filterFeedbackByTime();
-
-  const calculateFeedbackCount = (feedback, startTime, endTime) => {
-    return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime).length;
+  const calculateFeedbackCount = (startTime, endTime) => {
+    return filterFeedbackByTime(startTime, endTime).length;
   };
 
   const calculatePercentageChange = (currentCount, previousCount) => {
@@ -144,49 +140,42 @@ const DashboardPage = () => {
 
   const now = new Date();
 
+  // Feedback counts for metric cards
   const last30MinutesCount = calculateFeedbackCount(
-    filteredFeedback,
     new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
     now.toISOString()
   );
   const previous30MinutesCount = calculateFeedbackCount(
-    feedback,
     new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
     new Date(now.getTime() - 30 * 60 * 1000).toISOString()
   );
   const last30MinutesTrend = calculatePercentageChange(last30MinutesCount, previous30MinutesCount);
 
   const lastHourCount = calculateFeedbackCount(
-    filteredFeedback,
     new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
     now.toISOString()
   );
   const previousHourCount = calculateFeedbackCount(
-    feedback,
     new Date(now.getTime() - 120 * 60 * 1000).toISOString(),
     new Date(now.getTime() - 60 * 60 * 1000).toISOString()
   );
   const lastHourTrend = calculatePercentageChange(lastHourCount, previousHourCount);
 
   const todayCount = calculateFeedbackCount(
-    filteredFeedback,
     new Date(now.toISOString().split('T')[0]).toISOString(),
     now.toISOString()
   );
   const yesterdayCount = calculateFeedbackCount(
-    feedback,
     new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0],
     new Date(now.toISOString().split('T')[0]).toISOString()
   );
   const todayTrend = calculatePercentageChange(todayCount, yesterdayCount);
 
   const last7DaysCount = calculateFeedbackCount(
-    filteredFeedback,
     new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     now.toISOString()
   );
   const previous7DaysCount = calculateFeedbackCount(
-    feedback,
     new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
   );
@@ -275,8 +264,8 @@ const DashboardPage = () => {
 
         {/* Middle Section: Feedback Trends and Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <FeedbackTrendsChart feedback={filteredFeedback} />
-          <FeedbackDistributionChart feedback={filteredFeedback} />
+          <FeedbackTrendsChart feedback={feedback} /> {/* All-time feedback */}
+          <FeedbackDistributionChart feedback={feedback} /> {/* All-time feedback */}
         </div>
 
         {/* Bottom Section: Suggested Actions and Live Feedback Feed */}
@@ -298,7 +287,7 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <FeedbackFeed feedback={filteredFeedback} />
+          <FeedbackFeed feedback={feedback} /> {/* All-time feedback */}
         </div>
       </div>
     </DashboardFrame>
