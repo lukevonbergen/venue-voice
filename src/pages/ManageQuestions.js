@@ -59,7 +59,7 @@ const ManageQuestions = () => {
       .eq('venue_id', venueId)
       .eq('active', true)
       .order('order', { ascending: true });
-  
+
     if (error) {
       console.error('Error fetching questions:', error);
     } else {
@@ -91,31 +91,31 @@ const ManageQuestions = () => {
       setIsReplaceModalOpen(true); // Open the replace modal
       return;
     }
-  
+
     // Validate the new question
     if (!newQuestion.trim()) {
       alert('Question cannot be empty.');
       return;
     }
-  
+
     if (newQuestion.length > 100) {
       alert('Question cannot exceed 100 characters.');
       return;
     }
-  
-    // Check for duplicate question
-    const isDuplicate = await checkForDuplicateQuestion(newQuestion);
+
+    // Check for duplicate question among active questions
+    const isDuplicate = await checkForDuplicateQuestion(newQuestion, true);
     if (isDuplicate) {
       alert('This question already exists.');
       return;
     }
-  
+
     // Add the new question to the database
     const { data, error } = await supabase
       .from('questions')
       .insert([{ venue_id: venueId, question: newQuestion, order: questions.length, active: true }])
       .select();
-  
+
     if (error) {
       console.error('Error adding question:', error);
     } else {
@@ -161,33 +161,36 @@ const ManageQuestions = () => {
       alert('Please enter a question to add.');
       return;
     }
-  
+
     if (replacementSource === 'inactive' && !selectedInactiveQuestion) {
       alert('Please select a question to re-add.');
       return;
     }
-  
-    // Check for duplicate question
+
     const questionToAdd = replacementSource === 'new' ? pendingNewQuestion : selectedInactiveQuestion.question;
-    const isDuplicate = await checkForDuplicateQuestion(questionToAdd);
-    if (isDuplicate) {
-      alert('This question already exists. Please select a unique question.');
-      return;
+
+    // Check for duplicate among active questions only if the new question is being added
+    if (replacementSource === 'new') {
+      const isDuplicate = await checkForDuplicateQuestion(questionToAdd, true);
+      if (isDuplicate) {
+        alert('This question already exists. Please select a unique question.');
+        return;
+      }
     }
-  
+
     // Mark the selected active question as inactive
     await supabase
       .from('questions')
       .update({ active: false })
       .eq('id', questionIdToReplace);
-  
+
     // Add the new question or re-add the inactive question
     if (replacementSource === 'new') {
       const { data, error } = await supabase
         .from('questions')
         .insert([{ venue_id: venueId, question: pendingNewQuestion, order: questions.length, active: true }])
         .select();
-  
+
       if (error) {
         console.error('Error adding new question:', error);
       } else {
@@ -201,12 +204,12 @@ const ManageQuestions = () => {
         .from('questions')
         .update({ active: true, order: questions.length })
         .eq('id', selectedInactiveQuestion.id);
-  
+
       // Refresh both active and inactive questions
       fetchQuestions(venueId);
       fetchInactiveQuestions(venueId);
     }
-  
+
     // Reset states
     setPendingNewQuestion('');
     setSelectedInactiveQuestion(null);
@@ -225,14 +228,14 @@ const ManageQuestions = () => {
       handleAddInactiveQuestion(inactiveQuestion);
     }
   };
-  
+
   const handleAddInactiveQuestion = async (inactiveQuestion) => {
     // Mark the inactive question as active
     const { error } = await supabase
       .from('questions')
       .update({ active: true, order: questions.length + 1 })
       .eq('id', inactiveQuestion.id);
-  
+
     if (error) {
       console.error('Error re-adding inactive question:', error);
     } else {
@@ -247,18 +250,19 @@ const ManageQuestions = () => {
     setDuplicateError(''); // Clear any duplicate error message
   };
 
-  const checkForDuplicateQuestion = async (questionText) => {
+  const checkForDuplicateQuestion = async (questionText, isActive = true) => {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
       .eq('venue_id', venueId)
-      .eq('question', questionText);
-  
+      .eq('question', questionText)
+      .eq('active', isActive); // Only check for duplicates among active questions
+
     if (error) {
       console.error('Error checking for duplicate question:', error);
       return false; // Assume no duplicate if there's an error
     }
-  
+
     return data.length > 0; // Return true if a duplicate is found
   };
 
@@ -271,31 +275,34 @@ const ManageQuestions = () => {
   // Handle drag-and-drop reordering
   const onDragEnd = async (result) => {
     if (!result.destination) return; // Dropped outside the list
-  
+
+    // Create a new array with the reordered questions
     const reorderedQuestions = Array.from(questions);
     const [movedQuestion] = reorderedQuestions.splice(result.source.index, 1);
     reorderedQuestions.splice(result.destination.index, 0, movedQuestion);
-  
+
+    // Immediately update the local state to reflect the new order
+    setQuestions(reorderedQuestions);
+
     // Update the order in the database
     const updates = reorderedQuestions.map((q, index) => ({
       id: q.id,
-      order: index + 1, // Update the order based on the new position
+      order: index + 1,
     }));
-  
-    // Use `update` instead of `upsert`
+
     for (const update of updates) {
       const { error } = await supabase
         .from('questions')
         .update({ order: update.order })
         .eq('id', update.id);
-  
+
       if (error) {
         console.error('Error updating question order:', error);
-        return; // Stop further updates if an error occurs
+        // If there's an error, revert the local state to the previous order
+        fetchQuestions(venueId);
+        return;
       }
     }
-  
-    setQuestions(reorderedQuestions); // Update the state with the new order
   };
 
   // Start editing a question
@@ -375,7 +382,7 @@ const ManageQuestions = () => {
             <span className="text-blue-600 font-medium">Questions Active: {questions.length}/5</span>
           </div>
         </div>
-  
+
         {/* QR Code Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Feedback QR Code</h2>
@@ -407,7 +414,7 @@ const ManageQuestions = () => {
             </button>
           </div>
         </div>
-  
+
         {/* Suggested Questions */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Suggested Questions</h2>
@@ -423,7 +430,7 @@ const ManageQuestions = () => {
             ))}
           </div>
         </div>
-  
+
         {/* Add New Question */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Add New Question</h2>
@@ -457,7 +464,7 @@ const ManageQuestions = () => {
             </div>
           </div>
         </div>
-  
+
         {/* Current Questions */}
         <div>
           <h2 className="text-xl font-bold mb-4 text-gray-900">Current Questions</h2>
@@ -530,7 +537,7 @@ const ManageQuestions = () => {
             </Droppable>
           </DragDropContext>
         </div>
-  
+
         {/* Previously Used Questions */}
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Previously Used Questions</h2>
@@ -564,7 +571,7 @@ const ManageQuestions = () => {
             ))}
           </div>
         </div>
-  
+
         {/* Replace Modal */}
         <Modal
           isOpen={isReplaceModalOpen}
