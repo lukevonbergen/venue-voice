@@ -58,63 +58,53 @@ const SettingsPage = () => {
     }
   };
 
-  // Handle logo upload
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+  
     setLoading(true);
     setLogoMessage('');
-
-    // Step 1: Ensure the user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setLogoMessage('User is not authenticated.');
-      setLoading(false);
-      return;
-    }
-
-    // Step 2: Generate a unique file name
+  
+    // Step 1: Generate a unique file name
     const fileExt = file.name.split('.').pop();
     const fileName = `${venueId}-logo.${fileExt}`; // Unique file name
     const filePath = `${fileName}`;
-
-    // Step 3: Delete the existing file (if it exists)
+  
+    // Step 2: Delete the existing file (if it exists)
     const { error: deleteError } = await supabase.storage
       .from('venue-logos')
       .remove([filePath]);
-
+  
     if (deleteError && deleteError.message !== 'The resource was not found') {
       console.error('Error deleting existing logo:', deleteError);
       setLogoMessage('Failed to delete existing logo. Please try again.');
       setLoading(false);
       return;
     }
-
-    // Step 4: Upload the new file
+  
+    // Step 3: Upload the new file
     const { error: uploadError } = await supabase.storage
       .from('venue-logos')
       .upload(filePath, file);
-
+  
     if (uploadError) {
       console.error('Error uploading logo:', uploadError);
       setLogoMessage('Failed to upload logo. Please try again.');
       setLoading(false);
       return;
     }
-
-    // Step 5: Get the public URL of the uploaded logo
+  
+    // Step 4: Get the public URL of the uploaded logo
     const { data: { publicUrl } } = supabase.storage
       .from('venue-logos')
       .getPublicUrl(filePath);
-
-    // Step 6: Update the `logo` column in the `venues` table
+  
+    // Step 5: Update the `logo` column in the `venues` table
     const { error: updateError } = await supabase
       .from('venues')
       .update({ logo: publicUrl })
-      .eq('id', venueId)
-      .eq('owner_id', user.id); // Ensure the user is updating their own venue
-
+      .eq('id', venueId); // Update based on venueId only
+  
     if (updateError) {
       console.error('Error updating logo:', updateError);
       setLogoMessage('Failed to update logo. Please try again.');
@@ -122,7 +112,7 @@ const SettingsPage = () => {
       setLogo(publicUrl); // Update the logo in the state
       setLogoMessage('Logo updated successfully!');
     }
-
+  
     setLoading(false);
   };
 
