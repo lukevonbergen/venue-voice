@@ -209,36 +209,36 @@ const CustomerFeedbackPage = () => {
         {!showAdditionalFeedback && (
           <>
             {isNPSQuestion() ? (
-              // NPS Rating Input (1-10)
-              <div className="flex justify-center gap-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                  <button
-                    key={rating}
-                    className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors ${
-                      rating === rating
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
-                    onClick={() => handleNPSRating(rating)} // Automatically submit on click
-                  >
-                    {rating}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              // Emoji Buttons for Non-NPS Questions
-              <div className="flex justify-center gap-4">
-                {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
-                  <button
-                    key={index}
-                    className="text-4xl transition-transform hover:scale-125 active:scale-100"
-                    onClick={() => handleFeedback(emoji)} // Automatically submit on click
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            )}
+            // NPS Rating Input (1-10) in a Grid Layout
+            <div className="grid grid-cols-5 gap-2"> {/* 5 buttons per row */}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                <button
+                  key={rating}
+                  className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors text-sm ${
+                    rating === rating
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                  onClick={() => handleNPSRating(rating)} // Automatically submit on click
+                >
+                  {rating}
+                </button>
+              ))}
+            </div>
+          ) : (
+            // Emoji Buttons for Non-NPS Questions
+            <div className="flex justify-center gap-4">
+              {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
+                <button
+                  key={index}
+                  className="text-4xl transition-transform hover:scale-125 active:scale-100"
+                  onClick={() => handleFeedback(emoji)} // Automatically submit on click
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
           </>
         )}
 
