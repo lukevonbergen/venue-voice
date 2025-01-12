@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Users, Calendar, TrendingUp } from 'lucide-react';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
+import DashboardFrame from '../components/DashboardFrame';
 import FeedbackTrendsChart from '../components/dashboard/FeedbackTrendsChart';
 import FeedbackDistributionChart from '../components/dashboard/FeedbackDistributionChart';
 import MetricCard from '../components/dashboard/MetricCard';
 import SatisfactionCard from '../components/dashboard/SatisfactionCard';
 import ActionCard from '../components/dashboard/ActionCard';
 import FeedbackFeed from '../components/dashboard/FeedbackFeed';
-import TimeFilter from '../components/dashboard/TimeFilter';
 import LiveUpdatesToggle from '../components/dashboard/LiveUpdatesToggle';
 
 const DashboardPage = () => {
@@ -17,7 +16,6 @@ const DashboardPage = () => {
   const [venueId, setVenueId] = useState(null);
   const [feedback, setFeedback] = useState([]);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
-  const [timeFilter, setTimeFilter] = useState('1hour');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -127,28 +125,13 @@ const DashboardPage = () => {
     return (totalRating / feedback.length).toFixed(1);
   };
 
-  const filterFeedbackByTime = (timeFilter) => {
+  const filterFeedbackByTime = () => {
     const now = new Date();
-    let startTime;
-
-    switch (timeFilter) {
-      case '1hour':
-        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-        break;
-      case 'today':
-        startTime = new Date(now.toISOString().split('T')[0]).toISOString();
-        break;
-      case '7days':
-        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        break;
-      default:
-        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-    }
-
+    const startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Default to last hour
     return feedback.filter((f) => f.timestamp >= startTime);
   };
 
-  const filteredFeedback = filterFeedbackByTime(timeFilter);
+  const filteredFeedback = filterFeedbackByTime();
 
   const calculateFeedbackCount = (feedback, startTime, endTime) => {
     return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime).length;
@@ -237,13 +220,10 @@ const DashboardPage = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Page Title, Live Updates Toggle, and Time Filter */}
+        {/* Page Title and Live Updates Toggle */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Venue Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <TimeFilter timeFilter={timeFilter} setTimeFilter={setTimeFilter} />
-            <LiveUpdatesToggle liveUpdatesEnabled={liveUpdatesEnabled} toggleLiveUpdates={toggleLiveUpdates} />
-          </div>
+          <LiveUpdatesToggle liveUpdatesEnabled={liveUpdatesEnabled} toggleLiveUpdates={toggleLiveUpdates} />
         </div>
 
         {/* Top Section: Overall Satisfaction and Key Metrics */}
