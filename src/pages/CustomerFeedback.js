@@ -13,7 +13,7 @@ const CustomerFeedbackPage = () => {
   const [venueBranding, setVenueBranding] = useState({
     logo: null,
     primaryColor: '#1890ff', // Default primary color
-    secondaryColor: '#52c41a', // Default secondary color
+    secondaryColor: '#ffffff', // Default secondary color
   });
 
   // Disable scrolling when this page is active
