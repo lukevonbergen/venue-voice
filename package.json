@@ -9,6 +9,7 @@
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
     "@vercel/analytics": "^1.4.1",
+    "antd": "^5.23.0",
     "cra-template": "1.2.0",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.263.1",

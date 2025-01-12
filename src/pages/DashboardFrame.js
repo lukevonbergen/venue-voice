@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, LogOut, Menu, X, BarChart } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, LogOut, Menu, X, BarChart, Settings } from 'lucide-react';
 import supabase from '../utils/supabase';
 
 const DashboardFrame = ({ children }) => {
@@ -117,11 +117,17 @@ const DashboardFrame = ({ children }) => {
           </ul>
         </nav>
 
-        {/* Logout Section */}
+        {/* Settings and Logout Section */}
         <div className="p-4 border-t border-gray-200 bg-white"> {/* Fixed at the bottom */}
+          {/* Settings Link */}
+          <NavLink to="/dashboard/settings" icon={Settings}>
+            Settings
+          </NavLink>
+
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-3 text-left text-red-600 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center group"
+            className="w-full px-4 py-3 text-left text-red-600 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center group mt-2"
           >
             <LogOut className="w-5 h-5 mr-3 text-red-400 group-hover:text-red-500" />
             Sign Out

@@ -2,10 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react'; // Import the Analytics component
 import LandingPage from './pages/LandingPage';
+import 'antd/dist/reset.css';
 import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
+import SettingsPage from './pages/SettingsPage';
 import Scores from './pages/Scores';
 import FeedbackFeed from './pages/FeedbackFeed';
 import SignInPage from './pages/SignIn';
@@ -29,6 +31,7 @@ function App() {
       <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
       <Route path="/dashboard/questions" element={<ManageQuestions />} />
       <Route path="/dashboard/scores" element={<Scores />} />
+      <Route path="/dashboard/settings" element={<SettingsPage />} />
       <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/signin" element={<SignInPage />} />
