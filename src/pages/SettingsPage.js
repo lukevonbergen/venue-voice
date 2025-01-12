@@ -15,8 +15,13 @@ const SettingsPage = () => {
   const [secondaryColor, setSecondaryColor] = useState('#52c41a'); // Default secondary color
   const [isPaid, setIsPaid] = useState(false); // Subscription status
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [colorsUpdated, setColorsUpdated] = useState(false);
+
+  // Separate state for success/error messages
+  const [profileMessage, setProfileMessage] = useState('');
+  const [logoMessage, setLogoMessage] = useState('');
+  const [colorsMessage, setColorsMessage] = useState('');
+  const [allSettingsMessage, setAllSettingsMessage] = useState('');
 
   // Fetch venue ID and settings on component mount
   useEffect(() => {
@@ -59,12 +64,12 @@ const SettingsPage = () => {
     if (!file) return;
 
     setLoading(true);
-    setError('');
+    setLogoMessage('');
 
     // Step 1: Ensure the user is authenticated
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      setError('User is not authenticated.');
+      setLogoMessage('User is not authenticated.');
       setLoading(false);
       return;
     }
@@ -81,7 +86,7 @@ const SettingsPage = () => {
 
     if (deleteError && deleteError.message !== 'The resource was not found') {
       console.error('Error deleting existing logo:', deleteError);
-      setError('Failed to delete existing logo. Please try again.');
+      setLogoMessage('Failed to delete existing logo. Please try again.');
       setLoading(false);
       return;
     }
@@ -93,7 +98,7 @@ const SettingsPage = () => {
 
     if (uploadError) {
       console.error('Error uploading logo:', uploadError);
-      setError('Failed to upload logo. Please try again.');
+      setLogoMessage('Failed to upload logo. Please try again.');
       setLoading(false);
       return;
     }
@@ -112,9 +117,10 @@ const SettingsPage = () => {
 
     if (updateError) {
       console.error('Error updating logo:', updateError);
-      setError('Failed to update logo. Please try again.');
+      setLogoMessage('Failed to update logo. Please try again.');
     } else {
       setLogo(publicUrl); // Update the logo in the state
+      setLogoMessage('Logo updated successfully!');
     }
 
     setLoading(false);
@@ -130,7 +136,7 @@ const SettingsPage = () => {
   // Save colors to the database
   const saveColors = async () => {
     setLoading(true);
-    setError('');
+    setColorsMessage('');
 
     const updates = {
       primary_color: primaryColor,
@@ -144,10 +150,10 @@ const SettingsPage = () => {
 
     if (updateError) {
       console.error('Error updating colors:', updateError);
-      setError('Failed to update colors. Please try again.');
+      setColorsMessage('Failed to update colors. Please try again.');
     } else {
       setColorsUpdated(false); // Reset the updated state
-      setError('Colors updated successfully!');
+      setColorsMessage('Colors updated successfully!');
     }
 
     setLoading(false);
@@ -156,7 +162,7 @@ const SettingsPage = () => {
   // Save all settings (profile, logo, and colors)
   const saveAllSettings = async () => {
     setLoading(true);
-    setError('');
+    setAllSettingsMessage('');
 
     try {
       // Update profile
@@ -181,10 +187,10 @@ const SettingsPage = () => {
         .update(colorUpdates)
         .eq('id', venueId);
 
-      setError('All settings updated successfully!');
+      setAllSettingsMessage('All settings updated successfully!');
     } catch (error) {
       console.error('Error updating settings:', error);
-      setError('Failed to update settings. Please try again.');
+      setAllSettingsMessage('Failed to update settings. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -238,6 +244,7 @@ const SettingsPage = () => {
               </div>
             </div>
           </form>
+          {profileMessage && <p className="text-sm text-red-500 mt-2">{profileMessage}</p>}
         </div>
 
         {/* Subscription Status Section */}
@@ -291,7 +298,7 @@ const SettingsPage = () => {
               </p>
             </div>
           </div>
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          {logoMessage && <p className="text-sm text-red-500 mt-2">{logoMessage}</p>}
         </div>
 
         {/* Color Customization Section */}
@@ -326,7 +333,7 @@ const SettingsPage = () => {
               {loading ? 'Saving...' : 'Save Colors'}
             </button>
           )}
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          {colorsMessage && <p className="text-sm text-red-500 mt-2">{colorsMessage}</p>}
         </div>
 
         {/* Save All Settings Button */}
@@ -338,7 +345,7 @@ const SettingsPage = () => {
           >
             {loading ? 'Saving...' : 'Save All Settings'}
           </button>
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          {allSettingsMessage && <p className="text-sm text-red-500 mt-2">{allSettingsMessage}</p>}
         </div>
       </div>
     </DashboardFrame>
