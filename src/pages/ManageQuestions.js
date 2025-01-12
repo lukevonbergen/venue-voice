@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
+import DashboardFrame from '../components/DashboardFrame';
 import { DragDropContext } from 'react-beautiful-dnd';
 import SuggestedQuestions from '../components/SuggestedQuestions';
 import CurrentQuestions from '../components/CurrentQuestions';
@@ -133,6 +133,22 @@ const ManageQuestions = () => {
       if (suggestedQuestions.includes(newQuestion)) {
         setAddedSuggestedQuestions([...addedSuggestedQuestions, newQuestion]);
       }
+    }
+  };
+
+  const handleAddInactiveQuestion = async (inactiveQuestion) => {
+    // Mark the inactive question as active
+    const { error } = await supabase
+      .from('questions')
+      .update({ active: true, order: questions.length + 1 })
+      .eq('id', inactiveQuestion.id);
+
+    if (error) {
+      console.error('Error re-adding inactive question:', error);
+    } else {
+      // Refresh both active and inactive questions
+      fetchQuestions(venueId);
+      fetchInactiveQuestions(venueId);
     }
   };
 
