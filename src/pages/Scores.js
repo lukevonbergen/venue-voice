@@ -110,7 +110,7 @@ const ScoresPage = () => {
       const nps = total === 0 ? 0 : ((promoters - detractors) / total) * 100;
       return {
         month,
-        nps: parseFloat(nps.toFixed(1)),
+        'NPS Score': parseFloat(nps.toFixed(1)), // Change key to 'NPS Score'
       };
     });
 
@@ -223,7 +223,7 @@ const ScoresPage = () => {
       return (
         <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
           <p className="font-bold">{label}</p>
-          <p className="text-blue-600">NPS: {payload[0].value}</p>
+          <p className="text-blue-600">NPS Score: {payload[0].value}</p>
         </div>
       );
     }
@@ -324,7 +324,7 @@ const ScoresPage = () => {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="NPS Score"
+                dataKey="NPS Score" // Updated dataKey
                 stroke="#3B82F6"
                 strokeWidth={2}
                 activeDot={{ r: 8 }}
