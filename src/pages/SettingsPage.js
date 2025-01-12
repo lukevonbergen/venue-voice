@@ -61,13 +61,34 @@ const SettingsPage = () => {
     setLoading(true);
     setError('');
 
-    // Upload the file to Supabase Storage
+    // Step 1: Ensure the user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError('User is not authenticated.');
+      setLoading(false);
+      return;
+    }
+
+    // Step 2: Generate a unique file name
     const fileExt = file.name.split('.').pop();
-    const fileName = `${venueId}-logo.${fileExt}`;
+    const fileName = `${venueId}-logo.${fileExt}`; // Unique file name
     const filePath = `${fileName}`;
 
+    // Step 3: Delete the existing file (if it exists)
+    const { error: deleteError } = await supabase.storage
+      .from('venue-logos')
+      .remove([filePath]);
+
+    if (deleteError && deleteError.message !== 'The resource was not found') {
+      console.error('Error deleting existing logo:', deleteError);
+      setError('Failed to delete existing logo. Please try again.');
+      setLoading(false);
+      return;
+    }
+
+    // Step 4: Upload the new file
     const { error: uploadError } = await supabase.storage
-      .from('venue-logos') // Ensure the bucket exists in Supabase Storage
+      .from('venue-logos')
       .upload(filePath, file);
 
     if (uploadError) {
@@ -77,16 +98,17 @@ const SettingsPage = () => {
       return;
     }
 
-    // Get the public URL of the uploaded logo
+    // Step 5: Get the public URL of the uploaded logo
     const { data: { publicUrl } } = supabase.storage
       .from('venue-logos')
       .getPublicUrl(filePath);
 
-    // Update the venue's logo in the database
+    // Step 6: Update the `logo` column in the `venues` table
     const { error: updateError } = await supabase
       .from('venues')
       .update({ logo: publicUrl })
-      .eq('id', venueId);
+      .eq('id', venueId)
+      .eq('owner_id', user.id); // Ensure the user is updating their own venue
 
     if (updateError) {
       console.error('Error updating logo:', updateError);
