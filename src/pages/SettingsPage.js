@@ -16,6 +16,7 @@ const SettingsPage = () => {
   const [isPaid, setIsPaid] = useState(false); // Subscription status
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [colorsUpdated, setColorsUpdated] = useState(false);
 
   // Fetch venue ID and settings on component mount
   useEffect(() => {
@@ -66,7 +67,7 @@ const SettingsPage = () => {
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('venue-logos') // Create a bucket named 'venue-logos' in Supabase Storage
+      .from('venue-logos') // Ensure the bucket exists in Supabase Storage
       .upload(filePath, file);
 
     if (uploadError) {
@@ -97,17 +98,23 @@ const SettingsPage = () => {
     setLoading(false);
   };
 
-  // Handle color change
-  const handleColorChange = async (type, color) => {
+  // Handle color change (only update state, not database)
+  const handleColorChange = (type, color) => {
+    if (type === 'primary') setPrimaryColor(color);
+    if (type === 'secondary') setSecondaryColor(color);
+    setColorsUpdated(true); // Mark colors as updated
+  };
+
+  // Save colors to the database
+  const saveColors = async () => {
     setLoading(true);
     setError('');
 
     const updates = {
-      primary_color: type === 'primary' ? color : primaryColor,
-      secondary_color: type === 'secondary' ? color : secondaryColor,
+      primary_color: primaryColor,
+      secondary_color: secondaryColor,
     };
 
-    // Update the venue's colors in the database
     const { error: updateError } = await supabase
       .from('venues')
       .update(updates)
@@ -117,39 +124,48 @@ const SettingsPage = () => {
       console.error('Error updating colors:', updateError);
       setError('Failed to update colors. Please try again.');
     } else {
-      if (type === 'primary') setPrimaryColor(color);
-      if (type === 'secondary') setSecondaryColor(color);
+      setColorsUpdated(false); // Reset the updated state
+      setError('Colors updated successfully!');
     }
 
     setLoading(false);
   };
 
-  // Handle form submission for updating name, email, first name, and last name
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
+  // Save all settings (profile, logo, and colors)
+  const saveAllSettings = async () => {
     setLoading(true);
     setError('');
 
-    const updates = {
-      name,
-      email,
-      first_name: firstName,
-      last_name: lastName,
-    };
+    try {
+      // Update profile
+      const profileUpdates = {
+        name,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+      };
+      await supabase
+        .from('venues')
+        .update(profileUpdates)
+        .eq('id', venueId);
 
-    const { error: updateError } = await supabase
-      .from('venues')
-      .update(updates)
-      .eq('id', venueId);
+      // Update colors
+      const colorUpdates = {
+        primary_color: primaryColor,
+        secondary_color: secondaryColor,
+      };
+      await supabase
+        .from('venues')
+        .update(colorUpdates)
+        .eq('id', venueId);
 
-    if (updateError) {
-      console.error('Error updating profile:', updateError);
-      setError('Failed to update profile. Please try again.');
-    } else {
-      setError('Profile updated successfully!');
+      setError('All settings updated successfully!');
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      setError('Failed to update settings. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -160,7 +176,7 @@ const SettingsPage = () => {
         {/* Profile Section */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Profile</h2>
-          <form onSubmit={handleUpdateProfile}>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
@@ -199,14 +215,6 @@ const SettingsPage = () => {
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              disabled={loading}
-            >
-              {loading ? 'Updating...' : 'Update Profile'}
-            </button>
-            {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
           </form>
         </div>
 
@@ -287,6 +295,27 @@ const SettingsPage = () => {
               />
             </div>
           </div>
+          {colorsUpdated && (
+            <button
+              onClick={saveColors}
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save Colors'}
+            </button>
+          )}
+          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+        </div>
+
+        {/* Save All Settings Button */}
+        <div className="mt-8">
+          <button
+            onClick={saveAllSettings}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : 'Save All Settings'}
+          </button>
           {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
         </div>
       </div>
