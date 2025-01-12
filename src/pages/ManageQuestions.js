@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import supabase from '../utils/supabase';
-import DashboardFrame from '../components/DashboardFrame';
+import DashboardFrame from './/DashboardFrame';
 import { DragDropContext } from 'react-beautiful-dnd';
 import SuggestedQuestions from '../components/SuggestedQuestions';
 import CurrentQuestions from '../components/CurrentQuestions';
