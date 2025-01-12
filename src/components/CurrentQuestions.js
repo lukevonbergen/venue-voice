@@ -7,7 +7,7 @@ const CurrentQuestions = ({ questions, onEdit, onDelete, onDragEnd }) => {
       <h2 className="text-xl font-bold mb-4 text-gray-900">Current Questions</h2>
       <p className="text-sm text-gray-400 mb-4">
         You can drag and drop these questions in the order your customers will answer them.
-        Your NPS Question will automatically be populated, no need to add it here.
+        Your NPS Question will automatically be populated, no need to add it here!
       </p>
       <Droppable droppableId="questions">
         {(provided) => (
