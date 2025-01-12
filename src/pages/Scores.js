@@ -158,6 +158,52 @@ const ScoresPage = () => {
     };
   };
 
+  // Calculate average score for a specific question type
+  const calculateAverageScore = (questionType) => {
+    const relevantQuestions = questions.filter((q) => q.question.toLowerCase().includes(questionType.toLowerCase()));
+    if (relevantQuestions.length === 0) return 0;
+
+    const relevantFeedback = feedback.filter((f) =>
+      relevantQuestions.some((q) => q.id === f.question_id)
+    );
+
+    if (relevantFeedback.length === 0) return 0;
+
+    const totalRating = relevantFeedback.reduce((sum, f) => sum + f.rating, 0);
+    return (totalRating / relevantFeedback.length).toFixed(1);
+  };
+
+  // Calculate overall average score
+  const calculateOverallAverage = () => {
+    if (feedback.length === 0) return 0;
+
+    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
+    return (totalRating / feedback.length).toFixed(1);
+  };
+
+  // Count responses in a specific timeframe
+  const countResponses = (timeInterval) => {
+    const now = new Date();
+    let startTime;
+
+    switch (timeInterval) {
+      case '1hour':
+        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+        break;
+      case 'today':
+        startTime = new Date(now.toISOString().split('T')[0]).toISOString();
+        break;
+      case '7days':
+        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        break;
+      default:
+        throw new Error('Invalid time interval');
+    }
+
+    const filteredFeedback = feedback.filter((f) => f.timestamp >= startTime);
+    return filteredFeedback.length;
+  };
+
   // UI Components
   const ScoreCard = ({ title, value, maxValue = 100, icon: Icon, onClick }) => (
     <div
