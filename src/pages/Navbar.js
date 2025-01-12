@@ -88,12 +88,12 @@ const Navbar = () => {
                       onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
                       onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
                     >
-                      <div className="p-4 flex space-x-6">
+                      <div className="p-4 grid grid-cols-3 gap-4">
                         {features.map((feature, index) => (
                           <Link
                             key={index}
                             to={feature.path}
-                            className="flex flex-col items-center space-y-2 text-gray-700 hover:text-gray-900"
+                            className="flex flex-col items-center space-y-2 text-gray-700 hover:text-gray-900 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                           >
                             {feature.icon}
                             <span>{feature.name}</span>
