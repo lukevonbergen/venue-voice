@@ -10,7 +10,7 @@ const DashboardPage = () => {
   const [feedback, setFeedback] = useState([]);
   const [lastHourFeedback, setLastHourFeedback] = useState([]);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
-  const [timeFilter, setTimeFilter] = useState('1hour'); // State for time filter
+  const [timeFilter, setTimeFilter] = useState('1hour');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +26,6 @@ const DashboardPage = () => {
     fetchSession();
   }, [navigate]);
 
-  // Fetch venue ID and questions
   const fetchVenueId = async (email) => {
     const { data: venueData, error: venueError } = await supabase
       .from('venues')
@@ -53,7 +52,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Fetch active questions for the venue
   const fetchQuestions = async (venueId) => {
     const { data, error } = await supabase
       .from('questions')
@@ -68,7 +66,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Fetch feedback for the venue
   const fetchFeedback = async (venueId) => {
     const { data, error } = await supabase
       .from('feedback')
@@ -82,7 +79,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Fetch last hour's feedback with additional_feedback
   const fetchLastHourFeedback = async (venueId) => {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
@@ -102,7 +98,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Set up real-time updates for feedback
   const setupRealtimeUpdates = (venueId) => {
     const feedbackSubscription = supabase
       .channel('feedback')
@@ -125,7 +120,6 @@ const DashboardPage = () => {
     };
   };
 
-  // Toggle live updates
   const toggleLiveUpdates = () => {
     setLiveUpdatesEnabled((prev) => !prev);
     if (venueId) {
@@ -137,7 +131,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Calculate average rating for a specific question
   const calculateAverageRating = (questionId) => {
     const relevantFeedback = feedback.filter((f) => f.question_id === questionId);
     if (relevantFeedback.length === 0) return 0;
@@ -146,7 +139,6 @@ const DashboardPage = () => {
     return (totalRating / relevantFeedback.length).toFixed(1);
   };
 
-  // Calculate overall average rating across all questions
   const calculateOverallAverageRating = () => {
     if (feedback.length === 0) return 0;
 
@@ -154,7 +146,6 @@ const DashboardPage = () => {
     return (totalRating / feedback.length).toFixed(1);
   };
 
-  // Filter feedback based on the selected time frame
   const filterFeedbackByTime = (timeFilter) => {
     const now = new Date();
     let startTime;
@@ -170,30 +161,25 @@ const DashboardPage = () => {
         startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
         break;
       default:
-        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Default to last hour
+        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
     }
 
     return feedback.filter((f) => f.timestamp >= startTime);
   };
 
-  // Get filtered feedback based on the selected time frame
   const filteredFeedback = filterFeedbackByTime(timeFilter);
 
-  // Helper function to calculate feedback count for a specific time range
   const calculateFeedbackCount = (feedback, startTime, endTime) => {
     return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime).length;
   };
 
-  // Helper function to calculate percentage change
   const calculatePercentageChange = (currentCount, previousCount) => {
-    if (previousCount === 0) return 0; // Avoid division by zero
+    if (previousCount === 0) return 0;
     return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
   };
 
-  // Calculate feedback counts and trends
   const now = new Date();
 
-  // Last 30 Minutes
   const last30MinutesCount = calculateFeedbackCount(
     filteredFeedback,
     new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
@@ -206,7 +192,6 @@ const DashboardPage = () => {
   );
   const last30MinutesTrend = calculatePercentageChange(last30MinutesCount, previous30MinutesCount);
 
-  // Last Hour
   const lastHourCount = calculateFeedbackCount(
     filteredFeedback,
     new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
@@ -219,7 +204,6 @@ const DashboardPage = () => {
   );
   const lastHourTrend = calculatePercentageChange(lastHourCount, previousHourCount);
 
-  // Today
   const todayCount = calculateFeedbackCount(
     filteredFeedback,
     new Date(now.toISOString().split('T')[0]).toISOString(),
@@ -232,7 +216,6 @@ const DashboardPage = () => {
   );
   const todayTrend = calculatePercentageChange(todayCount, yesterdayCount);
 
-  // Last 7 Days
   const last7DaysCount = calculateFeedbackCount(
     filteredFeedback,
     new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -245,19 +228,16 @@ const DashboardPage = () => {
   );
   const last7DaysTrend = calculatePercentageChange(last7DaysCount, previous7DaysCount);
 
-  // Map questions to actionable suggestions
   const questionToSuggestionMap = {
     'How is the music?': 'Consider updating the playlist or adjusting the volume.',
     'How was the service?': 'Provide additional staff training to improve service quality.',
     'Was the venue clean?': 'Increase the frequency of cleaning schedules.',
     'How was the food?': 'Consider revising the menu or improving food quality.',
-    // Add more mappings as needed
   };
 
-  // Generate suggested actions based on low-rated questions
   const generateSuggestedActions = () => {
     const suggestedActions = [];
-    const ratingThreshold = 3.5; // Threshold for low ratings
+    const ratingThreshold = 3.5;
 
     questions.forEach((q) => {
       const averageRating = calculateAverageRating(q.id);
@@ -273,7 +253,6 @@ const DashboardPage = () => {
     return suggestedActions;
   };
 
-  // UI Components
   const MetricCard = ({ title, value, trend, trendValue, compareText, icon: Icon }) => (
     <div className="bg-white rounded-xl shadow-sm p-6 transition-all duration-200 hover:shadow-md border border-gray-100">
       <div className="flex items-start justify-between">
@@ -389,81 +368,91 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Overall Satisfaction */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Top Section: Overall Satisfaction and Key Metrics */}
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          {/* Overall Satisfaction */}
           <SatisfactionCard
             title="Overall Satisfaction"
             rating={calculateOverallAverageRating()}
             trend={calculateOverallAverageRating() > 4.2 ? 'up' : 'down'}
             difference={Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}
           />
-          {questions.map((q) => (
-            <SatisfactionCard
-              key={q.id}
-              title={q.question}
-              rating={calculateAverageRating(q.id)}
-              trend={calculateAverageRating(q.id) > 4.0 ? 'up' : 'down'}
-              difference={Math.abs(calculateAverageRating(q.id) - 4.0).toFixed(1)}
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <MetricCard
+              title="Last 30 Minutes"
+              value={last30MinutesCount}
+              trend={last30MinutesTrend >= 0 ? 'up' : 'down'}
+              trendValue={Math.abs(last30MinutesTrend)}
+              compareText="Compared to previous 30 mins"
+              icon={Clock}
             />
-          ))}
-        </div>
-
-        {/* Response Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <MetricCard
-            title="Last 30 Minutes"
-            value={last30MinutesCount}
-            trend={last30MinutesTrend >= 0 ? 'up' : 'down'}
-            trendValue={Math.abs(last30MinutesTrend)}
-            compareText="Compared to previous 30 mins"
-            icon={Clock}
-          />
-          <MetricCard
-            title="Last Hour"
-            value={lastHourCount}
-            trend={lastHourTrend >= 0 ? 'up' : 'down'}
-            trendValue={Math.abs(lastHourTrend)}
-            compareText="Compared to previous hour"
-            icon={Users}
-          />
-          <MetricCard
-            title="Today"
-            value={todayCount}
-            trend={todayTrend >= 0 ? 'up' : 'down'}
-            trendValue={Math.abs(todayTrend)}
-            compareText="Compared to yesterday"
-            icon={Calendar}
-          />
-          <MetricCard
-            title="Last 7 Days"
-            value={last7DaysCount}
-            trend={last7DaysTrend >= 0 ? 'up' : 'down'}
-            trendValue={Math.abs(last7DaysTrend)}
-            compareText="Compared to previous week"
-            icon={TrendingUp}
-          />
-        </div>
-
-        {/* Suggested Actions */}
-        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2 sm:mb-0">Suggested Actions</h2>
-            <span className="text-sm text-gray-500">Based on recent feedback</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            {generateSuggestedActions().map((action, index) => (
-              <ActionCard
-                key={index}
-                question={action.question}
-                rating={action.rating}
-                suggestion={action.suggestion}
-              />
-            ))}
+            <MetricCard
+              title="Last Hour"
+              value={lastHourCount}
+              trend={lastHourTrend >= 0 ? 'up' : 'down'}
+              trendValue={Math.abs(lastHourTrend)}
+              compareText="Compared to previous hour"
+              icon={Users}
+            />
+            <MetricCard
+              title="Today"
+              value={todayCount}
+              trend={todayTrend >= 0 ? 'up' : 'down'}
+              trendValue={Math.abs(todayTrend)}
+              compareText="Compared to yesterday"
+              icon={Calendar}
+            />
+            <MetricCard
+              title="Last 7 Days"
+              value={last7DaysCount}
+              trend={last7DaysTrend >= 0 ? 'up' : 'down'}
+              trendValue={Math.abs(last7DaysTrend)}
+              compareText="Compared to previous week"
+              icon={TrendingUp}
+            />
           </div>
         </div>
 
-        {/* Live Feedback Feed */}
-        <FeedbackFeed feedback={filteredFeedback} />
+        {/* Middle Section: Feedback Trends and Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Feedback Trends Over Time (Placeholder for Chart) */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Feedback Trends Over Time</h2>
+            <p className="text-gray-500">Chart placeholder for feedback trends.</p>
+          </div>
+
+          {/* Feedback Distribution by Rating (Placeholder for Chart) */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Feedback Distribution by Rating</h2>
+            <p className="text-gray-500">Chart placeholder for feedback distribution.</p>
+          </div>
+        </div>
+
+        {/* Bottom Section: Suggested Actions and Live Feedback Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Suggested Actions */}
+          <div className="bg-gray-50 rounded-xl p-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-2 sm:mb-0">Suggested Actions</h2>
+              <span className="text-sm text-gray-500">Based on recent feedback</span>
+            </div>
+            <div className="space-y-4">
+              {generateSuggestedActions().map((action, index) => (
+                <ActionCard
+                  key={index}
+                  question={action.question}
+                  rating={action.rating}
+                  suggestion={action.suggestion}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Live Feedback Feed */}
+          <FeedbackFeed feedback={filteredFeedback} />
+        </div>
       </div>
     </DashboardFrame>
   );
