@@ -67,7 +67,7 @@ const DashboardFrame = ({ children }) => {
       <div
         className={`w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm fixed lg:relative h-screen lg:h-auto transform transition-transform duration-200 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } z-40`}
+        } z-40 lg:fixed`} // Added lg:fixed to make the sidebar fixed on larger screens
       >
         {/* Header Section */}
         <div className="p-6 border-b border-gray-200">
@@ -130,7 +130,7 @@ const DashboardFrame = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 lg:p-8 mt-16 lg:mt-0">
+      <div className="flex-1 p-4 lg:p-8 mt-16 lg:mt-0 lg:ml-72"> {/* Added lg:ml-72 to account for the sidebar width */}
         <div className="max-w-6xl mx-auto">{children}</div>
       </div>
     </div>
