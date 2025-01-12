@@ -174,11 +174,11 @@ const CustomerFeedbackPage = () => {
     >
       {/* Venue Logo */}
       {venueBranding.logo && (
-        <div className="mb-8">
+        <div className="mb-8 flex justify-center">
           <img
             src={venueBranding.logo}
             alt="Venue Logo"
-            className="w-24 h-24 rounded-lg object-cover"
+            className="max-w-full max-h-[200px] object-contain" // Adjust max height as needed
           />
         </div>
       )}
