@@ -5,7 +5,6 @@ import { Menu, X, ArrowRight, QrCode, BarChart, Gauge, Paintbrush, ClipboardList
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeaturesDropdownOpen, setIsFeaturesDropdownOpen] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState(null); // Timeout for hover delay
   const location = useLocation();
 
   const toggleMobileMenu = () => {
@@ -18,20 +17,6 @@ const Navbar = () => {
 
   const isActive = (path) => {
     return location.pathname === path;
-  };
-
-  const handleMouseEnter = () => {
-    // Clear any existing timeout to prevent premature closing
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-    setIsFeaturesDropdownOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    // Set a timeout to close the dropdown after 300ms
-    const timeout = setTimeout(() => {
-      setIsFeaturesDropdownOpen(false);
-    }, 300);
-    setHoverTimeout(timeout);
   };
 
   const features = [
@@ -72,8 +57,8 @@ const Navbar = () => {
                 </Link>
                 <div
                   className="relative group"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
+                  onMouseEnter={() => setIsFeaturesDropdownOpen(true)}
+                  onMouseLeave={() => setIsFeaturesDropdownOpen(false)}
                 >
                   <button
                     className={`text-gray-600 hover:text-gray-900 ${
@@ -84,19 +69,19 @@ const Navbar = () => {
                   </button>
                   {isFeaturesDropdownOpen && (
                     <div
-                      className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200"
-                      onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
-                      onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
+                      className="absolute top-full left-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200"
+                      onMouseEnter={() => setIsFeaturesDropdownOpen(true)}
+                      onMouseLeave={() => setIsFeaturesDropdownOpen(false)}
                     >
-                      <div className="p-4 grid grid-cols-3 gap-4">
+                      <div className="p-6 grid grid-cols-2 gap-4">
                         {features.map((feature, index) => (
                           <Link
                             key={index}
                             to={feature.path}
-                            className="flex flex-col items-center space-y-2 text-gray-700 hover:text-gray-900 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                           >
                             {feature.icon}
-                            <span className="text-sm">{feature.name}</span>
+                            <span className="text-gray-700">{feature.name}</span>
                           </Link>
                         ))}
                       </div>
