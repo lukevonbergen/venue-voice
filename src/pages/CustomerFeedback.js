@@ -152,14 +152,6 @@ const CustomerFeedbackPage = () => {
     setIsFinished(true);
   };
 
-  // Function to determine button color based on rating
-  const getButtonColor = (rating) => {
-    if (rating >= 1 && rating <= 6) return '#f87171'; // Light red
-    if (rating >= 7 && rating <= 8) return '#fb923c'; // Light orange
-    if (rating >= 9 && rating <= 10) return '#4ade80'; // Light green
-    return '#e5e7eb'; // Default color
-  };
-
   if (questions.length === 0) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -224,7 +216,7 @@ const CustomerFeedbackPage = () => {
                     key={rating}
                     className="w-12 h-12 flex items-center justify-center border rounded-lg transition-colors text-sm font-medium"
                     style={{
-                      backgroundColor: getButtonColor(rating),
+                      backgroundColor: venueBranding.primaryColor, // Use primary color
                       color: '#ffffff', // White text for better contrast
                     }}
                     onClick={() => handleNPSRating(rating)}
