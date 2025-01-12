@@ -10,6 +10,11 @@ const CustomerFeedbackPage = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [additionalFeedback, setAdditionalFeedback] = useState('');
   const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false);
+  const [venueBranding, setVenueBranding] = useState({
+    logo: null,
+    primaryColor: '#1890ff', // Default primary color
+    secondaryColor: '#52c41a', // Default secondary color
+  });
 
   // Disable scrolling when this page is active
   useEffect(() => {
@@ -19,23 +24,42 @@ const CustomerFeedbackPage = () => {
     };
   }, []);
 
-  // Fetch active questions for the venue
+  // Fetch active questions and branding for the venue
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      // Fetch active questions
+      const { data: questionsData, error: questionsError } = await supabase
         .from('questions')
         .select('*')
         .eq('venue_id', venueId)
         .eq('active', true)
         .order('order', { ascending: true });
 
-      if (error) {
-        console.error(error);
+      if (questionsError) {
+        console.error('Error fetching questions:', questionsError);
       } else {
-        setQuestions(data);
+        setQuestions(questionsData);
+      }
+
+      // Fetch venue branding (logo, colors)
+      const { data: brandingData, error: brandingError } = await supabase
+        .from('venues')
+        .select('logo, primary_color, secondary_color')
+        .eq('id', venueId)
+        .single();
+
+      if (brandingError) {
+        console.error('Error fetching branding:', brandingError);
+      } else {
+        setVenueBranding({
+          logo: brandingData.logo,
+          primaryColor: brandingData.primary_color || '#1890ff', // Fallback to default
+          secondaryColor: brandingData.secondary_color || '#52c41a', // Fallback to default
+        });
       }
     };
-    fetchQuestions();
+
+    fetchData();
   }, [venueId]);
 
   // Check if the current question is the NPS question
@@ -134,7 +158,23 @@ const CustomerFeedbackPage = () => {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4 overflow-hidden">
+    <div
+      className="flex flex-col justify-center items-center h-screen p-4 overflow-hidden"
+      style={{
+        backgroundColor: venueBranding.secondaryColor, // Use secondary color as background
+      }}
+    >
+      {/* Venue Logo */}
+      {venueBranding.logo && (
+        <div className="mb-8">
+          <img
+            src={venueBranding.logo}
+            alt="Venue Logo"
+            className="w-24 h-24 rounded-lg object-cover"
+          />
+        </div>
+      )}
+
       {/* Question Section with Slide Animation */}
       {!showAdditionalFeedback && (
         <AnimatePresence mode="wait">
@@ -221,6 +261,11 @@ const CustomerFeedbackPage = () => {
           </div>
         </div>
       )}
+
+      {/* Powered by Chatters */}
+      <div className="mt-8 text-sm text-gray-600">
+        Powered by <strong>Chatters</strong>
+      </div>
     </div>
   );
 };
