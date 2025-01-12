@@ -10,6 +10,7 @@ import ManageQuestions from './pages/ManageQuestions';
 import SettingsPage from './pages/SettingsPage';
 import Scores from './pages/Scores';
 import QRCodePage_Feature from './pages/Features_QRCode';
+import NPS_Feature from './pages/Features_NPSScore';
 import FeedbackFeed from './pages/FeedbackFeed';
 import SignInPage from './pages/SignIn';
 import PricingPage from './pages/Pricing';
@@ -44,6 +45,7 @@ function App() {
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/features/qr-codes" element={<QRCodePage_Feature />} />
+      <Route path="/features/nps-score" element={<NPS_Feature />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
