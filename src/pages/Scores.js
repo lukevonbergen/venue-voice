@@ -111,6 +111,9 @@ const ScoresPage = () => {
       return {
         month,
         'NPS Score': parseFloat(nps.toFixed(1)), // Change key to 'NPS Score'
+        Promoters: promoters,
+        Passives: total - promoters - detractors,
+        Detractors: detractors,
       };
     });
 
@@ -224,6 +227,9 @@ const ScoresPage = () => {
         <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
           <p className="font-bold">{label}</p>
           <p className="text-blue-600">NPS Score: {payload[0].value}</p>
+          <p className="text-green-600">Promoters: {payload[1].value}</p>
+          <p className="text-yellow-600">Passives: {payload[2].value}</p>
+          <p className="text-red-600">Detractors: {payload[3].value}</p>
         </div>
       );
     }
@@ -302,7 +308,7 @@ const ScoresPage = () => {
 
         {/* NPS Trend Chart */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">NPS Trend</h2>
+          <h2 className="text-xl font-bold mb-4">NPS History</h2>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart
               data={monthlyNpsData}
@@ -324,10 +330,28 @@ const ScoresPage = () => {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="NPS Score" // Updated dataKey
+                dataKey="NPS Score"
                 stroke="#3B82F6"
                 strokeWidth={2}
                 activeDot={{ r: 8 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="Promoters"
+                stroke="#10B981"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="Passives"
+                stroke="#FBBF24"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="Detractors"
+                stroke="#EF4444"
+                strokeWidth={2}
               />
             </LineChart>
           </ResponsiveContainer>
