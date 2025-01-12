@@ -1,19 +1,32 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom'; // Import useLocation
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, ArrowRight, QrCode, BarChart, Gauge, Paintbrush, ClipboardList, LayoutDashboard } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation(); // Get the current route location
+  const [isFeaturesDropdownOpen, setIsFeaturesDropdownOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Helper function to check if a link is active
+  const toggleFeaturesDropdown = () => {
+    setIsFeaturesDropdownOpen(!isFeaturesDropdownOpen);
+  };
+
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  const features = [
+    { name: 'QR Codes', icon: <QrCode className="h-5 w-5" /> },
+    { name: 'NPS Score', icon: <BarChart className="h-5 w-5" /> },
+    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5" /> },
+    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5" /> },
+    { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5" /> },
+    { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5" /> },
+  ];
 
   return (
     <nav className="fixed w-full top-4 z-50 px-4">
@@ -25,9 +38,9 @@ const Navbar = () => {
               <div className="flex items-center">
                 <Link to="/">
                   <img
-                    src="/img/getchatters_logo.svg" // Path to your logo in the public folder
+                    src="/img/getchatters_logo.svg"
                     alt="Chatter Logo"
-                    className="h-8" // Adjust the height as needed
+                    className="h-8"
                   />
                 </Link>
               </div>
@@ -42,14 +55,28 @@ const Navbar = () => {
                 >
                   Pricing
                 </Link>
-                <Link
-                  to="/features"
-                  className={`text-gray-600 hover:text-gray-900 ${
-                    isActive('/features') ? 'font-semibold' : ''
-                  }`}
-                >
-                  Features
-                </Link>
+                <div className="relative">
+                  <button
+                    onClick={toggleFeaturesDropdown}
+                    className={`text-gray-600 hover:text-gray-900 ${
+                      isActive('/features') ? 'font-semibold' : ''
+                    }`}
+                  >
+                    Features
+                  </button>
+                  {isFeaturesDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200">
+                      <div className="p-4 space-y-4">
+                        {features.map((feature, index) => (
+                          <div key={index} className="flex items-center space-x-3">
+                            {feature.icon}
+                            <span className="text-gray-700">{feature.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <Link
                   to="#"
                   className={`text-gray-600 hover:text-gray-900 ${
@@ -89,14 +116,24 @@ const Navbar = () => {
                 >
                   Pricing
                 </Link>
-                <Link
-                  to="/features"
+                <button
+                  onClick={toggleFeaturesDropdown}
                   className={`block text-gray-600 hover:text-gray-900 ${
                     isActive('/features') ? 'font-semibold' : ''
                   }`}
                 >
                   Features
-                </Link>
+                </button>
+                {isFeaturesDropdownOpen && (
+                  <div className="pl-4 space-y-4">
+                    {features.map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        {feature.icon}
+                        <span className="text-gray-700">{feature.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <Link
                   to="/docs"
                   className={`block text-gray-600 hover:text-gray-900 ${
