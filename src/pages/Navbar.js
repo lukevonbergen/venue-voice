@@ -96,7 +96,7 @@ const Navbar = () => {
                             className="flex flex-col items-center space-y-2 text-gray-700 hover:text-gray-900 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                           >
                             {feature.icon}
-                            <span>{feature.name}</span>
+                            <span className="text-sm">{feature.name}</span>
                           </Link>
                         ))}
                       </div>
