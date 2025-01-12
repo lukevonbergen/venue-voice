@@ -38,7 +38,15 @@ const CustomerFeedbackPage = () => {
       if (questionsError) {
         console.error('Error fetching questions:', questionsError);
       } else {
-        setQuestions(questionsData);
+        // Add NPS question at the end
+        const npsQuestion = {
+          id: 'nps', // Unique identifier for NPS question
+          question: 'How likely are you to recommend us?',
+          venue_id: venueId,
+          order: questionsData.length + 1,
+          active: true,
+        };
+        setQuestions([...questionsData, npsQuestion]);
       }
 
       // Fetch venue branding (logo, colors)
@@ -64,7 +72,7 @@ const CustomerFeedbackPage = () => {
 
   // Check if the current question is the NPS question
   const isNPSQuestion = () => {
-    return questions[currentQuestionIndex]?.question.includes('recommend');
+    return questions[currentQuestionIndex]?.id === 'nps';
   };
 
   const handleFeedback = async (emoji) => {
@@ -105,7 +113,7 @@ const CustomerFeedbackPage = () => {
       .insert([
         {
           venue_id: venueId,
-          question_id: questions[currentQuestionIndex].id,
+          question_id: 'nps', // Use 'nps' as the question_id for NPS
           rating: rating, // Save the NPS rating (1-10)
         },
       ]);
