@@ -152,6 +152,14 @@ const CustomerFeedbackPage = () => {
     setIsFinished(true);
   };
 
+  // Function to determine button color based on rating
+  const getButtonColor = (rating) => {
+    if (rating >= 1 && rating <= 6) return '#f87171'; // Light red
+    if (rating >= 7 && rating <= 8) return '#fb923c'; // Light orange
+    if (rating >= 9 && rating <= 10) return '#4ade80'; // Light green
+    return '#e5e7eb'; // Default color
+  };
+
   if (questions.length === 0) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -209,26 +217,21 @@ const CustomerFeedbackPage = () => {
         {!showAdditionalFeedback && (
           <>
             {isNPSQuestion() ? (
-              // NPS Rating Slider (1-10)
-              <div className="w-full max-w-md px-4">
-                <div className="relative">
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    defaultValue="5"
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              // NPS Rating Buttons (1-10)
+              <div className="grid grid-cols-5 gap-3"> {/* 5 buttons per row */}
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                  <button
+                    key={rating}
+                    className="w-12 h-12 flex items-center justify-center border rounded-lg transition-colors text-sm font-medium"
                     style={{
-                      background: `linear-gradient(to right, ${venueBranding.primaryColor} 0%, ${venueBranding.primaryColor} 50%, #e5e7eb 50%, #e5e7eb 100%)`,
+                      backgroundColor: getButtonColor(rating),
+                      color: '#ffffff', // White text for better contrast
                     }}
-                    onChange={(e) => handleNPSRating(Number(e.target.value))}
-                  />
-                  <div className="flex justify-between text-sm text-gray-600 mt-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <span key={num}>{num}</span>
-                    ))}
-                  </div>
-                </div>
+                    onClick={() => handleNPSRating(rating)}
+                  >
+                    {rating}
+                  </button>
+                ))}
               </div>
             ) : (
               // Emoji Buttons for Non-NPS Questions
