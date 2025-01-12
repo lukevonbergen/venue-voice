@@ -115,7 +115,7 @@ const NPSPage = () => {
               {[
                 {
                   title: 'Collect NPS Feedback',
-                  description: 'Use QR codes, email surveys, or in-app prompts to collect NPS feedback from your customers.',
+                  description: 'Use QR codes to collect NPS feedback from your customers.',
                   icon: '📋',
                 },
                 {
