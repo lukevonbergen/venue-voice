@@ -50,6 +50,9 @@ const FeedbackDistributionChart = ({ feedback }) => {
       title: {
         display: true,
         text: 'Feedback Distribution by Rating',
+        font: {
+          size: 16,
+        },
       },
     },
     scales: {
@@ -59,7 +62,11 @@ const FeedbackDistributionChart = ({ feedback }) => {
     },
   };
 
-  return <Bar data={chartData} options={options} />;
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+      <Bar data={chartData} options={options} />
+    </div>
+  );
 };
 
 export default FeedbackDistributionChart;

@@ -58,6 +58,9 @@ const FeedbackTrendsChart = ({ feedback }) => {
       title: {
         display: true,
         text: 'Feedback Trends Over Time',
+        font: {
+          size: 16,
+        },
       },
     },
     scales: {
@@ -71,7 +74,11 @@ const FeedbackTrendsChart = ({ feedback }) => {
     },
   };
 
-  return <Line data={chartData} options={options} />;
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
+      <Line data={chartData} options={options} />
+    </div>
+  );
 };
 
 export default FeedbackTrendsChart;
