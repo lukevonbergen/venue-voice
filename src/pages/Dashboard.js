@@ -179,6 +179,72 @@ const DashboardPage = () => {
   // Get filtered feedback based on the selected time frame
   const filteredFeedback = filterFeedbackByTime(timeFilter);
 
+  // Helper function to calculate feedback count for a specific time range
+  const calculateFeedbackCount = (feedback, startTime, endTime) => {
+    return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime).length;
+  };
+
+  // Helper function to calculate percentage change
+  const calculatePercentageChange = (currentCount, previousCount) => {
+    if (previousCount === 0) return 0; // Avoid division by zero
+    return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
+  };
+
+  // Calculate feedback counts and trends
+  const now = new Date();
+
+  // Last 30 Minutes
+  const last30MinutesCount = calculateFeedbackCount(
+    filteredFeedback,
+    new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
+    now.toISOString()
+  );
+  const previous30MinutesCount = calculateFeedbackCount(
+    feedback,
+    new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
+    new Date(now.getTime() - 30 * 60 * 1000).toISOString()
+  );
+  const last30MinutesTrend = calculatePercentageChange(last30MinutesCount, previous30MinutesCount);
+
+  // Last Hour
+  const lastHourCount = calculateFeedbackCount(
+    filteredFeedback,
+    new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
+    now.toISOString()
+  );
+  const previousHourCount = calculateFeedbackCount(
+    feedback,
+    new Date(now.getTime() - 120 * 60 * 1000).toISOString(),
+    new Date(now.getTime() - 60 * 60 * 1000).toISOString()
+  );
+  const lastHourTrend = calculatePercentageChange(lastHourCount, previousHourCount);
+
+  // Today
+  const todayCount = calculateFeedbackCount(
+    filteredFeedback,
+    new Date(now.toISOString().split('T')[0]).toISOString(),
+    now.toISOString()
+  );
+  const yesterdayCount = calculateFeedbackCount(
+    feedback,
+    new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0],
+    new Date(now.toISOString().split('T')[0]).toISOString()
+  );
+  const todayTrend = calculatePercentageChange(todayCount, yesterdayCount);
+
+  // Last 7 Days
+  const last7DaysCount = calculateFeedbackCount(
+    filteredFeedback,
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    now.toISOString()
+  );
+  const previous7DaysCount = calculateFeedbackCount(
+    feedback,
+    new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  );
+  const last7DaysTrend = calculatePercentageChange(last7DaysCount, previous7DaysCount);
+
   // Map questions to actionable suggestions
   const questionToSuggestionMap = {
     'How is the music?': 'Consider updating the playlist or adjusting the volume.',
@@ -346,33 +412,33 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <MetricCard
             title="Last 30 Minutes"
-            value={filteredFeedback.filter((f) => new Date(f.timestamp) >= new Date(new Date().getTime() - 30 * 60 * 1000)).length}
-            trend="up" // Placeholder, you can calculate trends based on filtered data
-            trendValue="0" // Placeholder
+            value={last30MinutesCount}
+            trend={last30MinutesTrend >= 0 ? 'up' : 'down'}
+            trendValue={Math.abs(last30MinutesTrend)}
             compareText="Compared to previous 30 mins"
             icon={Clock}
           />
           <MetricCard
             title="Last Hour"
-            value={filteredFeedback.filter((f) => new Date(f.timestamp) >= new Date(new Date().getTime() - 60 * 60 * 1000)).length}
-            trend="up" // Placeholder
-            trendValue="0" // Placeholder
+            value={lastHourCount}
+            trend={lastHourTrend >= 0 ? 'up' : 'down'}
+            trendValue={Math.abs(lastHourTrend)}
             compareText="Compared to previous hour"
             icon={Users}
           />
           <MetricCard
             title="Today"
-            value={filteredFeedback.filter((f) => new Date(f.timestamp).toDateString() === new Date().toDateString()).length}
-            trend="up" // Placeholder
-            trendValue="0" // Placeholder
+            value={todayCount}
+            trend={todayTrend >= 0 ? 'up' : 'down'}
+            trendValue={Math.abs(todayTrend)}
             compareText="Compared to yesterday"
             icon={Calendar}
           />
           <MetricCard
             title="Last 7 Days"
-            value={filteredFeedback.length}
-            trend="up" // Placeholder
-            trendValue="0" // Placeholder
+            value={last7DaysCount}
+            trend={last7DaysTrend >= 0 ? 'up' : 'down'}
+            trendValue={Math.abs(last7DaysTrend)}
             compareText="Compared to previous week"
             icon={TrendingUp}
           />
