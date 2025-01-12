@@ -117,17 +117,22 @@ const CustomerFeedbackPage = () => {
   };
 
   const handleNPSRating = async (rating) => {
-    // Save NPS rating to the database
-    await supabase
-      .from('feedback')
+    // Save NPS rating to the nps_scores table
+    const { error } = await supabase
+      .from('nps_scores')
       .insert([
         {
           venue_id: venueId,
-          question_id: 'nps', // Use 'nps' as the question_id for NPS
-          rating: rating, // Save the NPS rating (1-10)
+          score: rating,
         },
       ]);
-
+  
+    if (error) {
+      console.error('Error saving NPS score:', error);
+    } else {
+      console.log('NPS score saved successfully:', rating);
+    }
+  
     // Move to the next question or show additional feedback
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
