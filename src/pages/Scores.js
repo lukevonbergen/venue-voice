@@ -117,8 +117,8 @@ const ScoresPage = () => {
 
     if (totalResponses === 0) return 0;
 
-    const nps = (promoters - detractors) / totalResponses; // Remove * 100
-    return nps.toFixed(1); // Keep one decimal place for precision
+    const nps = ((promoters - detractors) / totalResponses) * 100;
+    return nps.toFixed(1);
   };
 
   // Calculate breakdown of Promoters, Passives, and Detractors
