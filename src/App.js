@@ -11,6 +11,10 @@ import SettingsPage from './pages/SettingsPage';
 import Scores from './pages/Scores';
 import QRCodePage_Feature from './pages/Features_QRCode';
 import NPS_Feature from './pages/Features_NPSScore';
+import RealTimeStats_Feature from './pages/Features_RealTimeStats';
+import CustomBranding_Feature from './pages/Features_CustomBranding';
+import CustomQuestions_Feature from './pages/Features_CustomQuestions';
+import Dashboards_Feature from './pages/Features_Dashboards';
 import FeedbackFeed from './pages/FeedbackFeed';
 import SignInPage from './pages/SignIn';
 import PricingPage from './pages/Pricing';
@@ -46,6 +50,10 @@ function App() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/features/qr-codes" element={<QRCodePage_Feature />} />
       <Route path="/features/nps-score" element={<NPS_Feature />} />
+      <Route path="/features/real-time-stats" element={<RealTimeStats_Feature />} />
+      <Route path="/features/custom-branding" element={<CustomBranding_Feature />} />
+      <Route path="/features/custom-questions" element={<CustomQuestions_Feature />} />
+      <Route path="/features/dashboards" element={<Dashboards_Feature />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
