@@ -15,12 +15,14 @@ import DashboardFrame from './DashboardFrame';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import Modal from 'react-modal';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'; // Import Recharts components
 
 // Set app element for react-modal (required for accessibility)
 Modal.setAppElement('#root');
 
 const ScoresPage = () => {
   const [npsScores, setNpsScores] = useState([]); // State for NPS scores
+  const [monthlyNpsData, setMonthlyNpsData] = useState([]); // State for monthly NPS data
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,14 +70,51 @@ const ScoresPage = () => {
   const fetchNpsScores = async (venueId) => {
     const { data, error } = await supabase
       .from('nps_scores') // Fetch from nps_scores table
-      .select('score') // Only fetch the score column
+      .select('score, created_at') // Fetch score and created_at
       .eq('venue_id', venueId); // Filter by venue_id
 
     if (error) {
       console.error('Error fetching NPS scores:', error);
     } else {
       setNpsScores(data);
+      calculateMonthlyNps(data); // Calculate monthly NPS data
     }
+  };
+
+  // Calculate monthly NPS data
+  const calculateMonthlyNps = (scores) => {
+    const monthlyData = {};
+
+    scores.forEach((score) => {
+      const date = new Date(score.created_at);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // Format as YYYY-MM
+
+      if (!monthlyData[monthYear]) {
+        monthlyData[monthYear] = {
+          promoters: 0,
+          detractors: 0,
+          total: 0,
+        };
+      }
+
+      if (score.score >= 9) {
+        monthlyData[monthYear].promoters += 1;
+      } else if (score.score <= 6) {
+        monthlyData[monthYear].detractors += 1;
+      }
+      monthlyData[monthYear].total += 1;
+    });
+
+    const monthlyNps = Object.keys(monthlyData).map((month) => {
+      const { promoters, detractors, total } = monthlyData[month];
+      const nps = total === 0 ? 0 : ((promoters - detractors) / total) * 100;
+      return {
+        month,
+        nps: parseFloat(nps.toFixed(1)), // Round to 1 decimal place
+      };
+    });
+
+    setMonthlyNpsData(monthlyNps);
   };
 
   // Set up real-time updates for NPS scores
@@ -88,6 +127,7 @@ const ScoresPage = () => {
         (payload) => {
           console.log('New NPS score received:', payload.new);
           setNpsScores((prevScores) => [...prevScores, payload.new]);
+          calculateMonthlyNps([...npsScores, payload.new]); // Recalculate monthly NPS data
         }
       )
       .subscribe();
@@ -117,8 +157,8 @@ const ScoresPage = () => {
 
     if (totalResponses === 0) return 0;
 
-    const nps = ((promoters - detractors) / totalResponses) * 100;
-    return nps.toFixed(1);
+    const nps = ((promoters - detractors) / totalResponses) * 100; // Keep * 100
+    return nps.toFixed(1); // Keep one decimal place for precision
   };
 
   // Calculate breakdown of Promoters, Passives, and Detractors
@@ -150,7 +190,7 @@ const ScoresPage = () => {
           <CircularProgressbar
             value={value}
             maxValue={maxValue}
-            text={`${value}`}
+            text={`${value}`} // Remove the % symbol
             styles={{
               path: { stroke: '#3B82F6' },
               text: { fill: '#1F2937', fontSize: '24px', fontWeight: 'bold' },
@@ -245,6 +285,24 @@ const ScoresPage = () => {
             icon={TrendingDown}
             color="red"
           />
+        </div>
+
+        {/* NPS Trend Chart */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <h2 className="text-xl font-bold mb-4">NPS Trend</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={monthlyNpsData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="nps" stroke="#3B82F6" activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Total Responses Card */}
