@@ -15,14 +15,14 @@ import DashboardFrame from './DashboardFrame';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import Modal from 'react-modal';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'; // Import Recharts components
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Set app element for react-modal (required for accessibility)
 Modal.setAppElement('#root');
 
 const ScoresPage = () => {
-  const [npsScores, setNpsScores] = useState([]); // State for NPS scores
-  const [monthlyNpsData, setMonthlyNpsData] = useState([]); // State for monthly NPS data
+  const [npsScores, setNpsScores] = useState([]);
+  const [monthlyNpsData, setMonthlyNpsData] = useState([]);
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,7 +59,7 @@ const ScoresPage = () => {
       }
 
       setVenueId(venueData.id);
-      fetchNpsScores(venueData.id); // Fetch NPS scores for the venue
+      fetchNpsScores(venueData.id);
       if (liveUpdatesEnabled) {
         setupRealtimeUpdates(venueData.id);
       }
@@ -69,15 +69,15 @@ const ScoresPage = () => {
   // Fetch NPS scores for the venue
   const fetchNpsScores = async (venueId) => {
     const { data, error } = await supabase
-      .from('nps_scores') // Fetch from nps_scores table
-      .select('score, created_at') // Fetch score and created_at
-      .eq('venue_id', venueId); // Filter by venue_id
+      .from('nps_scores')
+      .select('score, created_at')
+      .eq('venue_id', venueId);
 
     if (error) {
       console.error('Error fetching NPS scores:', error);
     } else {
       setNpsScores(data);
-      calculateMonthlyNps(data); // Calculate monthly NPS data
+      calculateMonthlyNps(data);
     }
   };
 
@@ -87,7 +87,7 @@ const ScoresPage = () => {
 
     scores.forEach((score) => {
       const date = new Date(score.created_at);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; // Format as YYYY-MM
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
       if (!monthlyData[monthYear]) {
         monthlyData[monthYear] = {
@@ -110,7 +110,7 @@ const ScoresPage = () => {
       const nps = total === 0 ? 0 : ((promoters - detractors) / total) * 100;
       return {
         month,
-        nps: parseFloat(nps.toFixed(1)), // Round to 1 decimal place
+        nps: parseFloat(nps.toFixed(1)),
       };
     });
 
@@ -127,7 +127,7 @@ const ScoresPage = () => {
         (payload) => {
           console.log('New NPS score received:', payload.new);
           setNpsScores((prevScores) => [...prevScores, payload.new]);
-          calculateMonthlyNps([...npsScores, payload.new]); // Recalculate monthly NPS data
+          calculateMonthlyNps([...npsScores, payload.new]);
         }
       )
       .subscribe();
@@ -157,8 +157,8 @@ const ScoresPage = () => {
 
     if (totalResponses === 0) return 0;
 
-    const nps = ((promoters - detractors) / totalResponses) * 100; // Keep * 100
-    return nps.toFixed(1); // Keep one decimal place for precision
+    const nps = ((promoters - detractors) / totalResponses) * 100;
+    return nps.toFixed(1);
   };
 
   // Calculate breakdown of Promoters, Passives, and Detractors
@@ -190,7 +190,7 @@ const ScoresPage = () => {
           <CircularProgressbar
             value={value}
             maxValue={maxValue}
-            text={`${value}`} // Remove the % symbol
+            text={`${value}`}
             styles={{
               path: { stroke: '#3B82F6' },
               text: { fill: '#1F2937', fontSize: '24px', fontWeight: 'bold' },
@@ -216,6 +216,19 @@ const ScoresPage = () => {
       </div>
     </div>
   );
+
+  // Custom Tooltip for the chart
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
+          <p className="font-bold">{label}</p>
+          <p className="text-blue-600">NPS: {payload[0].value}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   // Modal Styles
   const modalStyles = {
@@ -290,17 +303,32 @@ const ScoresPage = () => {
         {/* NPS Trend Chart */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-xl font-bold mb-4">NPS Trend</h2>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={400}>
             <LineChart
               data={monthlyNpsData}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <XAxis
+                dataKey="month"
+                stroke="#666"
+                tick={{ fill: '#666' }}
+                tickLine={{ stroke: '#666' }}
+              />
+              <YAxis
+                stroke="#666"
+                tick={{ fill: '#666' }}
+                tickLine={{ stroke: '#666' }}
+              />
+              <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Line type="monotone" dataKey="nps" stroke="#3B82F6" activeDot={{ r: 8 }} />
+              <Line
+                type="monotone"
+                dataKey="nps"
+                stroke="#3B82F6"
+                strokeWidth={2}
+                activeDot={{ r: 8 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
