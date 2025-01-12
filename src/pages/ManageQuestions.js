@@ -365,7 +365,6 @@ const ManageQuestions = () => {
     'How was the service today?',
     'How would you rate the atmosphere?',
     'Was your order prepared correctly?',
-    'How likely are you to recommend us?',
     'How clean was the venue?',
   ];
 
