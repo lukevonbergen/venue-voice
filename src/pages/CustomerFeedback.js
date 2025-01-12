@@ -167,112 +167,116 @@ const CustomerFeedbackPage = () => {
 
   return (
     <div
-      className="flex flex-col justify-center items-center h-screen p-4 overflow-hidden"
+      className="flex flex-col h-screen p-4 overflow-hidden"
       style={{
         backgroundColor: venueBranding.secondaryColor, // Use secondary color as background
       }}
     >
-      {/* Venue Logo */}
+      {/* Logo at the Top */}
       {venueBranding.logo && (
-        <div className="mb-8 flex justify-center">
+        <div className="flex justify-center pt-4">
           <img
             src={venueBranding.logo}
             alt="Venue Logo"
-            className="max-w-full max-h-[200px] object-contain" // Adjust max height as needed
+            className="max-w-full max-h-[30px] object-contain" // Adjust max height as needed
           />
         </div>
       )}
 
-      {/* Question Section with Slide Animation */}
-      {!showAdditionalFeedback && (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ type: 'tween', duration: 0.3 }}
-            className="flex flex-col justify-center items-center text-center mb-8"
-          >
-            <h2 className="text-2xl font-bold mb-4">
-              {questions[currentQuestionIndex].question}
-            </h2>
-            <p className="text-gray-600">
-              Question {currentQuestionIndex + 1} of {questions.length}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-      )}
-
-      {/* Emoji Buttons or NPS Rating Input */}
-      {!showAdditionalFeedback && (
-        <>
-          {isNPSQuestion() ? (
-            // NPS Rating Input (1-10)
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                <button
-                  key={rating}
-                  className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors ${
-                    rating === rating
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                  onClick={() => handleNPSRating(rating)} // Automatically submit on click
-                >
-                  {rating}
-                </button>
-              ))}
-            </div>
-          ) : (
-            // Emoji Buttons for Non-NPS Questions
-            <div className="flex justify-center gap-4">
-              {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
-                <button
-                  key={index}
-                  className="text-4xl transition-transform hover:scale-125 active:scale-100"
-                  onClick={() => handleFeedback(emoji)} // Automatically submit on click
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Additional Feedback Section */}
-      {showAdditionalFeedback && (
-        <div className="flex flex-col items-center gap-4">
-          <h2 className="text-2xl font-bold mb-4">Any additional feedback?</h2>
-          <p className="text-gray-600 mb-4">This is optional, but we'd love to hear more!</p>
-          <textarea
-            className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="4"
-            placeholder="Type your feedback here..."
-            value={additionalFeedback}
-            onChange={(e) => setAdditionalFeedback(e.target.value)}
-          />
-          <div className="flex gap-4">
-            <button
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              onClick={handleAdditionalFeedback}
+      {/* Centered Content (Questions or Additional Feedback) */}
+      <div className="flex-1 flex flex-col justify-center items-center">
+        {!showAdditionalFeedback && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="flex flex-col justify-center items-center text-center mb-8"
             >
-              Submit
-            </button>
-            <button
-              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-              onClick={() => setIsFinished(true)} // Skip additional feedback
-            >
-              Skip
-            </button>
+              <h2 className="text-2xl font-bold mb-4">
+                {questions[currentQuestionIndex].question}
+              </h2>
+              <p className="text-gray-600">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        )}
+
+        {/* Emoji Buttons or NPS Rating Input */}
+        {!showAdditionalFeedback && (
+          <>
+            {isNPSQuestion() ? (
+              // NPS Rating Input (1-10)
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                  <button
+                    key={rating}
+                    className={`w-10 h-10 flex items-center justify-center border rounded-lg transition-colors ${
+                      rating === rating
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                    onClick={() => handleNPSRating(rating)} // Automatically submit on click
+                  >
+                    {rating}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              // Emoji Buttons for Non-NPS Questions
+              <div className="flex justify-center gap-4">
+                {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
+                  <button
+                    key={index}
+                    className="text-4xl transition-transform hover:scale-125 active:scale-100"
+                    onClick={() => handleFeedback(emoji)} // Automatically submit on click
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Additional Feedback Section */}
+        {showAdditionalFeedback && (
+          <div className="flex flex-col items-center gap-4">
+            <h2 className="text-2xl font-bold mb-4">Any additional feedback?</h2>
+            <p className="text-gray-600 mb-4">This is optional, but we'd love to hear more!</p>
+            <textarea
+              className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="4"
+              placeholder="Type your feedback here..."
+              value={additionalFeedback}
+              onChange={(e) => setAdditionalFeedback(e.target.value)}
+            />
+            <div className="flex gap-4">
+              <button
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                onClick={handleAdditionalFeedback}
+              >
+                Submit
+              </button>
+              <button
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                onClick={() => setIsFinished(true)} // Skip additional feedback
+              >
+                Skip
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Powered by Chatters */}
-      <div className="mt-8 text-sm text-gray-600">
-        Powered by <strong>Chatters</strong>
+      {/* Powered by Chatters at the Bottom */}
+      <div className="flex justify-center pb-4">
+        <div className="text-sm text-gray-600">
+          Powered by <strong>Chatters</strong>
+        </div>
       </div>
     </div>
   );
