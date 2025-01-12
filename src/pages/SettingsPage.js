@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import { ColorPicker } from 'antd'; // Using Ant Design's ColorPicker for simplicity
+import { ColorPicker, Tooltip } from 'antd'; // Import Tooltip from Ant Design
 import 'antd/dist/reset.css'; // Import Ant Design styles
 
 const SettingsPage = () => {
@@ -291,23 +291,36 @@ const SettingsPage = () => {
           {logoMessage && <p className="text-sm text-red-500 mt-2">{logoMessage}</p>}
         </div>
 
-        {/* Color Customization Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+          {/* Color Customization Section */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
           <h2 className="text-xl font-bold mb-4 text-gray-900">Custom Colors</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Primary Color */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Primary Color
-              </label>
+              <div className="flex items-center gap-2 mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Primary Color
+                </label>
+                <Tooltip title="Primary color is used for text on the feedback collection page.">
+                  <span className="text-gray-400 cursor-help">ⓘ</span>
+                </Tooltip>
+              </div>
               <ColorPicker
                 value={primaryColor}
                 onChange={(color) => handleColorChange('primary', color.toHexString())}
               />
             </div>
+
+            {/* Secondary Color */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Secondary Color
-              </label>
+              <div className="flex items-center gap-2 mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Secondary Color
+                </label>
+                <Tooltip title="Secondary color is used for the background on the feedback collection page.">
+                  <span className="text-gray-400 cursor-help">ⓘ</span>
+                </Tooltip>
+              </div>
               <ColorPicker
                 value={secondaryColor}
                 onChange={(color) => handleColorChange('secondary', color.toHexString())}
