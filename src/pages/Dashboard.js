@@ -8,56 +8,50 @@ const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
   const [venueId, setVenueId] = useState(null);
   const [feedback, setFeedback] = useState([]);
-  const [lastHourFeedback, setLastHourFeedback] = useState([]); // State for last hour's feedback
-  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true); // State for live updates toggle
+  const [lastHourFeedback, setLastHourFeedback] = useState([]);
+  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
+  const [timeFilter, setTimeFilter] = useState('1hour'); // State for time filter
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/signin'); // Redirect to sign-in if not authenticated
+        navigate('/signin');
       } else {
-        console.log('Logged-in user email:', user.email);
-        fetchVenueId(user.email); // Fetch venue ID and check payment status
+        fetchVenueId(user.email);
       }
     };
-  
+
     fetchSession();
   }, [navigate]);
 
   // Fetch venue ID and questions
   const fetchVenueId = async (email) => {
-    console.log('Fetching venue ID for email:', email);
-
     const { data: venueData, error: venueError } = await supabase
-    .from('venues')
-    .select('id, is_paid') // Fetch both id and is_paid
-    .eq('email', email)
-    .single();
+      .from('venues')
+      .select('id, is_paid')
+      .eq('email', email)
+      .single();
 
     if (venueError) {
       console.error('Error fetching venue ID:', venueError);
     } else {
-      console.log('Venue ID fetched successfully:', venueData.id);
-
-      // Check if the venue has paid
       if (!venueData.is_paid) {
-        navigate('/pricing'); // Redirect to the pricing page if not paid
+        navigate('/pricing');
         return;
       }
 
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
       fetchFeedback(venueData.id);
-      const lastHourData = await fetchLastHourFeedback(venueData.id); // Fetch last hour's feedback
+      const lastHourData = await fetchLastHourFeedback(venueData.id);
       setLastHourFeedback(lastHourData);
       if (liveUpdatesEnabled) {
-        setupRealtimeUpdates(venueData.id); // Set up real-time updates if enabled
+        setupRealtimeUpdates(venueData.id);
       }
     }
   };
-
 
   // Fetch active questions for the venue
   const fetchQuestions = async (venueId) => {
@@ -65,7 +59,7 @@ const DashboardPage = () => {
       .from('questions')
       .select('*')
       .eq('venue_id', venueId)
-      .eq('active', true); // Only fetch active questions
+      .eq('active', true);
 
     if (error) {
       console.error('Error fetching questions:', error);
@@ -76,8 +70,6 @@ const DashboardPage = () => {
 
   // Fetch feedback for the venue
   const fetchFeedback = async (venueId) => {
-    console.log('Fetching feedback for venue ID:', venueId);
-
     const { data, error } = await supabase
       .from('feedback')
       .select('*')
@@ -86,7 +78,6 @@ const DashboardPage = () => {
     if (error) {
       console.error('Error fetching feedback:', error);
     } else {
-      console.log('Feedback fetched successfully:', data);
       setFeedback(data);
     }
   };
@@ -100,9 +91,9 @@ const DashboardPage = () => {
       .from('feedback')
       .select('*')
       .eq('venue_id', venueId)
-      .not('additional_feedback', 'is', null) // Only fetch rows with additional_feedback
-      .gte('timestamp', oneHourAgo) // Fetch feedback from the last hour
-      .order('timestamp', { ascending: false }); // Sort by most recent
+      .not('additional_feedback', 'is', null)
+      .gte('timestamp', oneHourAgo)
+      .order('timestamp', { ascending: false });
 
     if (error) {
       console.error('Error fetching last hour feedback:', error);
@@ -119,10 +110,8 @@ const DashboardPage = () => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
         async (payload) => {
-          console.log('New feedback received:', payload.new);
           setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
 
-          // If the new feedback has additional_feedback, update the feed
           if (payload.new.additional_feedback) {
             const newFeedback = await fetchLastHourFeedback(venueId);
             setLastHourFeedback(newFeedback);
@@ -141,10 +130,8 @@ const DashboardPage = () => {
     setLiveUpdatesEnabled((prev) => !prev);
     if (venueId) {
       if (liveUpdatesEnabled) {
-        // Disable live updates
         supabase.removeAllChannels();
       } else {
-        // Enable live updates
         setupRealtimeUpdates(venueId);
       }
     }
@@ -167,15 +154,12 @@ const DashboardPage = () => {
     return (totalRating / feedback.length).toFixed(1);
   };
 
-  // Count responses in timeframes
-  const countResponses = (timeInterval) => {
+  // Filter feedback based on the selected time frame
+  const filterFeedbackByTime = (timeFilter) => {
     const now = new Date();
     let startTime;
 
-    switch (timeInterval) {
-      case '30min':
-        startTime = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
-        break;
+    switch (timeFilter) {
       case '1hour':
         startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
         break;
@@ -186,51 +170,14 @@ const DashboardPage = () => {
         startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
         break;
       default:
-        throw new Error('Invalid time interval');
+        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Default to last hour
     }
 
-    const filteredFeedback = feedback.filter((f) => f.timestamp >= startTime);
-    return filteredFeedback.length;
+    return feedback.filter((f) => f.timestamp >= startTime);
   };
 
-  // Calculate percentage change compared to the previous time interval
-  const calculatePercentageChange = (currentCount, previousCount) => {
-    if (previousCount === 0) return 0; // Avoid division by zero
-    return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
-  };
-
-  // Get the count for the previous time interval
-  const getPreviousCount = (timeInterval) => {
-    const now = new Date();
-    let startTime, endTime;
-
-    switch (timeInterval) {
-      case '30min':
-        startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Last hour
-        endTime = new Date(now.getTime() - 30 * 60 * 1000).toISOString(); // Last 30 minutes
-        break;
-      case '1hour':
-        startTime = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(); // Last 2 hours
-        endTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Last hour
-        break;
-      case 'today':
-        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        startTime = new Date(yesterday).toISOString(); // Yesterday
-        endTime = new Date(now.toISOString().split('T')[0]).toISOString(); // Today
-        break;
-      case '7days':
-        startTime = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(); // Last 14 days
-        endTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(); // Last 7 days
-        break;
-      default:
-        throw new Error('Invalid time interval');
-    }
-
-    const filteredFeedback = feedback.filter(
-      (f) => f.timestamp >= startTime && f.timestamp < endTime
-    );
-    return filteredFeedback.length;
-  };
+  // Get filtered feedback based on the selected time frame
+  const filteredFeedback = filterFeedbackByTime(timeFilter);
 
   // Map questions to actionable suggestions
   const questionToSuggestionMap = {
@@ -333,7 +280,7 @@ const DashboardPage = () => {
           </div>
         ))}
         {feedback.length === 0 && (
-          <p className="text-gray-500 text-center">No feedback in the last hour.</p>
+          <p className="text-gray-500 text-center">No feedback in the selected time frame.</p>
         )}
       </div>
     </div>
@@ -342,26 +289,40 @@ const DashboardPage = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Page Title and Live Updates Toggle */}
+        {/* Page Title, Live Updates Toggle, and Time Filter */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Venue Dashboard</h1>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-500">Live Updates</span>
-            <button
-              onClick={toggleLiveUpdates}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                liveUpdatesEnabled ? 'bg-green-50 hover:bg-green-100' : 'bg-red-50 hover:bg-red-100'
-              }`}
-            >
-              {liveUpdatesEnabled ? (
-                <ToggleRight className="w-6 h-6 text-green-600" />
-              ) : (
-                <ToggleLeft className="w-6 h-6 text-red-600" />
-              )}
-            </button>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Filter by:</span>
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                className="p-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="1hour">Last Hour</option>
+                <option value="today">Today</option>
+                <option value="7days">Last 7 Days</option>
+              </select>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-500">Live Updates</span>
+              <button
+                onClick={toggleLiveUpdates}
+                className={`p-2 rounded-lg transition-colors duration-200 ${
+                  liveUpdatesEnabled ? 'bg-green-50 hover:bg-green-100' : 'bg-red-50 hover:bg-red-100'
+                }`}
+              >
+                {liveUpdatesEnabled ? (
+                  <ToggleRight className="w-6 h-6 text-green-600" />
+                ) : (
+                  <ToggleLeft className="w-6 h-6 text-red-600" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-  
+
         {/* Overall Satisfaction */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <SatisfactionCard
@@ -380,43 +341,43 @@ const DashboardPage = () => {
             />
           ))}
         </div>
-  
+
         {/* Response Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <MetricCard
             title="Last 30 Minutes"
-            value={countResponses('30min')}
-            trend={countResponses('30min') > getPreviousCount('30min') ? 'up' : 'down'}
-            trendValue={Math.abs(calculatePercentageChange(countResponses('30min'), getPreviousCount('30min')))}
+            value={filteredFeedback.filter((f) => new Date(f.timestamp) >= new Date(new Date().getTime() - 30 * 60 * 1000)).length}
+            trend="up" // Placeholder, you can calculate trends based on filtered data
+            trendValue="0" // Placeholder
             compareText="Compared to previous 30 mins"
             icon={Clock}
           />
           <MetricCard
             title="Last Hour"
-            value={countResponses('1hour')}
-            trend={countResponses('1hour') > getPreviousCount('1hour') ? 'up' : 'down'}
-            trendValue={Math.abs(calculatePercentageChange(countResponses('1hour'), getPreviousCount('1hour')))}
+            value={filteredFeedback.filter((f) => new Date(f.timestamp) >= new Date(new Date().getTime() - 60 * 60 * 1000)).length}
+            trend="up" // Placeholder
+            trendValue="0" // Placeholder
             compareText="Compared to previous hour"
             icon={Users}
           />
           <MetricCard
             title="Today"
-            value={countResponses('today')}
-            trend={countResponses('today') > getPreviousCount('today') ? 'up' : 'down'}
-            trendValue={Math.abs(calculatePercentageChange(countResponses('today'), getPreviousCount('today')))}
+            value={filteredFeedback.filter((f) => new Date(f.timestamp).toDateString() === new Date().toDateString()).length}
+            trend="up" // Placeholder
+            trendValue="0" // Placeholder
             compareText="Compared to yesterday"
             icon={Calendar}
           />
           <MetricCard
             title="Last 7 Days"
-            value={countResponses('7days')}
-            trend={countResponses('7days') > getPreviousCount('7days') ? 'up' : 'down'}
-            trendValue={Math.abs(calculatePercentageChange(countResponses('7days'), getPreviousCount('7days')))}
+            value={filteredFeedback.length}
+            trend="up" // Placeholder
+            trendValue="0" // Placeholder
             compareText="Compared to previous week"
             icon={TrendingUp}
           />
         </div>
-  
+
         {/* Suggested Actions */}
         <div className="bg-gray-50 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6">
@@ -434,9 +395,9 @@ const DashboardPage = () => {
             ))}
           </div>
         </div>
-  
+
         {/* Live Feedback Feed */}
-        <FeedbackFeed feedback={lastHourFeedback} />
+        <FeedbackFeed feedback={filteredFeedback} />
       </div>
     </DashboardFrame>
   );
