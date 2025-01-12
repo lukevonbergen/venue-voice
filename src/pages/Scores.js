@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
   TrendingDown,
-  Star,
   Smile,
+  Star,
   Heart,
   Coffee,
-  Clock,
-  Users,
   ToggleRight,
   ToggleLeft,
 } from 'lucide-react';
@@ -26,7 +24,7 @@ const ScoresPage = () => {
   const [questions, setQuestions] = useState([]);
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   // Fetch venue ID and feedback
