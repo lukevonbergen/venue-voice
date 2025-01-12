@@ -37,8 +37,8 @@ const Navbar = () => {
   const features = [
     { name: 'QR Codes', icon: <QrCode className="h-5 w-5 text-blue-500" />, path: '/features/qr-codes' },
     { name: 'NPS Score', icon: <BarChart className="h-5 w-5 text-green-500" />, path: '/features/nps-score' },
-    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5 text-purple-500" />, path: '/feature/real-time-stats' },
-    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5 text-yellow-500" />, path: '/feature/custom-branding' },
+    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5 text-purple-500" />, path: '/features/real-time-stats' },
+    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5 text-yellow-500" />, path: '/features/custom-branding' },
     { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5 text-red-500" />, path: '/features/custom-questions' },
     { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5 text-indigo-500" />, path: '/features/dashboards' },
   ];
