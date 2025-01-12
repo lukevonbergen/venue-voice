@@ -269,7 +269,7 @@ const SettingsPage = () => {
               <img
                 src={logo}
                 alt="Venue Logo"
-                className="w-24 h-24 rounded-lg object-cover"
+                className="max-w-[200px] max-h-[200px] object-contain" // Adjust dimensions as needed
               />
             )}
             <div>
