@@ -28,7 +28,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/features" className="text-sm text-gray-500 hover:text-gray-900">Features</Link></li>
               <li><Link to="/pricing" className="text-sm text-gray-500 hover:text-gray-900">Pricing</Link></li>
-              <li><Link to="#" className="text-sm text-gray-500 hover:text-gray-900">Documentation</Link></li>
+              <li><Link to="https://chatters.canny.io/changelog" className="text-sm text-gray-500 hover:text-gray-900">Documentation</Link></li>
               <li><Link to="#" className="text-sm text-gray-500 hover:text-gray-900">Demo</Link></li>
             </ul>
           </div>

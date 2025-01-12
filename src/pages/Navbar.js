@@ -104,7 +104,7 @@ const Navbar = () => {
                   )}
                 </div>
                 <Link
-                  to="#"
+                  to="https://chatters.canny.io/changelog"
                   className={`text-gray-600 hover:text-gray-900 ${
                     isActive('/docs') ? 'font-semibold' : ''
                   }`}
