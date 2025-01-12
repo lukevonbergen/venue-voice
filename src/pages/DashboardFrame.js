@@ -65,7 +65,7 @@ const DashboardFrame = ({ children }) => {
 
       {/* Sidebar */}
       <div
-        className={`w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm fixed lg:relative h-screen lg:h-auto transform transition-transform duration-200 ${
+        className={`w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm fixed h-screen transform transition-transform duration-200 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } z-40`}
       >
@@ -89,7 +89,7 @@ const DashboardFrame = ({ children }) => {
         </div>
 
         {/* Navigation Section */}
-        <nav className="flex-1 p-4 overflow-y-auto"> {/* Added overflow-y-auto to make the nav scrollable */}
+        <nav className="flex-1 p-4 overflow-y-auto"> {/* Make the nav scrollable */}
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">
             Menu
           </div>
@@ -118,7 +118,7 @@ const DashboardFrame = ({ children }) => {
         </nav>
 
         {/* Logout Section */}
-        <div className="p-4 border-t border-gray-200 bg-white"> {/* Added bg-white to ensure the button is visible */}
+        <div className="p-4 border-t border-gray-200 bg-white"> {/* Fixed at the bottom */}
           <button
             onClick={handleLogout}
             className="w-full px-4 py-3 text-left text-red-600 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center group"
@@ -130,7 +130,7 @@ const DashboardFrame = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 lg:p-8 mt-16 lg:mt-0 lg:ml-72"> {/* Added lg:ml-72 to account for the sidebar width */}
+      <div className="flex-1 p-4 lg:p-8 mt-16 lg:mt-0 lg:ml-72 overflow-y-auto"> {/* Make the main content scrollable */}
         <div className="max-w-6xl mx-auto">{children}</div>
       </div>
     </div>
