@@ -324,7 +324,7 @@ const ScoresPage = () => {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="nps"
+                dataKey="NPS Score"
                 stroke="#3B82F6"
                 strokeWidth={2}
                 activeDot={{ r: 8 }}
