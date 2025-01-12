@@ -9,7 +9,7 @@ import MetricCard from '../components/dashboard/MetricCard';
 import SatisfactionCard from '../components/dashboard/SatisfactionCard';
 import ActionCard from '../components/dashboard/ActionCard';
 import FeedbackFeed from '../components/dashboard/FeedbackFeed';
-import TimeFilter from '../components/dashboard/TimeFilter';
+// import TimeFilter from '../components/dashboard/TimeFilter';
 import LiveUpdatesToggle from '../components/dashboard/LiveUpdatesToggle';
 
 const DashboardPage = () => {
