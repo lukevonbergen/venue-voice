@@ -43,7 +43,7 @@ const QRCodePage = () => {
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
               <img
-                src="https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                src="https://www.pointingdogcheadle.co.uk/wp-content/uploads/sites/7/2023/10/Pointing-Dog-Bar-1.jpg"
                 alt="QR Code Example"
                 className="rounded-lg"
               />
