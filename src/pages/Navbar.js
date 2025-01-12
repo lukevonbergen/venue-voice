@@ -35,12 +35,12 @@ const Navbar = () => {
   };
 
   const features = [
-    { name: 'QR Codes', icon: <QrCode className="h-5 w-5" />, path: '/features/qr-codes' },
-    { name: 'NPS Score', icon: <BarChart className="h-5 w-5" />, path: '/features/nps-score' },
-    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5" />, path: '/features/real-time-stats' },
-    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5" />, path: '/features/custom-branding' },
-    { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5" />, path: '/features/custom-questions' },
-    { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5" />, path: '/features/dashboards' },
+    { name: 'QR Codes', icon: <QrCode className="h-5 w-5 text-blue-500" />, path: '/features/qr-codes' },
+    { name: 'NPS Score', icon: <BarChart className="h-5 w-5 text-green-500" />, path: '/features/nps-score' },
+    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5 text-purple-500" />, path: '/features/real-time-stats' },
+    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5 text-yellow-500" />, path: '/features/custom-branding' },
+    { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5 text-red-500" />, path: '/features/custom-questions' },
+    { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5 text-indigo-500" />, path: '/features/dashboards' },
   ];
 
   return (
@@ -84,7 +84,7 @@ const Navbar = () => {
                   </button>
                   {isFeaturesDropdownOpen && (
                     <div
-                      className="absolute top-full left-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200"
+                      className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-120 bg-white rounded-lg shadow-lg border border-gray-200"
                       onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
                       onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
                     >
