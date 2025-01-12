@@ -15,7 +15,7 @@ import DashboardFrame from './DashboardFrame';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import Modal from 'react-modal';
-import { BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Set app element for react-modal (required for accessibility)
 Modal.setAppElement('#root');
@@ -26,6 +26,7 @@ const ScoresPage = () => {
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [chartType, setChartType] = useState('line'); // 'line' or 'bar'
   const navigate = useNavigate();
 
   // Fetch venue ID and NPS scores
@@ -150,6 +151,11 @@ const ScoresPage = () => {
         setupRealtimeUpdates(venueId);
       }
     }
+  };
+
+  // Toggle chart type
+  const toggleChartType = () => {
+    setChartType((prev) => (prev === 'line' ? 'bar' : 'line'));
   };
 
   // Calculate NPS (Net Promoter Score)
@@ -306,52 +312,102 @@ const ScoresPage = () => {
           />
         </div>
 
-        {/* Combined Bar and Line Chart */}
+        {/* Chart Toggle */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleChartType}
+            className="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+          >
+            {chartType === 'line' ? 'Switch to Bar Chart' : 'Switch to Line Chart'}
+          </button>
+        </div>
+
+        {/* NPS Trend Chart */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-xl font-bold mb-4">NPS History</h2>
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={monthlyNpsData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis
-                dataKey="month"
-                stroke="#666"
-                tick={{ fill: '#666' }}
-                tickLine={{ stroke: '#666' }}
-              />
-              <YAxis
-                stroke="#666"
-                tick={{ fill: '#666' }}
-                tickLine={{ stroke: '#666' }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
-                dataKey="Promoters"
-                fill="#10B981"
-                name="Promoters"
-              />
-              <Bar
-                dataKey="Passives"
-                fill="#FBBF24"
-                name="Passives"
-              />
-              <Bar
-                dataKey="Detractors"
-                fill="#EF4444"
-                name="Detractors"
-              />
-              <Line
-                type="monotone"
-                dataKey="NPS Score"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                activeDot={{ r: 8 }}
-                name="NPS Score"
-              />
-            </BarChart>
+            {chartType === 'line' ? (
+              <LineChart
+                data={monthlyNpsData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <XAxis
+                  dataKey="month"
+                  stroke="#666"
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <YAxis
+                  stroke="#666"
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="NPS Score"
+                  stroke="#3B82F6"
+                  strokeWidth={2}
+                  activeDot={{ r: 8 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Promoters"
+                  stroke="#10B981"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Passives"
+                  stroke="#FBBF24"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Detractors"
+                  stroke="#EF4444"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            ) : (
+              <BarChart
+                data={monthlyNpsData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <XAxis
+                  dataKey="month"
+                  stroke="#666"
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <YAxis
+                  stroke="#666"
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar
+                  dataKey="NPS Score"
+                  fill="#3B82F6"
+                />
+                <Bar
+                  dataKey="Promoters"
+                  fill="#10B981"
+                />
+                <Bar
+                  dataKey="Passives"
+                  fill="#FBBF24"
+                />
+                <Bar
+                  dataKey="Detractors"
+                  fill="#EF4444"
+                />
+              </BarChart>
+            )}
           </ResponsiveContainer>
         </div>
 
