@@ -6,9 +6,14 @@ import 'antd/dist/reset.css'; // Import Ant Design styles
 
 const SettingsPage = () => {
   const [venueId, setVenueId] = useState(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [logo, setLogo] = useState(null);
   const [primaryColor, setPrimaryColor] = useState('#1890ff'); // Default primary color
   const [secondaryColor, setSecondaryColor] = useState('#52c41a'); // Default secondary color
+  const [isPaid, setIsPaid] = useState(false); // Subscription status
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,11 +29,11 @@ const SettingsPage = () => {
     fetchSession();
   }, []);
 
-  // Fetch venue ID
+  // Fetch venue ID and all fields
   const fetchVenueId = async (email) => {
     const { data: venueData, error: venueError } = await supabase
       .from('venues')
-      .select('id, logo, primary_color, secondary_color')
+      .select('id, name, email, first_name, last_name, logo, primary_color, secondary_color, is_paid')
       .eq('email', email)
       .single();
 
@@ -36,9 +41,14 @@ const SettingsPage = () => {
       console.error('Error fetching venue ID:', venueError);
     } else {
       setVenueId(venueData.id);
-      setLogo(venueData.logo); // Set existing logo
-      setPrimaryColor(venueData.primary_color || '#1890ff'); // Set existing primary color
-      setSecondaryColor(venueData.secondary_color || '#52c41a'); // Set existing secondary color
+      setName(venueData.name || '');
+      setEmail(venueData.email || '');
+      setFirstName(venueData.first_name || '');
+      setLastName(venueData.last_name || '');
+      setLogo(venueData.logo || null);
+      setPrimaryColor(venueData.primary_color || '#1890ff');
+      setSecondaryColor(venueData.secondary_color || '#52c41a');
+      setIsPaid(venueData.is_paid || false);
     }
   };
 
@@ -114,10 +124,112 @@ const SettingsPage = () => {
     setLoading(false);
   };
 
+  // Handle form submission for updating name, email, first name, and last name
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const updates = {
+      name,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+    };
+
+    const { error: updateError } = await supabase
+      .from('venues')
+      .update(updates)
+      .eq('id', venueId);
+
+    if (updateError) {
+      console.error('Error updating profile:', updateError);
+      setError('Failed to update profile. Please try again.');
+    } else {
+      setError('Profile updated successfully!');
+    }
+
+    setLoading(false);
+  };
+
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
+
+        {/* Profile Section */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Profile</h2>
+          <form onSubmit={handleUpdateProfile}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              disabled={loading}
+            >
+              {loading ? 'Updating...' : 'Update Profile'}
+            </button>
+            {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          </form>
+        </div>
+
+        {/* Subscription Status Section */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Subscription Status</h2>
+          <div className="flex items-center gap-4">
+            <span className="text-lg font-medium text-gray-700">
+              {isPaid ? 'Active Subscription' : 'No Active Subscription'}
+            </span>
+            {!isPaid && (
+              <button
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+                onClick={() => {
+                  // Add logic to handle subscription upgrade
+                  alert('Redirect to subscription upgrade page.');
+                }}
+              >
+                Upgrade
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* Logo Upload Section */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
