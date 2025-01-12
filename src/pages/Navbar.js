@@ -35,7 +35,7 @@ const Navbar = () => {
   };
 
   const features = [
-    { name: 'QR Codes', icon: <QrCode className="h-5 w-5 text-blue-500" />, path: '#' },
+    { name: 'QR Codes', icon: <QrCode className="h-5 w-5 text-blue-500" />, path: '/features/qr-codes' },
     { name: 'NPS Score', icon: <BarChart className="h-5 w-5 text-green-500" />, path: '#' },
     { name: 'Real-time stats', icon: <Gauge className="h-5 w-5 text-purple-500" />, path: '#' },
     { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5 text-yellow-500" />, path: '#' },
