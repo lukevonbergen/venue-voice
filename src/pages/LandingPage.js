@@ -57,7 +57,7 @@ const LandingPage = () => {
               <Bell className="h-5 w-5 text-green-600" />
               <span className="text-sm text-gray-600">
                 Table {alerts[currentAlert].table}: {alerts[currentAlert].issue}
-                <span className="ml-2 text-green-600">• {alerts[currentAlert].time}</span>
+                <span className="ml-2 text-green-600">•  {alerts[currentAlert].time}</span>
               </span>
             </div>
 
@@ -197,8 +197,8 @@ const LandingPage = () => {
               icon: BarChart2
             },
             {
-              title: "Team Coordination",
-              desc: "Keep everyone aligned with clear task assignment and issue tracking.",
+              title: "Team Insights & Feedback Alignment",
+              desc: "Stay informed and aligned with real-time customer feedback and NPS scores. Empower your team to address concerns and improve guest satisfaction collaboratively.",
               stats: "54% reduction in service delays",
               icon: Users
             }
