@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountChange, onAddressChange, loading }) => {
+  const [locked, setLocked] = useState(true);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-900">Venue Settings</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-gray-900">Venue Settings</h2>
+        <button
+          onClick={() => setLocked(!locked)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+        >
+          {locked ? 'Unlock' : 'Lock'}
+        </button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Venue Name</label>
@@ -12,7 +22,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
             value={name}
             onChange={onNameChange}
             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            disabled={loading}
+            disabled={locked || loading}
           />
         </div>
         <div>
@@ -22,7 +32,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
             value={tableCount}
             onChange={onTableCountChange}
             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            disabled={loading}
+            disabled={locked || loading}
           />
         </div>
         <div className="col-span-2">
@@ -34,7 +44,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.line1}
               onChange={(e) => onAddressChange({ ...address, line1: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              disabled={loading}
+              disabled={locked || loading}
             />
             <input
               type="text"
@@ -42,7 +52,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.line2}
               onChange={(e) => onAddressChange({ ...address, line2: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              disabled={loading}
+              disabled={locked || loading}
             />
             <input
               type="text"
@@ -50,7 +60,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.city}
               onChange={(e) => onAddressChange({ ...address, city: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              disabled={loading}
+              disabled={locked || loading}
             />
             <input
               type="text"
@@ -58,7 +68,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.county}
               onChange={(e) => onAddressChange({ ...address, county: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              disabled={loading}
+              disabled={locked || loading}
             />
             <input
               type="text"
@@ -66,7 +76,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.postalCode}
               onChange={(e) => onAddressChange({ ...address, postalCode: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              disabled={loading}
+              disabled={locked || loading}
             />
             <input
               type="text"
@@ -74,7 +84,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.country}
               onChange={(e) => onAddressChange({ ...address, country: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              disabled={loading}
+              disabled={locked || loading}
             />
           </div>
         </div>

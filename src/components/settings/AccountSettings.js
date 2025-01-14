@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const AccountSettings = ({ name, email, firstName, lastName, onNameChange, onEmailChange, onFirstNameChange, onLastNameChange, profileMessage }) => {
+  const [locked, setLocked] = useState(true);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-900">Account Settings</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
+        <button
+          onClick={() => setLocked(!locked)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+        >
+          {locked ? 'Unlock' : 'Lock'}
+        </button>
+      </div>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
@@ -13,6 +23,7 @@ const AccountSettings = ({ name, email, firstName, lastName, onNameChange, onEma
               value={name}
               onChange={onNameChange}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={locked}
             />
           </div>
           <div>
@@ -22,6 +33,7 @@ const AccountSettings = ({ name, email, firstName, lastName, onNameChange, onEma
               value={email}
               onChange={onEmailChange}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={locked}
             />
           </div>
           <div>
@@ -31,6 +43,7 @@ const AccountSettings = ({ name, email, firstName, lastName, onNameChange, onEma
               value={firstName}
               onChange={onFirstNameChange}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={locked}
             />
           </div>
           <div>
@@ -40,6 +53,7 @@ const AccountSettings = ({ name, email, firstName, lastName, onNameChange, onEma
               value={lastName}
               onChange={onLastNameChange}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={locked}
             />
           </div>
         </div>

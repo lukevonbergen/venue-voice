@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ColorPicker, Tooltip } from 'antd';
 
 const BrandingSettings = ({ logo, onLogoUpload, primaryColor, secondaryColor, onColorChange, colorsUpdated, onSaveColors, colorsMessage, loading }) => {
+  const [locked, setLocked] = useState(true);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-      <h2 className="text-xl font-bold mb-4 text-gray-900">Branding Settings</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-gray-900">Branding Settings</h2>
+        <button
+          onClick={() => setLocked(!locked)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+        >
+          {locked ? 'Unlock' : 'Lock'}
+        </button>
+      </div>
       <div className="flex items-center gap-6">
         {logo && (
           <img
@@ -20,10 +30,13 @@ const BrandingSettings = ({ logo, onLogoUpload, primaryColor, secondaryColor, on
             onChange={onLogoUpload}
             className="hidden"
             id="logo-upload"
+            disabled={locked}
           />
           <label
             htmlFor="logo-upload"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors duration-200"
+            className={`bg-blue-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors duration-200 ${
+              locked ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             {loading ? 'Uploading...' : 'Upload Logo'}
           </label>
@@ -48,6 +61,7 @@ const BrandingSettings = ({ logo, onLogoUpload, primaryColor, secondaryColor, on
           <ColorPicker
             value={primaryColor}
             onChange={(color) => onColorChange('primary', color.toHexString())}
+            disabled={locked}
           />
         </div>
 
@@ -64,6 +78,7 @@ const BrandingSettings = ({ logo, onLogoUpload, primaryColor, secondaryColor, on
           <ColorPicker
             value={secondaryColor}
             onChange={(color) => onColorChange('secondary', color.toHexString())}
+            disabled={locked}
           />
         </div>
       </div>
@@ -71,7 +86,7 @@ const BrandingSettings = ({ logo, onLogoUpload, primaryColor, secondaryColor, on
         <button
           onClick={onSaveColors}
           className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          disabled={loading}
+          disabled={loading || locked}
         >
           {loading ? 'Saving...' : 'Save Colors'}
         </button>
