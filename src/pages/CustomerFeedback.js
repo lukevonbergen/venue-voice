@@ -190,14 +190,15 @@ const CustomerFeedbackPage = () => {
             />
           </div>
         )}
-
+  
         {/* Table Number Input */}
         <div className="flex-1 flex flex-col justify-center items-center">
           <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
             What is your table number? (Optional)
           </h2>
           <input
-            type="text"
+            type="number"
+            inputMode="numeric"
             className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter your table number"
             value={tableNumber}
@@ -210,7 +211,7 @@ const CustomerFeedbackPage = () => {
             Next
           </button>
         </div>
-
+  
         {/* Powered by Chatters at the Bottom */}
         <div className="flex justify-center pb-4">
           <div className="text-sm" style={{ color: textColor }}>
