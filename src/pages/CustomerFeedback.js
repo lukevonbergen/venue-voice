@@ -1,18 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import supabase from '../utils/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// Helper function to calculate luminance
-const getLuminance = (color) => {
-  const hex = color.replace(/^#/, '');
-  const r = parseInt(hex.slice(0, 2), 16) / 255;
-  const g = parseInt(hex.slice(2, 4), 16) / 255;
-  const b = parseInt(hex.slice(4, 6), 16) / 255;
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luminance;
-};
-
 const CustomerFeedbackPage = () => {
   const { venueId } = useParams();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -22,9 +7,11 @@ const CustomerFeedbackPage = () => {
   const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false);
   const [venueBranding, setVenueBranding] = useState({
     logo: null,
-    primaryColor: '#1890ff', // Default primary color
-    secondaryColor: '#ffffff', // Default secondary color
+    primaryColor: '#1890ff',
+    secondaryColor: '#ffffff',
   });
+  const [tableNumber, setTableNumber] = useState('');
+  const [hasCollectedTableNumber, setHasCollectedTableNumber] = useState(false);
 
   // Disable scrolling when this page is active
   useEffect(() => {
@@ -50,7 +37,7 @@ const CustomerFeedbackPage = () => {
       } else {
         // Add NPS question at the end
         const npsQuestion = {
-          id: 'nps', // Unique identifier for NPS question
+          id: 'nps',
           question: 'How likely are you to recommend us?',
           venue_id: venueId,
           order: questionsData.length + 1,
@@ -59,7 +46,7 @@ const CustomerFeedbackPage = () => {
         setQuestions([...questionsData, npsQuestion]);
       }
 
-      // Fetch venue branding (logo, colors)
+      // Fetch venue branding
       const { data: brandingData, error: brandingError } = await supabase
         .from('venues')
         .select('logo, primary_color, secondary_color')
@@ -71,8 +58,8 @@ const CustomerFeedbackPage = () => {
       } else {
         setVenueBranding({
           logo: brandingData.logo,
-          primaryColor: brandingData.primary_color || '#1890ff', // Fallback to default
-          secondaryColor: brandingData.secondary_color || '#52c41a', // Fallback to default
+          primaryColor: brandingData.primary_color || '#1890ff',
+          secondaryColor: brandingData.secondary_color || '#52c41a',
         });
       }
     };
@@ -86,7 +73,6 @@ const CustomerFeedbackPage = () => {
   };
 
   const handleFeedback = async (emoji) => {
-    // Map emoji to rating
     const emojiToRating = {
       '😠': 1,
       '😞': 2,
@@ -105,6 +91,7 @@ const CustomerFeedbackPage = () => {
           question_id: questions[currentQuestionIndex].id,
           sentiment: emoji,
           rating: rating,
+          table_number: tableNumber || null, // Include table number
         },
       ]);
 
@@ -112,58 +99,44 @@ const CustomerFeedbackPage = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setShowAdditionalFeedback(true); // Show the additional feedback section
+      setShowAdditionalFeedback(true);
     }
   };
 
   const handleNPSRating = async (rating) => {
-    // Save NPS rating to the nps_scores table
-    const { error } = await supabase
+    await supabase
       .from('nps_scores')
       .insert([
         {
           venue_id: venueId,
           score: rating,
+          table_number: tableNumber || null, // Include table number
         },
       ]);
-  
-    if (error) {
-      console.error('Error saving NPS score:', error);
-    } else {
-      console.log('NPS score saved successfully:', rating);
-    }
-  
-    // Move to the next question or show additional feedback
+
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setShowAdditionalFeedback(true); // Show the additional feedback section
+      setShowAdditionalFeedback(true);
     }
   };
 
   const handleAdditionalFeedback = async () => {
-    // Save additional feedback to the database
     if (additionalFeedback.trim() !== '') {
-      const { data, error } = await supabase
+      await supabase
         .from('feedback')
         .insert([
           {
             venue_id: venueId,
-            question_id: null, // Use null or a special value (e.g., -1) for additional feedback
-            sentiment: null,   // No emoji for additional feedback
-            rating: null,      // No rating for additional feedback
+            question_id: null,
+            sentiment: null,
+            rating: null,
             additional_feedback: additionalFeedback,
+            table_number: tableNumber || null, // Include table number
           },
         ]);
-
-      if (error) {
-        console.error('Error inserting additional feedback:', error);
-      } else {
-        console.log('Additional feedback inserted successfully:', data);
-      }
     }
 
-    // Show the "Thank You" message
     setIsFinished(true);
   };
 
@@ -183,11 +156,62 @@ const CustomerFeedbackPage = () => {
     );
   }
 
+  // Show table number input if not collected yet
+  if (!hasCollectedTableNumber) {
+    return (
+      <div
+        className="flex flex-col h-screen p-4 overflow-hidden"
+        style={{
+          backgroundColor: venueBranding.secondaryColor,
+        }}
+      >
+        {/* Logo at the Top */}
+        {venueBranding.logo && (
+          <div className="flex justify-center pt-4">
+            <img
+              src={venueBranding.logo}
+              alt="Venue Logo"
+              className="max-w-full max-h-[30px] object-contain"
+            />
+          </div>
+        )}
+
+        {/* Table Number Input */}
+        <div className="flex-1 flex flex-col justify-center items-center">
+          <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
+            What is your table number? (Optional)
+          </h2>
+          <input
+            type="text"
+            className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your table number"
+            value={tableNumber}
+            onChange={(e) => setTableNumber(e.target.value)}
+          />
+          <button
+            className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            onClick={() => setHasCollectedTableNumber(true)}
+          >
+            Next
+          </button>
+        </div>
+
+        {/* Powered by Chatters at the Bottom */}
+        <div className="flex justify-center pb-4">
+          <div className="text-sm" style={{ color: textColor }}>
+            Powered by <strong>Chatters</strong>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main feedback UI
   return (
     <div
       className="flex flex-col h-screen p-4 overflow-hidden"
       style={{
-        backgroundColor: venueBranding.secondaryColor, // Use secondary color as background
+        backgroundColor: venueBranding.secondaryColor,
       }}
     >
       {/* Logo at the Top */}
@@ -196,7 +220,7 @@ const CustomerFeedbackPage = () => {
           <img
             src={venueBranding.logo}
             alt="Venue Logo"
-            className="max-w-full max-h-[30px] object-contain" // Adjust max height as needed
+            className="max-w-full max-h-[30px] object-contain"
           />
         </div>
       )}
@@ -228,14 +252,14 @@ const CustomerFeedbackPage = () => {
           <>
             {isNPSQuestion() ? (
               // NPS Rating Buttons (1-10)
-              <div className="grid grid-cols-5 gap-3"> {/* 5 buttons per row */}
+              <div className="grid grid-cols-5 gap-3">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
                   <button
                     key={rating}
                     className="w-12 h-12 flex items-center justify-center border rounded-lg transition-colors text-sm font-medium"
                     style={{
-                      backgroundColor: venueBranding.primaryColor, // Use primary color
-                      color: '#ffffff', // White text for better contrast
+                      backgroundColor: venueBranding.primaryColor,
+                      color: '#ffffff',
                     }}
                     onClick={() => handleNPSRating(rating)}
                   >
@@ -285,7 +309,7 @@ const CustomerFeedbackPage = () => {
               </button>
               <button
                 className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                onClick={() => setIsFinished(true)} // Skip additional feedback
+                onClick={() => setIsFinished(true)}
               >
                 Skip
               </button>
