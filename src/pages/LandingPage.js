@@ -57,7 +57,7 @@ const LandingPage = () => {
               <Bell className="h-5 w-5 text-green-600" />
               <span className="text-sm text-gray-600">
                 Table {alerts[currentAlert].table}: {alerts[currentAlert].issue}
-                <span className="ml-2 text-green-600">• Resolved in 2 mins</span>
+                <span className="ml-2 text-green-600">• {alerts[currentAlert].time}</span>
               </span>
             </div>
 
