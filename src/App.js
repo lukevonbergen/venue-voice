@@ -19,7 +19,7 @@ import FeedbackFeed from './pages/FeedbackFeed';
 import SignInPage from './pages/SignIn';
 import PricingPage from './pages/Pricing';
 import FeaturesPage from './pages/Features';
-import DemoPage from './pages/Demo';
+import DemoPage from './pages/DemoPage';
 import ContactPage from './pages/ContactPage';
 import SecurityPage from './pages/SecurityPage';
 import TermsAndConditionsPage from './pages/Terms';
