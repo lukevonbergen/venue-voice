@@ -103,20 +103,20 @@ const FeaturesPage = () => {
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                name: 'Jane Doe',
-                role: 'CEO, Acme Inc.',
+                name: 'Jess',
+                role: 'Operations Director - Pub Group',
                 testimonial:
-                  'Feedie.app has completely changed how we handle customer feedback. The insights are invaluable!',
+                  'Chatters has completely changed how we handle customer feedback. The insights are invaluable!',
               },
               {
-                name: 'John Smith',
-                role: 'Founder, Startup Co.',
+                name: 'Steve',
+                role: 'Founder - Restaurant',
                 testimonial:
                   'The AI-powered recommendations have helped us improve our customer experience significantly.',
               },
               {
-                name: 'Sarah Lee',
-                role: 'Marketing Manager, Brandify',
+                name: 'Sarah',
+                role: 'People Lead - Hotel',
                 testimonial:
                   'The real-time analytics dashboard is a game-changer. We can now make data-driven decisions instantly.',
               },
