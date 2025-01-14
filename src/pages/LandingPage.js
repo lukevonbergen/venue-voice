@@ -110,12 +110,11 @@ const LandingPage = () => {
       </div>
 
       {/* Social Proof Section */}
-      <div className="bg-white py-16">
+      {/* <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Trusted by Leading Venues</h2>
             <div className="flex justify-center items-center space-x-12 mt-8 grayscale opacity-60">
-              {/* Replace these with actual client logos */}
               <div className="h-12 w-32 bg-gray-200 rounded"></div>
               <div className="h-12 w-32 bg-gray-200 rounded"></div>
               <div className="h-12 w-32 bg-gray-200 rounded"></div>
@@ -123,7 +122,7 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* How It Works Section */}
       <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
