@@ -24,6 +24,7 @@ const CustomerFeedbackPage = () => {
     logo: null,
     primaryColor: '#1890ff',
     secondaryColor: '#ffffff',
+    tableCount: 0, // Add tableCount to venueBranding
   });
   const [tableNumber, setTableNumber] = useState('');
   const [hasCollectedTableNumber, setHasCollectedTableNumber] = useState(false);
@@ -61,10 +62,10 @@ const CustomerFeedbackPage = () => {
         setQuestions([...questionsData, npsQuestion]);
       }
 
-      // Fetch venue branding
+      // Fetch venue branding and table_count
       const { data: brandingData, error: brandingError } = await supabase
         .from('venues')
-        .select('logo, primary_color, secondary_color')
+        .select('logo, primary_color, secondary_color, table_count') // Add table_count here
         .eq('id', venueId)
         .single();
 
@@ -75,6 +76,7 @@ const CustomerFeedbackPage = () => {
           logo: brandingData.logo,
           primaryColor: brandingData.primary_color || '#1890ff',
           secondaryColor: brandingData.secondary_color || '#52c41a',
+          tableCount: brandingData.table_count || 0, // Add tableCount to venueBranding
         });
       }
     };
@@ -190,7 +192,7 @@ const CustomerFeedbackPage = () => {
             />
           </div>
         )}
-  
+
         {/* Table Number Dropdown */}
         <div className="flex-1 flex flex-col justify-center items-center">
           <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
@@ -215,7 +217,7 @@ const CustomerFeedbackPage = () => {
             Next
           </button>
         </div>
-  
+
         {/* Powered by Chatters at the Bottom */}
         <div className="flex justify-center pb-4">
           <div className="text-sm" style={{ color: textColor }}>
