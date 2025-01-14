@@ -135,7 +135,7 @@ const LandingPage = () => {
                 icon: Zap
               },
               {
-                title: 'Customizable Surveys',
+                title: 'Customisable Surveys',
                 desc: 'Get exactly the insights you need with tailored feedback forms',
                 icon: MessageSquare
               },
