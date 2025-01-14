@@ -54,9 +54,9 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
             />
             <input
               type="text"
-              placeholder="State"
-              value={address.state}
-              onChange={(e) => onAddressChange({ ...address, state: e.target.value })}
+              placeholder="County"
+              value={address.county}
+              onChange={(e) => onAddressChange({ ...address, county: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               disabled={loading}
             />
