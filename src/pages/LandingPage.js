@@ -18,7 +18,7 @@ const LandingPage = () => {
 
   const alerts = [
     { table: "14", issue: "Service delay", time: "2 mins ago" },
-    { table: "23", issue: "Temperature concern", time: "5 mins ago" },
+    { table: "23", issue: "Music issue", time: "5 mins ago" },
     { table: "7", issue: "Menu inquiry", time: "8 mins ago" }
   ];
 
