@@ -6,9 +6,18 @@ import Footer from './Footer';
 
 const LandingPage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const openDemoModal = () => {
+    setIsDemoModalOpen(true);
+  };
+
+  const closeDemoModal = () => {
+    setIsDemoModalOpen(false);
   };
 
   return (
@@ -37,11 +46,13 @@ const LandingPage = () => {
               analyse sentiment, and make data-driven decisions in real-time.
             </p>
             <div className="mt-8 flex justify-center space-x-4">
-              <Link to="/demo"
-                className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2">
+              <button
+                onClick={openDemoModal}
+                className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2"
+              >
                 <span>Book a demo</span>
                 <ArrowRight className="h-4 w-4" />
-              </Link>
+              </button>
               <a href="/pricing" 
                 className="px-8 py-3 text-base font-medium rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center space-x-2">
                 <span>Pricing</span>
@@ -155,33 +166,38 @@ const LandingPage = () => {
               Book a demo with our team and discover how Chatters can transform your customer feedback process.
             </p>
           </div>
-          <div className="bg-white rounded-3xl p-8 shadow-xl max-w-2xl mx-auto">
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Schedule a Demo
-              </button>
-            </form>
+          <div className="flex justify-center">
+            <button
+              onClick={openDemoModal}
+              className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2"
+            >
+              <span>Schedule a Demo</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Footer */}
       <Footer />
+
+      {/* Demo Modal */}
+      {isDemoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-4xl relative">
+            <button
+              onClick={closeDemoModal}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X className="h-6 w-6 text-gray-600" />
+            </button>
+            <div className="p-8">
+              <div className="meetings-iframe-container" data-src="https://meetings.hubspot.com/luke-von-bergen/chatters-demo?embed=true"></div>
+              <script type="text/javascript" src="https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js"></script>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
