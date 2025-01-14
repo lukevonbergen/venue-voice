@@ -17,7 +17,6 @@ const SettingsPage = () => {
   const [secondaryColor, setSecondaryColor] = useState('#52c41a');
   const [isPaid, setIsPaid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [colorsUpdated, setColorsUpdated] = useState(false);
   const [tableCount, setTableCount] = useState('');
   const [address, setAddress] = useState({
     line1: '',
@@ -28,12 +27,8 @@ const SettingsPage = () => {
     country: '',
   });
 
-  // Separate state for success/error messages
-  const [profileMessage, setProfileMessage] = useState('');
-  const [logoMessage, setLogoMessage] = useState('');
-  const [colorsMessage, setColorsMessage] = useState('');
-  const [allSettingsMessage, setAllSettingsMessage] = useState('');
-  const [venueSettingsMessage, setVenueSettingsMessage] = useState('');
+  // Single state for success/error message
+  const [message, setMessage] = useState('');
 
   // Fetch venue ID and settings on component mount
   useEffect(() => {
@@ -82,120 +77,64 @@ const SettingsPage = () => {
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     setLoading(true);
-    setLogoMessage('');
-  
+
     // Step 1: Generate a unique file name
     const fileExt = file.name.split('.').pop();
     const fileName = `${venueId}-logo.${fileExt}`; // Unique file name
     const filePath = `${fileName}`;
-  
+
     // Step 2: Delete the existing file (if it exists)
     const { error: deleteError } = await supabase.storage
       .from('venue-logos')
       .remove([filePath]);
-  
+
     if (deleteError && deleteError.message !== 'The resource was not found') {
       console.error('Error deleting existing logo:', deleteError);
-      setLogoMessage('Failed to delete existing logo. Please try again.');
       setLoading(false);
       return;
     }
-  
+
     // Step 3: Upload the new file
     const { error: uploadError } = await supabase.storage
       .from('venue-logos')
       .upload(filePath, file);
-  
+
     if (uploadError) {
       console.error('Error uploading logo:', uploadError);
-      setLogoMessage('Failed to upload logo. Please try again.');
       setLoading(false);
       return;
     }
-  
+
     // Step 4: Get the public URL of the uploaded logo
     const { data: { publicUrl } } = supabase.storage
       .from('venue-logos')
       .getPublicUrl(filePath);
-  
+
     // Step 5: Update the `logo` column in the `venues` table
     const { error: updateError } = await supabase
       .from('venues')
       .update({ logo: publicUrl })
-      .eq('id', venueId); // Update based on venueId only
-  
+      .eq('id', venueId);
+
     if (updateError) {
       console.error('Error updating logo:', updateError);
-      setLogoMessage('Failed to update logo. Please try again.');
     } else {
       setLogo(publicUrl); // Update the logo in the state
-      setLogoMessage('Logo updated successfully!');
     }
-  
+
     setLoading(false);
   };
 
   const handleColorChange = (type, color) => {
     if (type === 'primary') setPrimaryColor(color);
     if (type === 'secondary') setSecondaryColor(color);
-    setColorsUpdated(true); // Mark colors as updated
-  };
-
-  const saveColors = async () => {
-    setLoading(true);
-    setColorsMessage('');
-
-    const updates = {
-      primary_color: primaryColor,
-      secondary_color: secondaryColor,
-    };
-
-    const { error: updateError } = await supabase
-      .from('venues')
-      .update(updates)
-      .eq('id', venueId);
-
-    if (updateError) {
-      console.error('Error updating colors:', updateError);
-      setColorsMessage('Failed to update colors. Please try again.');
-    } else {
-      setColorsUpdated(false); // Reset the updated state
-      setColorsMessage('Colors updated successfully!');
-    }
-
-    setLoading(false);
-  };
-
-  const saveVenueSettings = async () => {
-    setLoading(true);
-    setVenueSettingsMessage('');
-
-    try {
-      const updates = {
-        name,
-        table_count: tableCount,
-        address,
-      };
-
-      await supabase
-        .from('venues')
-        .update(updates)
-        .eq('id', venueId);
-
-      setVenueSettingsMessage('Venue settings updated successfully!');
-    } catch (error) {
-      console.error('Error updating venue settings:', error);
-      setVenueSettingsMessage('Failed to update venue settings. Please try again.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const saveAllSettings = async () => {
     setLoading(true);
-    setAllSettingsMessage('');
+    setMessage('');
 
     try {
       // Update profile
@@ -230,16 +169,14 @@ const SettingsPage = () => {
         .update(venueUpdates)
         .eq('id', venueId);
 
-      setAllSettingsMessage('All settings updated successfully!');
+      setMessage('Settings updated successfully!');
     } catch (error) {
       console.error('Error updating settings:', error);
-      setAllSettingsMessage('Failed to update settings. Please try again.');
+      setMessage('Failed to update settings. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
-  const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
 
   return (
     <DashboardFrame>
@@ -256,7 +193,6 @@ const SettingsPage = () => {
           onEmailChange={(e) => setEmail(e.target.value)}
           onFirstNameChange={(e) => setFirstName(e.target.value)}
           onLastNameChange={(e) => setLastName(e.target.value)}
-          profileMessage={profileMessage}
         />
 
         {/* Subscription Status */}
@@ -273,9 +209,7 @@ const SettingsPage = () => {
           onNameChange={(e) => setName(e.target.value)}
           onTableCountChange={(e) => setTableCount(e.target.value)}
           onAddressChange={setAddress}
-          venueSettingsMessage={venueSettingsMessage}
           loading={loading}
-          onSave={saveVenueSettings}
         />
 
         {/* Branding Settings */}
@@ -285,22 +219,19 @@ const SettingsPage = () => {
           primaryColor={primaryColor}
           secondaryColor={secondaryColor}
           onColorChange={handleColorChange}
-          colorsUpdated={colorsUpdated}
-          onSaveColors={saveColors}
-          colorsMessage={colorsMessage}
           loading={loading}
         />
 
-        {/* Save All Settings Button */}
+        {/* Save Button */}
         <div className="mt-8">
           <button
             onClick={saveAllSettings}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
             disabled={loading}
           >
-            {loading ? 'Saving...' : 'Save All Settings'}
+            {loading ? 'Saving...' : 'Save'}
           </button>
-          {allSettingsMessage && <p className="text-sm text-red-500 mt-2">{allSettingsMessage}</p>}
+          {message && <p className="text-sm text-red-500 mt-2">{message}</p>}
         </div>
       </div>
     </DashboardFrame>
