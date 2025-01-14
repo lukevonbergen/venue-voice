@@ -315,7 +315,7 @@ const ManageQuestions = () => {
           </div>
         </div>
 
-        <QRCodeSection feedbackUrl={feedbackUrl} />
+        <QRCodeSection feedbackUrl={feedbackUrl} venueId={venueId} />
 
         <SuggestedQuestions
           suggestedQuestions={filteredSuggestedQuestions}
