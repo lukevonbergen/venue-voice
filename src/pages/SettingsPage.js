@@ -30,6 +30,11 @@ const SettingsPage = () => {
   // Single state for success/error message
   const [message, setMessage] = useState('');
 
+  // State to control the lock status of each section
+  const [isAccountLocked, setIsAccountLocked] = useState(true);
+  const [isVenueLocked, setIsVenueLocked] = useState(true);
+  const [isBrandingLocked, setIsBrandingLocked] = useState(true);
+
   // Fetch venue ID and settings on component mount
   useEffect(() => {
     const fetchSession = async () => {
@@ -170,6 +175,11 @@ const SettingsPage = () => {
         .eq('id', venueId);
 
       setMessage('Settings updated successfully!');
+
+      // Lock all sections after saving
+      setIsAccountLocked(true);
+      setIsVenueLocked(true);
+      setIsBrandingLocked(true);
     } catch (error) {
       console.error('Error updating settings:', error);
       setMessage('Failed to update settings. Please try again.');
@@ -193,6 +203,8 @@ const SettingsPage = () => {
           onEmailChange={(e) => setEmail(e.target.value)}
           onFirstNameChange={(e) => setFirstName(e.target.value)}
           onLastNameChange={(e) => setLastName(e.target.value)}
+          locked={isAccountLocked}
+          onLockToggle={() => setIsAccountLocked(!isAccountLocked)}
         />
 
         {/* Subscription Status */}
@@ -210,6 +222,8 @@ const SettingsPage = () => {
           onTableCountChange={(e) => setTableCount(e.target.value)}
           onAddressChange={setAddress}
           loading={loading}
+          locked={isVenueLocked}
+          onLockToggle={() => setIsVenueLocked(!isVenueLocked)}
         />
 
         {/* Branding Settings */}
@@ -220,6 +234,8 @@ const SettingsPage = () => {
           secondaryColor={secondaryColor}
           onColorChange={handleColorChange}
           loading={loading}
+          locked={isBrandingLocked}
+          onLockToggle={() => setIsBrandingLocked(!isBrandingLocked)}
         />
 
         {/* Save Button */}
