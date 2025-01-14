@@ -6,9 +6,9 @@ import Footer from './Footer';
 
 // Define the images for the zig-zag section
 const featureImages = [
-  "https://via.placeholder.com/600x400?text=Real-time+Issue+Alerts",
-  "https://via.placeholder.com/600x400?text=Smart+Performance+Analytics",
-  "https://via.placeholder.com/600x400?text=Team+Coordination"
+  "https://images.pexels.com/photos/1058277/pexels-photo-1058277.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  "/img/lp-img-vv.png",
+  "https://images.pexels.com/photos/7016364/pexels-photo-7016364.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
 ];
 
 const LandingPage = () => {
