@@ -5,6 +5,12 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 
 const LandingPage = () => {
+  // Placeholder images for different sections
+  const placeholderImages = {
+    dashboard: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&w=800&h=600",
+    team: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&w=800&h=600",
+    restaurant: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&w=800&h=600"
+  };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [currentAlert, setCurrentAlert] = useState(0);
@@ -138,17 +144,20 @@ const LandingPage = () => {
               {
                 icon: Globe,
                 title: "Guest Scans QR",
-                desc: "Strategically placed QR codes make it easy for guests to share feedback"
+                desc: "Strategically placed QR codes make it easy for guests to share feedback",
+                image: "https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
               },
               {
                 icon: MessageSquare,
                 title: "Instant Alert",
-                desc: "Your team gets notified immediately when attention is needed"
+                desc: "Your team gets notified immediately when attention is needed",
+                image: "/img/lp-img-vv.png"
               },
               {
                 icon: Check,
                 title: "Swift Resolution",
-                desc: "Address concerns before they become negative reviews"
+                desc: "Address concerns before they become negative reviews",
+                image: "https://images.pexels.com/photos/5054653/pexels-photo-5054653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
               }
             ].map((step, i) => (
               <div key={i} className="flex-1 relative z-10 px-4 mb-8 md:mb-0">
@@ -156,6 +165,11 @@ const LandingPage = () => {
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
                     <step.icon className="h-6 w-6 text-green-600" />
                   </div>
+                  <img 
+                    src={step.image}
+                    alt={step.title}
+                    className="w-full h-48 object-cover rounded-xl mb-4"
+                  />
                   <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                   <p className="text-gray-600">{step.desc}</p>
                 </div>
@@ -214,7 +228,11 @@ const LandingPage = () => {
               
               {/* Feature Image/Demo */}
               <div className="flex-1 p-8">
-                <div className="bg-gray-100 rounded-2xl aspect-video"></div>
+                <img 
+                  src={i === 0 ? placeholderImages.dashboard : i === 1 ? placeholderImages.team : placeholderImages.restaurant}
+                  alt={feature.title}
+                  className="rounded-2xl shadow-lg w-full object-cover aspect-video"
+                />
               </div>
             </div>
           ))}
