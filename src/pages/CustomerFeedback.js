@@ -191,19 +191,23 @@ const CustomerFeedbackPage = () => {
           </div>
         )}
   
-        {/* Table Number Input */}
+        {/* Table Number Dropdown */}
         <div className="flex-1 flex flex-col justify-center items-center">
           <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
             What is your table number? (Optional)
           </h2>
-          <input
-            type="number"
-            inputMode="numeric"
+          <select
             className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your table number"
             value={tableNumber}
             onChange={(e) => setTableNumber(e.target.value)}
-          />
+          >
+            <option value="">Select your table number</option>
+            {Array.from({ length: venueBranding.tableCount || 0 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                Table {i + 1}
+              </option>
+            ))}
+          </select>
           <button
             className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
             onClick={() => setHasCollectedTableNumber(true)}

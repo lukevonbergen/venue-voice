@@ -1,9 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Download } from 'lucide-react';
+import supabase from '../utils/supabase'; // Adjust the path as needed
 
-const QRCodeSection = ({ feedbackUrl }) => {
+const QRCodeSection = ({ feedbackUrl, venueId }) => {
   const qrCodeRef = useRef(null);
+  const [tableCount, setTableCount] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const downloadQRCode = () => {
     const qrCodeElement = qrCodeRef.current;
@@ -30,6 +33,30 @@ const QRCodeSection = ({ feedbackUrl }) => {
       downloadLink.href = pngFile;
       downloadLink.click();
     };
+  };
+
+  const handleSaveTableCount = async () => {
+    if (!tableCount || isNaN(tableCount) || tableCount <= 0) {
+      alert('Please enter a valid table count.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Update the venue's table_count in Supabase
+    const { error } = await supabase
+      .from('venues')
+      .update({ table_count: parseInt(tableCount, 10) })
+      .eq('id', venueId);
+
+    setIsLoading(false);
+
+    if (error) {
+      console.error('Error updating table count:', error);
+      alert('Failed to update table count. Please try again.');
+    } else {
+      alert('Table count updated successfully!');
+    }
   };
 
   return (
@@ -59,6 +86,28 @@ const QRCodeSection = ({ feedbackUrl }) => {
               </a>
             </div>
           </div>
+        </div>
+
+        {/* Table Count Input */}
+        <div className="mt-6">
+          <label htmlFor="tableCount" className="block text-sm font-medium text-gray-700 mb-2">
+            Number of Tables
+          </label>
+          <input
+            type="number"
+            id="tableCount"
+            className="w-full max-w-md p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter the number of tables"
+            value={tableCount}
+            onChange={(e) => setTableCount(e.target.value)}
+          />
+          <button
+            onClick={handleSaveTableCount}
+            disabled={isLoading}
+            className="mt-4 w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          >
+            {isLoading ? 'Saving...' : 'Save Table Count'}
+          </button>
         </div>
 
         {/* Download Button */}
