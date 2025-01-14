@@ -78,7 +78,7 @@ const LandingPage = () => {
                 onClick={openDemoModal}
                 className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2"
               >
-                <span>Watch 2-min demo</span>
+                <span>Book a demo</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
               <a href="/pricing" 
