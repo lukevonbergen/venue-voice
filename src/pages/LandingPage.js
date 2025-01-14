@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, BarChart2, Users, Zap, Globe, Lock, MessageSquare, Menu, X } from 'lucide-react';
 import Navbar from './Navbar';
@@ -19,6 +19,20 @@ const LandingPage = () => {
   const closeDemoModal = () => {
     setIsDemoModalOpen(false);
   };
+
+  // Load the HubSpot meeting embed script dynamically
+  useEffect(() => {
+    if (isDemoModalOpen) {
+      const script = document.createElement('script');
+      script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
+      script.async = true;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, [isDemoModalOpen]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative">
@@ -192,8 +206,10 @@ const LandingPage = () => {
               <X className="h-6 w-6 text-gray-600" />
             </button>
             <div className="p-8">
-              <div className="meetings-iframe-container" data-src="https://meetings.hubspot.com/luke-von-bergen/chatters-demo?embed=true"></div>
-              <script type="text/javascript" src="https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js"></script>
+              <div
+                className="meetings-iframe-container"
+                data-src="https://meetings.hubspot.com/luke-von-bergen/chatters-demo?embed=true"
+              ></div>
             </div>
           </div>
         </div>
