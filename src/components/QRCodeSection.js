@@ -1,23 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Download } from 'lucide-react';
-import supabase from '../utils/supabase';
 
-const QRCodeSection = ({ feedbackUrl, venueId }) => {
+const QRCodeSection = ({ feedbackUrl }) => {
   const qrCodeRef = useRef(null);
-  const [tableCount, setTableCount] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [buttonText, setButtonText] = useState('Save Table Count'); // State for button text
-
-  // Animation effect
-  useEffect(() => {
-    if (buttonText === '✔️') {
-      const timeout = setTimeout(() => {
-        setButtonText('Save Table Count');
-      }, 2000); // Revert back to "Save Table Count" after 2 seconds
-      return () => clearTimeout(timeout);
-    }
-  }, [buttonText]);
 
   const downloadQRCode = () => {
     const qrCodeElement = qrCodeRef.current;
@@ -46,48 +32,6 @@ const QRCodeSection = ({ feedbackUrl, venueId }) => {
     };
   };
 
-  const handleSaveTableCount = async () => {
-    console.log('Current tableCount:', tableCount); // Debugging log
-    console.log('Venue ID:', venueId); // Debugging log
-
-    // Ensure venueId is defined
-    if (!venueId) {
-      alert('Venue ID is missing. Please try again.');
-      return;
-    }
-
-    // Ensure tableCount is not empty
-    if (!tableCount) {
-      alert('Please enter the number of tables.');
-      return;
-    }
-
-    // Parse tableCount as an integer
-    const count = parseInt(tableCount, 10);
-    if (isNaN(count) || count <= 0) {
-      alert('Please enter a valid table count.');
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Update the venue's table_count in Supabase
-    const { error } = await supabase
-      .from('venues')
-      .update({ table_count: count }) // Ensure count is an integer
-      .eq('id', venueId);
-
-    setIsLoading(false);
-
-    if (error) {
-      console.error('Error updating table count:', error);
-      alert('Failed to update table count. Please try again.');
-    } else {
-      // Change button text to a tick (✔️)
-      setButtonText('✔️');
-    }
-  };
-
   return (
     <div className="mb-8">
       <h2 className="text-xl font-bold mb-4 text-gray-900">Feedback QR Code</h2>
@@ -114,30 +58,6 @@ const QRCodeSection = ({ feedbackUrl, venueId }) => {
                 {feedbackUrl}
               </a>
             </div>
-          </div>
-        </div>
-
-        {/* Table Count Input */}
-        <div className="mt-6">
-          <label htmlFor="tableCount" className="block text-sm font-medium text-gray-700 mb-2">
-            Number of Tables
-          </label>
-          <div className="flex gap-4">
-            <input
-              type="number"
-              id="tableCount"
-              className="w-full max-w-md p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter the number of tables"
-              value={tableCount}
-              onChange={(e) => setTableCount(e.target.value)}
-            />
-            <button
-              onClick={handleSaveTableCount}
-              disabled={isLoading}
-              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              {buttonText} {/* Use buttonText state here */}
-            </button>
           </div>
         </div>
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import { ColorPicker, Tooltip } from 'antd'; // Import Tooltip from Ant Design
-import 'antd/dist/reset.css'; // Import Ant Design styles
+import AccountSettings from '../components/settings/AccountSettings';
+import VenueSettings from '../components/settings/VenueSettings';
+import BrandingSettings from '../components/settings/BrandingSettings';
+import SubscriptionStatus from '../components/settings/SubscriptionStatus';
 
 const SettingsPage = () => {
   const [venueId, setVenueId] = useState(null);
@@ -11,17 +13,27 @@ const SettingsPage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [logo, setLogo] = useState(null);
-  const [primaryColor, setPrimaryColor] = useState('#1890ff'); // Default primary color
-  const [secondaryColor, setSecondaryColor] = useState('#52c41a'); // Default secondary color
-  const [isPaid, setIsPaid] = useState(false); // Subscription status
+  const [primaryColor, setPrimaryColor] = useState('#1890ff');
+  const [secondaryColor, setSecondaryColor] = useState('#52c41a');
+  const [isPaid, setIsPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [colorsUpdated, setColorsUpdated] = useState(false);
+  const [tableCount, setTableCount] = useState('');
+  const [address, setAddress] = useState({
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+  });
 
   // Separate state for success/error messages
   const [profileMessage, setProfileMessage] = useState('');
   const [logoMessage, setLogoMessage] = useState('');
   const [colorsMessage, setColorsMessage] = useState('');
   const [allSettingsMessage, setAllSettingsMessage] = useState('');
+  const [venueSettingsMessage, setVenueSettingsMessage] = useState('');
 
   // Fetch venue ID and settings on component mount
   useEffect(() => {
@@ -39,7 +51,7 @@ const SettingsPage = () => {
   const fetchVenueId = async (email) => {
     const { data: venueData, error: venueError } = await supabase
       .from('venues')
-      .select('id, name, email, first_name, last_name, logo, primary_color, secondary_color, is_paid')
+      .select('id, name, email, first_name, last_name, logo, primary_color, secondary_color, is_paid, table_count, address')
       .eq('email', email)
       .single();
 
@@ -55,6 +67,15 @@ const SettingsPage = () => {
       setPrimaryColor(venueData.primary_color || '#1890ff');
       setSecondaryColor(venueData.secondary_color || '#52c41a');
       setIsPaid(venueData.is_paid || false);
+      setTableCount(venueData.table_count || '');
+      setAddress(venueData.address || {
+        line1: '',
+        line2: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        country: '',
+      });
     }
   };
 
@@ -116,14 +137,12 @@ const SettingsPage = () => {
     setLoading(false);
   };
 
-  // Handle color change (only update state, not database)
   const handleColorChange = (type, color) => {
     if (type === 'primary') setPrimaryColor(color);
     if (type === 'secondary') setSecondaryColor(color);
     setColorsUpdated(true); // Mark colors as updated
   };
 
-  // Save colors to the database
   const saveColors = async () => {
     setLoading(true);
     setColorsMessage('');
@@ -149,7 +168,31 @@ const SettingsPage = () => {
     setLoading(false);
   };
 
-  // Save all settings (profile, logo, and colors)
+  const saveVenueSettings = async () => {
+    setLoading(true);
+    setVenueSettingsMessage('');
+
+    try {
+      const updates = {
+        name,
+        table_count: tableCount,
+        address,
+      };
+
+      await supabase
+        .from('venues')
+        .update(updates)
+        .eq('id', venueId);
+
+      setVenueSettingsMessage('Venue settings updated successfully!');
+    } catch (error) {
+      console.error('Error updating venue settings:', error);
+      setVenueSettingsMessage('Failed to update venue settings. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const saveAllSettings = async () => {
     setLoading(true);
     setAllSettingsMessage('');
@@ -177,6 +220,16 @@ const SettingsPage = () => {
         .update(colorUpdates)
         .eq('id', venueId);
 
+      // Update venue settings
+      const venueUpdates = {
+        table_count: tableCount,
+        address,
+      };
+      await supabase
+        .from('venues')
+        .update(venueUpdates)
+        .eq('id', venueId);
+
       setAllSettingsMessage('All settings updated successfully!');
     } catch (error) {
       console.error('Error updating settings:', error);
@@ -186,158 +239,57 @@ const SettingsPage = () => {
     }
   };
 
+  const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
+
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
-        {/* Profile Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">Profile</h2>
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-            </div>
-          </form>
-          {profileMessage && <p className="text-sm text-red-500 mt-2">{profileMessage}</p>}
-        </div>
+        {/* Account Settings */}
+        <AccountSettings
+          name={name}
+          email={email}
+          firstName={firstName}
+          lastName={lastName}
+          onNameChange={(e) => setName(e.target.value)}
+          onEmailChange={(e) => setEmail(e.target.value)}
+          onFirstNameChange={(e) => setFirstName(e.target.value)}
+          onLastNameChange={(e) => setLastName(e.target.value)}
+          profileMessage={profileMessage}
+        />
 
-        {/* Subscription Status Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">Subscription Status</h2>
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-medium text-gray-700">
-              {isPaid ? 'Active Subscription' : 'No Active Subscription'}
-            </span>
-            {!isPaid && (
-              <button
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                onClick={() => {
-                  // Add logic to handle subscription upgrade
-                  alert('Redirect to subscription upgrade page.');
-                }}
-              >
-                Upgrade
-              </button>
-            )}
-          </div>
-        </div>
+        {/* Subscription Status */}
+        <SubscriptionStatus
+          isPaid={isPaid}
+          onUpgrade={() => alert('Redirect to subscription upgrade page.')}
+        />
 
-        {/* Logo Upload Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">Venue Logo</h2>
-          <div className="flex items-center gap-6">
-            {logo && (
-              <img
-                src={logo}
-                alt="Venue Logo"
-                className="max-w-[200px] max-h-[200px] object-contain" // Adjust dimensions as needed
-              />
-            )}
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="hidden"
-                id="logo-upload"
-              />
-              <label
-                htmlFor="logo-upload"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors duration-200"
-              >
-                {loading ? 'Uploading...' : 'Upload Logo'}
-              </label>
-              <p className="text-sm text-gray-500 mt-2">
-                Recommended size: 200x200 pixels
-              </p>
-            </div>
-          </div>
-          {logoMessage && <p className="text-sm text-red-500 mt-2">{logoMessage}</p>}
-        </div>
+        {/* Venue Settings */}
+        <VenueSettings
+          name={name}
+          tableCount={tableCount}
+          address={address}
+          onNameChange={(e) => setName(e.target.value)}
+          onTableCountChange={(e) => setTableCount(e.target.value)}
+          onAddressChange={setAddress}
+          venueSettingsMessage={venueSettingsMessage}
+          loading={loading}
+          onSave={saveVenueSettings}
+        />
 
-          {/* Color Customization Section */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">Custom Colors</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Primary Color */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Primary Color
-                </label>
-                <Tooltip title="Primary color is used for text on the feedback collection page.">
-                  <span className="text-gray-400 cursor-help">ⓘ</span>
-                </Tooltip>
-              </div>
-              <ColorPicker
-                value={primaryColor}
-                onChange={(color) => handleColorChange('primary', color.toHexString())}
-              />
-            </div>
-
-            {/* Secondary Color */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Secondary Color
-                </label>
-                <Tooltip title="Secondary color is used for the background on the feedback collection page.">
-                  <span className="text-gray-400 cursor-help">ⓘ</span>
-                </Tooltip>
-              </div>
-              <ColorPicker
-                value={secondaryColor}
-                onChange={(color) => handleColorChange('secondary', color.toHexString())}
-              />
-            </div>
-          </div>
-          {colorsUpdated && (
-            <button
-              onClick={saveColors}
-              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              disabled={loading}
-            >
-              {loading ? 'Saving...' : 'Save Colors'}
-            </button>
-          )}
-          {colorsMessage && <p className="text-sm text-red-500 mt-2">{colorsMessage}</p>}
-        </div>
+        {/* Branding Settings */}
+        <BrandingSettings
+          logo={logo}
+          onLogoUpload={handleLogoUpload}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          onColorChange={handleColorChange}
+          colorsUpdated={colorsUpdated}
+          onSaveColors={saveColors}
+          colorsMessage={colorsMessage}
+          loading={loading}
+        />
 
         {/* Save All Settings Button */}
         <div className="mt-8">
