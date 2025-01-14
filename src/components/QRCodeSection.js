@@ -37,6 +37,7 @@ const QRCodeSection = ({ feedbackUrl, venueId }) => {
 
   const handleSaveTableCount = async () => {
     console.log('Current tableCount:', tableCount); // Debugging log
+    console.log('Venue ID:', venueId); // Debugging log
 
     // Ensure tableCount is not empty
     if (!tableCount) {
@@ -44,7 +45,7 @@ const QRCodeSection = ({ feedbackUrl, venueId }) => {
       return;
     }
 
-    // Ensure tableCount is a valid number
+    // Parse tableCount as an integer
     const count = parseInt(tableCount, 10);
     if (isNaN(count) || count <= 0) {
       alert('Please enter a valid table count.');
@@ -56,7 +57,7 @@ const QRCodeSection = ({ feedbackUrl, venueId }) => {
     // Update the venue's table_count in Supabase
     const { error } = await supabase
       .from('venues')
-      .update({ table_count: count })
+      .update({ table_count: count }) // Ensure count is an integer
       .eq('id', venueId);
 
     setIsLoading(false);
