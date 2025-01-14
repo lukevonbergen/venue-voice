@@ -4,6 +4,13 @@ import { ArrowRight, Check, BarChart2, Users, Zap, Globe, Lock, MessageSquare, M
 import Navbar from './Navbar';
 import Footer from './Footer';
 
+// Define the images for the zig-zag section
+const featureImages = [
+  "https://via.placeholder.com/600x400?text=Real-time+Issue+Alerts",
+  "https://via.placeholder.com/600x400?text=Smart+Performance+Analytics",
+  "https://via.placeholder.com/600x400?text=Team+Coordination"
+];
+
 const LandingPage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
@@ -214,7 +221,7 @@ const LandingPage = () => {
               
               {/* Feature Image/Demo */}
               <div className="flex-1 p-8">
-                <div className="bg-gray-100 rounded-2xl aspect-video"></div>
+                <img src={featureImages[i]} alt={feature.title} className="rounded-2xl aspect-video object-cover" />
               </div>
             </div>
           ))}
