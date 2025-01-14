@@ -1,6 +1,6 @@
 import React from 'react';
 
-const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountChange, onAddressChange, venueSettingsMessage, loading, onSave }) => {
+const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountChange, onAddressChange, loading }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
       <h2 className="text-xl font-bold mb-4 text-gray-900">Venue Settings</h2>
@@ -12,6 +12,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
             value={name}
             onChange={onNameChange}
             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            disabled={loading}
           />
         </div>
         <div>
@@ -21,6 +22,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
             value={tableCount}
             onChange={onTableCountChange}
             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            disabled={loading}
           />
         </div>
         <div className="col-span-2">
@@ -32,6 +34,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.line1}
               onChange={(e) => onAddressChange({ ...address, line1: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={loading}
             />
             <input
               type="text"
@@ -39,6 +42,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.line2}
               onChange={(e) => onAddressChange({ ...address, line2: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={loading}
             />
             <input
               type="text"
@@ -46,6 +50,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.city}
               onChange={(e) => onAddressChange({ ...address, city: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={loading}
             />
             <input
               type="text"
@@ -53,6 +58,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.state}
               onChange={(e) => onAddressChange({ ...address, state: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={loading}
             />
             <input
               type="text"
@@ -60,6 +66,7 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.postalCode}
               onChange={(e) => onAddressChange({ ...address, postalCode: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={loading}
             />
             <input
               type="text"
@@ -67,18 +74,11 @@ const VenueSettings = ({ name, tableCount, address, onNameChange, onTableCountCh
               value={address.country}
               onChange={(e) => onAddressChange({ ...address, country: e.target.value })}
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              disabled={loading}
             />
           </div>
         </div>
       </div>
-      <button
-        onClick={onSave}
-        className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-        disabled={loading}
-      >
-        {loading ? 'Saving...' : 'Save Venue Settings'}
-      </button>
-      {venueSettingsMessage && <p className="text-sm text-red-500 mt-2">{venueSettingsMessage}</p>}
     </div>
   );
 };
