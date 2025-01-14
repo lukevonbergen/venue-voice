@@ -17,9 +17,9 @@ const LandingPage = () => {
   const [currentAlert, setCurrentAlert] = useState(0);
 
   const alerts = [
-    { table: "14", issue: "Service delay", time: "2 mins ago" },
-    { table: "23", issue: "Music issue", time: "5 mins ago" },
-    { table: "7", issue: "Menu inquiry", time: "8 mins ago" }
+    { table: "14", issue: "How was the food?", time: "4/5" },
+    { table: "23", issue: "How's the music", time: "5/5" },
+    { table: "7", issue: "How is the service?", time: "4/5" }
   ];
 
   // Cycle through alerts
