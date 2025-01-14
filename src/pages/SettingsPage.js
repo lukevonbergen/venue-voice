@@ -22,7 +22,7 @@ const SettingsPage = () => {
     line1: '',
     line2: '',
     city: '',
-    state: '',
+    county: '',
     postalCode: '',
     country: '',
   });
