@@ -4,29 +4,25 @@ import {
   TrendingUp,
   TrendingDown,
   Smile,
-  Star,
-  Heart,
-  Coffee,
   ToggleRight,
   ToggleLeft,
 } from 'lucide-react';
-import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import Modal from 'react-modal';
-import { BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import supabase from '../utils/supabase';
+import DashboardFrame from './DashboardFrame';
+import NpsTrendChart from '../components/nps_scores/NpsTrendChart';
 
 // Set app element for react-modal (required for accessibility)
 Modal.setAppElement('#root');
 
-const ScoresPage = () => {
+const NpsScoresPage = () => {
   const [npsScores, setNpsScores] = useState([]);
-  const [dailyNpsData, setDailyNpsData] = useState([]); // Renamed from monthlyNpsData
+  const [dailyNpsData, setDailyNpsData] = useState([]);
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [chartType, setChartType] = useState('line'); // 'line' or 'bar'
   const navigate = useNavigate();
 
   // Fetch venue ID and NPS scores
@@ -83,9 +79,16 @@ const ScoresPage = () => {
     }
   };
 
-  // Calculate daily NPS data
+  // Calculate daily NPS data (cumulative)
   const calculateDailyNps = (scores) => {
     const dailyData = {};
+
+    // Sort scores by date (oldest to newest)
+    scores.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    let cumulativePromoters = 0;
+    let cumulativeDetractors = 0;
+    let cumulativeTotal = 0;
 
     scores.forEach((score) => {
       const date = new Date(score.created_at);
@@ -101,18 +104,27 @@ const ScoresPage = () => {
 
       if (score.score >= 9) {
         dailyData[dayYear].promoters += 1;
+        cumulativePromoters += 1;
       } else if (score.score <= 6) {
         dailyData[dayYear].detractors += 1;
+        cumulativeDetractors += 1;
       }
       dailyData[dayYear].total += 1;
+      cumulativeTotal += 1;
+
+      // Calculate cumulative NPS for the day
+      const cumulativeNps = cumulativeTotal === 0 ? 0 : ((cumulativePromoters - cumulativeDetractors) / cumulativeTotal) * 100;
+
+      // Store cumulative data
+      dailyData[dayYear].cumulativeNps = parseFloat(cumulativeNps.toFixed(1));
     });
 
+    // Format the data for the chart
     const dailyNps = Object.keys(dailyData).map((day) => {
-      const { promoters, detractors, total } = dailyData[day];
-      const nps = total === 0 ? 0 : ((promoters - detractors) / total) * 100;
+      const { promoters, detractors, total, cumulativeNps } = dailyData[day];
       return {
         day,
-        'NPS Score': parseFloat(nps.toFixed(1)),
+        'NPS Score': cumulativeNps, // Use cumulative NPS score
         Promoters: promoters,
         Passives: total - promoters - detractors,
         Detractors: detractors,
@@ -153,11 +165,6 @@ const ScoresPage = () => {
         setupRealtimeUpdates(venueId);
       }
     }
-  };
-
-  // Toggle chart type
-  const toggleChartType = () => {
-    setChartType((prev) => (prev === 'line' ? 'bar' : 'line'));
   };
 
   // Calculate NPS (Net Promoter Score)
@@ -228,22 +235,6 @@ const ScoresPage = () => {
     </div>
   );
 
-  // Custom Tooltip for the chart
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
-          <p className="font-bold">{label}</p>
-          <p className="text-blue-600">NPS Score: {payload[0].value}</p>
-          <p className="text-green-600">Promoters: {payload[1].value}</p>
-          <p className="text-yellow-600">Passives: {payload[2].value}</p>
-          <p className="text-red-600">Detractors: {payload[3].value}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   // Modal Styles
   const modalStyles = {
     content: {
@@ -262,6 +253,16 @@ const ScoresPage = () => {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
   };
+
+  // Fetch NPS scores when venueId changes
+  useEffect(() => {
+    if (venueId) {
+      fetchNpsScores(venueId);
+      if (liveUpdatesEnabled) {
+        setupRealtimeUpdates(venueId);
+      }
+    }
+  }, [venueId, liveUpdatesEnabled]);
 
   return (
     <DashboardFrame>
@@ -314,104 +315,8 @@ const ScoresPage = () => {
           />
         </div>
 
-        {/* Chart Toggle */}
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={toggleChartType}
-            className="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-          >
-            {chartType === 'line' ? 'Switch to Bar Chart' : 'Switch to Line Chart'}
-          </button>
-        </div>
-
         {/* NPS Trend Chart */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">NPS History</h2>
-          <ResponsiveContainer width="100%" height={400}>
-            {chartType === 'line' ? (
-              <LineChart
-                data={dailyNpsData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                <XAxis
-                  dataKey="day"
-                  stroke="#666"
-                  tick={{ fill: '#666' }}
-                  tickLine={{ stroke: '#666' }}
-                />
-                <YAxis
-                  stroke="#666"
-                  tick={{ fill: '#666' }}
-                  tickLine={{ stroke: '#666' }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="NPS Score"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                  activeDot={{ r: 8 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="Promoters"
-                  stroke="#10B981"
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="Passives"
-                  stroke="#FBBF24"
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="Detractors"
-                  stroke="#EF4444"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            ) : (
-              <BarChart
-                data={dailyNpsData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                <XAxis
-                  dataKey="day"
-                  stroke="#666"
-                  tick={{ fill: '#666' }}
-                  tickLine={{ stroke: '#666' }}
-                />
-                <YAxis
-                  stroke="#666"
-                  tick={{ fill: '#666' }}
-                  tickLine={{ stroke: '#666' }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Bar
-                  dataKey="NPS Score"
-                  fill="#3B82F6"
-                />
-                <Bar
-                  dataKey="Promoters"
-                  fill="#10B981"
-                />
-                <Bar
-                  dataKey="Passives"
-                  fill="#FBBF24"
-                />
-                <Bar
-                  dataKey="Detractors"
-                  fill="#EF4444"
-                />
-              </BarChart>
-            )}
-          </ResponsiveContainer>
-        </div>
+        <NpsTrendChart dailyNpsData={dailyNpsData} />
 
         {/* Total Responses Card */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
@@ -454,4 +359,4 @@ const ScoresPage = () => {
   );
 };
 
-export default ScoresPage;
+export default NpsScoresPage;
