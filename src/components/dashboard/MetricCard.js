@@ -18,7 +18,7 @@ const MetricCard = ({ title, value, trend, trendValue, compareText, icon: Icon }
                 <AlertTriangle size={16} />
               )}
               <span className="ml-1 text-sm font-medium">
-                {hasDataToCompare ? `${trendValue}%` : 'No data to compare'}
+                {hasDataToCompare ? `${trendValue}%` : 'N/A'}
               </span>
             </div>
           </div>
