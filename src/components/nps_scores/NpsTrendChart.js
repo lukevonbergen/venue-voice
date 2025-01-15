@@ -36,53 +36,36 @@ const NpsTrendChart = ({ dailyNpsData }) => {
               tickLine={{ stroke: '#666' }}
             />
             <YAxis
+              domain={[-100, 100]} // Set Y-axis range from -100 to +100
               stroke="#666"
               tick={{ fill: '#666' }}
               tickLine={{ stroke: '#666' }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <defs>
-              <linearGradient id="colorNpsScore" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorPromoters" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorPassives" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#FBBF24" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#FBBF24" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorDetractors" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-              </linearGradient>
-            </defs>
             <Line
-              type="monotone"
+              type="linear" // Straight lines instead of curved
               dataKey="NPS Score"
-              stroke="url(#colorNpsScore)"
+              stroke="#3B82F6"
               strokeWidth={2}
               activeDot={{ r: 8 }}
             />
             <Line
-              type="monotone"
+              type="linear"
               dataKey="Promoters"
-              stroke="url(#colorPromoters)"
+              stroke="#10B981"
               strokeWidth={2}
             />
             <Line
-              type="monotone"
+              type="linear"
               dataKey="Passives"
-              stroke="url(#colorPassives)"
+              stroke="#FBBF24"
               strokeWidth={2}
             />
             <Line
-              type="monotone"
+              type="linear"
               dataKey="Detractors"
-              stroke="url(#colorDetractors)"
+              stroke="#EF4444"
               strokeWidth={2}
             />
           </LineChart>
