@@ -15,10 +15,18 @@ const NpsTrendChart = ({ dailyNpsData }) => {
         <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
           <p className="font-bold text-sm mb-2">{label}</p>
           <div className="space-y-1">
-            <p className="text-blue-600 text-sm">NPS Score: <span className="font-semibold">{payload[0].value}</span></p>
-            <p className="text-green-600 text-sm">Promoters: <span className="font-semibold">{payload[1].value}</span></p>
-            <p className="text-yellow-600 text-sm">Passives: <span className="font-semibold">{payload[2].value}</span></p>
-            <p className="text-red-600 text-sm">Detractors: <span className="font-semibold">{payload[3].value}</span></p>
+            <p className="text-blue-600 text-sm">
+              NPS Score: <span className="font-semibold">{payload.find(entry => entry.dataKey === 'NPS Score')?.value ?? 'N/A'}</span>
+            </p>
+            <p className="text-green-600 text-sm">
+              Promoters: <span className="font-semibold">{payload.find(entry => entry.dataKey === 'Promoters')?.value ?? 'N/A'}</span>
+            </p>
+            <p className="text-yellow-600 text-sm">
+              Passives: <span className="font-semibold">{payload.find(entry => entry.dataKey === 'Passives')?.value ?? 'N/A'}</span>
+            </p>
+            <p className="text-red-600 text-sm">
+              Detractors: <span className="font-semibold">{payload.find(entry => entry.dataKey === 'Detractors')?.value ?? 'N/A'}</span>
+            </p>
           </div>
         </div>
       );
