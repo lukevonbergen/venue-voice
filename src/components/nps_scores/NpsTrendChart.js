@@ -1,17 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const NpsTrendChart = ({ dailyNpsData }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Calculate average NPS score for visible data points
+  const averageNps =
+    dailyNpsData.reduce((sum, entry) => sum + entry['NPS Score'], 0) / dailyNpsData.length;
+
   // Custom Tooltip for the chart
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
-          <p className="font-bold">{label}</p>
-          <p className="text-blue-600">NPS Score: {payload[0].value}</p>
-          <p className="text-green-600">Promoters: {payload[1].value}</p>
-          <p className="text-yellow-600">Passives: {payload[2].value}</p>
-          <p className="text-red-600">Detractors: {payload[3].value}</p>
+          <p className="font-bold text-sm mb-2">{label}</p>
+          <div className="space-y-1">
+            <p className="text-blue-600 text-sm">NPS Score: <span className="font-semibold">{payload[0].value}</span></p>
+            <p className="text-green-600 text-sm">Promoters: <span className="font-semibold">{payload[1].value}</span></p>
+            <p className="text-yellow-600 text-sm">Passives: <span className="font-semibold">{payload[2].value}</span></p>
+            <p className="text-red-600 text-sm">Detractors: <span className="font-semibold">{payload[3].value}</span></p>
+          </div>
         </div>
       );
     }
@@ -20,6 +28,16 @@ const NpsTrendChart = ({ dailyNpsData }) => {
 
   return (
     <div>
+      {/* Toggle Link */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="text-blue-600 hover:text-blue-800 underline focus:outline-none"
+        >
+          {showDetails ? 'Hide Details' : 'Show Details'}
+        </button>
+      </div>
+
       {/* NPS Trend Chart */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
         <h2 className="text-xl font-bold mb-4">NPS History</h2>
@@ -36,7 +54,7 @@ const NpsTrendChart = ({ dailyNpsData }) => {
               tickLine={{ stroke: '#666' }}
             />
             <YAxis
-              domain={[-100, 100]} // Set Y-axis range from -100 to +100
+              domain={[averageNps - 20, averageNps + 20]} // Dynamic Y-axis range
               stroke="#666"
               tick={{ fill: '#666' }}
               tickLine={{ stroke: '#666' }}
@@ -44,7 +62,7 @@ const NpsTrendChart = ({ dailyNpsData }) => {
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Line
-              type="linear" // Straight lines instead of curved
+              type="linear"
               dataKey="NPS Score"
               stroke="#3B82F6"
               strokeWidth={2}
@@ -55,18 +73,24 @@ const NpsTrendChart = ({ dailyNpsData }) => {
               dataKey="Promoters"
               stroke="#10B981"
               strokeWidth={2}
+              strokeOpacity={showDetails ? 1 : 0} // Hide/show line
+              hide={!showDetails} // Remove from legend when hidden
             />
             <Line
               type="linear"
               dataKey="Passives"
               stroke="#FBBF24"
               strokeWidth={2}
+              strokeOpacity={showDetails ? 1 : 0} // Hide/show line
+              hide={!showDetails} // Remove from legend when hidden
             />
             <Line
               type="linear"
               dataKey="Detractors"
               stroke="#EF4444"
               strokeWidth={2}
+              strokeOpacity={showDetails ? 1 : 0} // Hide/show line
+              hide={!showDetails} // Remove from legend when hidden
             />
           </LineChart>
         </ResponsiveContainer>
