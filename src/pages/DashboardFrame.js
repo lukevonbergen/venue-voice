@@ -128,8 +128,8 @@ const DashboardFrame = ({ children }) => {
                 </button>
                 {isFeedbackDropdownOpen && (
                   <div className="mt-2 ml-8 space-y-2">
-                    <NavLink to="/dashboard/feedback/feedbackfeed">Comments</NavLink>
-                    <NavLink to="/dashboard/feedback/tablefeedback">Tables</NavLink>
+                    <NavLink to="/dashboard/feedbackfeed">Comments</NavLink>
+                    <NavLink to="/dashboard/tablefeedback">Tables</NavLink>
                   </div>
                 )}
               </div>
