@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, LogOut, Menu, X, BarChart, Settings } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, LogOut, Menu, X, BarChart, Settings, ChevronDown } from 'lucide-react';
 import supabase from '../utils/supabase';
 
 const DashboardFrame = ({ children }) => {
@@ -10,6 +10,7 @@ const DashboardFrame = ({ children }) => {
   const [venueId, setVenueId] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isFeedbackDropdownOpen, setIsFeedbackDropdownOpen] = useState(false);
 
   const fetchVenue = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -106,9 +107,32 @@ const DashboardFrame = ({ children }) => {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/dashboard/feedbackfeed" icon={MessageSquare}>
-                Feedback Feed
-              </NavLink>
+              <div className="relative">
+                <button
+                  onClick={() => setIsFeedbackDropdownOpen(!isFeedbackDropdownOpen)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
+                    location.pathname.startsWith('/dashboard/feedback')
+                      ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <MessageSquare className="w-5 h-5 mr-3 text-gray-400" />
+                    Feedback
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      isFeedbackDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                {isFeedbackDropdownOpen && (
+                  <div className="mt-2 ml-8 space-y-2">
+                    <NavLink to="/dashboard/feedback/feedbackfeed">Comments</NavLink>
+                    <NavLink to="/dashboard/feedback/tablefeedback">Tables</NavLink>
+                  </div>
+                )}
+              </div>
             </li>
           </ul>
         </nav>

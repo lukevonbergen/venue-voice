@@ -7,6 +7,7 @@ import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
+import TablesDashboard from './pages/Dashboard_Tables';
 import SettingsPage from './pages/SettingsPage';
 import NPSScores from './pages/NPSScores';
 import QRCodePage_Feature from './pages/Features_QRCode';
@@ -37,6 +38,7 @@ function App() {
       <Route path="/feedback" element={<CustomerFeedbackPage />} />
       <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
       <Route path="/dashboard/questions" element={<ManageQuestions />} />
+      <Route path="/dashboard/tablefeedback" element={<TablesDashboard />} />
       <Route path="/dashboard/nps" element={<NPSScores />} />
       <Route path="/dashboard/settings" element={<SettingsPage />} />
       <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
