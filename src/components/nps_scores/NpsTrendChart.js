@@ -6,7 +6,10 @@ const NpsTrendChart = ({ dailyNpsData }) => {
 
   // Calculate average NPS score for visible data points
   const averageNps =
-    dailyNpsData.reduce((sum, entry) => sum + entry['NPS Score'], 0) / dailyNpsData.length;
+    dailyNpsData.reduce((sum, entry) => sum + (entry['NPS Score'] || 0), 0) / dailyNpsData.length;
+
+  console.log('Daily NPS Data:', dailyNpsData); // Debugging
+  console.log('Average NPS:', averageNps); // Debugging
 
   // Custom Tooltip for the chart
   const CustomTooltip = ({ active, payload, label }) => {
@@ -62,7 +65,7 @@ const NpsTrendChart = ({ dailyNpsData }) => {
               tickLine={{ stroke: '#666' }}
             />
             <YAxis
-              domain={[averageNps - 20, averageNps + 20]} // Dynamic Y-axis range
+              domain={[-100, 100]} // Fixed Y-axis range
               stroke="#666"
               tick={{ fill: '#666' }}
               tickLine={{ stroke: '#666' }}
