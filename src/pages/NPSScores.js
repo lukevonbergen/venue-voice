@@ -22,7 +22,7 @@ Modal.setAppElement('#root');
 
 const ScoresPage = () => {
   const [npsScores, setNpsScores] = useState([]);
-  const [monthlyNpsData, setMonthlyNpsData] = useState([]);
+  const [dailyNpsData, setDailyNpsData] = useState([]); // Renamed from monthlyNpsData
   const [venueId, setVenueId] = useState(null);
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,20 +78,21 @@ const ScoresPage = () => {
       console.error('Error fetching NPS scores:', error);
     } else {
       setNpsScores(data);
-      calculateMonthlyNps(data);
+      const dailyNps = calculateDailyNps(data); // Calculate daily NPS
+      setDailyNpsData(dailyNps);
     }
   };
 
-  // Calculate monthly NPS data
-  const calculateMonthlyNps = (scores) => {
-    const monthlyData = {};
+  // Calculate daily NPS data
+  const calculateDailyNps = (scores) => {
+    const dailyData = {};
 
     scores.forEach((score) => {
       const date = new Date(score.created_at);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const dayYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-      if (!monthlyData[monthYear]) {
-        monthlyData[monthYear] = {
+      if (!dailyData[dayYear]) {
+        dailyData[dayYear] = {
           promoters: 0,
           detractors: 0,
           total: 0,
@@ -99,26 +100,26 @@ const ScoresPage = () => {
       }
 
       if (score.score >= 9) {
-        monthlyData[monthYear].promoters += 1;
+        dailyData[dayYear].promoters += 1;
       } else if (score.score <= 6) {
-        monthlyData[monthYear].detractors += 1;
+        dailyData[dayYear].detractors += 1;
       }
-      monthlyData[monthYear].total += 1;
+      dailyData[dayYear].total += 1;
     });
 
-    const monthlyNps = Object.keys(monthlyData).map((month) => {
-      const { promoters, detractors, total } = monthlyData[month];
+    const dailyNps = Object.keys(dailyData).map((day) => {
+      const { promoters, detractors, total } = dailyData[day];
       const nps = total === 0 ? 0 : ((promoters - detractors) / total) * 100;
       return {
-        month,
-        'NPS Score': parseFloat(nps.toFixed(1)), // Change key to 'NPS Score'
+        day,
+        'NPS Score': parseFloat(nps.toFixed(1)),
         Promoters: promoters,
         Passives: total - promoters - detractors,
         Detractors: detractors,
       };
     });
 
-    setMonthlyNpsData(monthlyNps);
+    return dailyNps;
   };
 
   // Set up real-time updates for NPS scores
@@ -131,7 +132,8 @@ const ScoresPage = () => {
         (payload) => {
           console.log('New NPS score received:', payload.new);
           setNpsScores((prevScores) => [...prevScores, payload.new]);
-          calculateMonthlyNps([...npsScores, payload.new]);
+          const dailyNps = calculateDailyNps([...npsScores, payload.new]);
+          setDailyNpsData(dailyNps);
         }
       )
       .subscribe();
@@ -328,12 +330,12 @@ const ScoresPage = () => {
           <ResponsiveContainer width="100%" height={400}>
             {chartType === 'line' ? (
               <LineChart
-                data={monthlyNpsData}
+                data={dailyNpsData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                 <XAxis
-                  dataKey="month"
+                  dataKey="day"
                   stroke="#666"
                   tick={{ fill: '#666' }}
                   tickLine={{ stroke: '#666' }}
@@ -373,12 +375,12 @@ const ScoresPage = () => {
               </LineChart>
             ) : (
               <BarChart
-                data={monthlyNpsData}
+                data={dailyNpsData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                 <XAxis
-                  dataKey="month"
+                  dataKey="day"
                   stroke="#666"
                   tick={{ fill: '#666' }}
                   tickLine={{ stroke: '#666' }}
