@@ -81,24 +81,21 @@ const NpsTrendChart = ({ dailyNpsData }) => {
               dataKey="Promoters"
               stroke="#10B981"
               strokeWidth={2}
-              strokeOpacity={showDetails ? 1 : 0} // Hide/show line
-              hide={!showDetails} // Remove from legend when hidden
+              strokeOpacity={showDetails ? 1 : 0} // Visually hide/show line
             />
             <Line
               type="linear"
               dataKey="Passives"
               stroke="#FBBF24"
               strokeWidth={2}
-              strokeOpacity={showDetails ? 1 : 0} // Hide/show line
-              hide={!showDetails} // Remove from legend when hidden
+              strokeOpacity={showDetails ? 1 : 0} // Visually hide/show line
             />
             <Line
               type="linear"
               dataKey="Detractors"
               stroke="#EF4444"
               strokeWidth={2}
-              strokeOpacity={showDetails ? 1 : 0} // Hide/show line
-              hide={!showDetails} // Remove from legend when hidden
+              strokeOpacity={showDetails ? 1 : 0} // Visually hide/show line
             />
           </LineChart>
         </ResponsiveContainer>
