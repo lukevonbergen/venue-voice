@@ -108,6 +108,8 @@ const TablesPage = () => {
 
   // Toggle feedback actioned status
   const toggleActionedStatus = async (sessionId, isActioned) => {
+    console.log('Toggling feedback status:', sessionId, isActioned); // Debugging
+
     const { data, error } = await supabase
       .from('feedback')
       .update({ is_actioned: !isActioned })
@@ -118,7 +120,7 @@ const TablesPage = () => {
       console.error('Error toggling feedback status:', error);
       toast.error(`Failed to update feedback status: ${error.message}`);
     } else {
-      console.log('Updated feedback:', data);
+      console.log('Updated feedback:', data); // Debugging
       toast.success(`Feedback marked as ${!isActioned ? 'actioned' : 'unactioned'}`);
       fetchFeedback(); // Refetch feedback after update
     }
@@ -170,7 +172,7 @@ const TablesPage = () => {
           dataLength={feedback.length}
           next={loadMoreFeedback}
           hasMore={hasMore}
-          loader={<p>Loading...</p>}
+          loader={hasMore ? <p>Loading...</p> : null} // Only show "Loading..." if there's more data
         >
           <div className="space-y-4">
             {feedback.map((fb) => (
