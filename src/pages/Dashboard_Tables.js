@@ -26,7 +26,33 @@ const TablesPage = () => {
       console.error('Error fetching feedback:', error);
       toast.error('Failed to fetch feedback');
     } else {
-      setFeedback((prev) => (page === 1 ? data : [...prev, ...data]));
+      // Group feedback by session_id
+      const groupedFeedback = data.reduce((acc, fb) => {
+        if (!acc[fb.session_id]) {
+          acc[fb.session_id] = {
+            session_id: fb.session_id,
+            table_number: fb.table_number,
+            timestamp: fb.timestamp,
+            is_actioned: fb.is_actioned,
+            questions: [],
+            additional_feedback: null,
+          };
+        }
+        if (fb.question_id) {
+          acc[fb.session_id].questions.push({
+            question_id: fb.question_id,
+            sentiment: fb.sentiment,
+            rating: fb.rating,
+          });
+        }
+        if (fb.additional_feedback) {
+          acc[fb.session_id].additional_feedback = fb.additional_feedback;
+        }
+        return acc;
+      }, {});
+
+      const feedbackList = Object.values(groupedFeedback);
+      setFeedback((prev) => (page === 1 ? feedbackList : [...prev, ...feedbackList]));
       setHasMore(data.length === 10);
     }
   };
@@ -49,7 +75,7 @@ const TablesPage = () => {
         { event: 'UPDATE', schema: 'public', table: 'feedback', filter: 'table_number=not.is.null' },
         (payload) => {
           setFeedback((prev) =>
-            prev.map((fb) => (fb.id === payload.new.id ? payload.new : fb))
+            prev.map((fb) => (fb.session_id === payload.new.session_id ? payload.new : fb))
           );
         }
       )
@@ -60,12 +86,18 @@ const TablesPage = () => {
     };
   };
 
+  useEffect(() => {
+    fetchFeedback();
+    const unsubscribe = setupRealtimeUpdates();
+    return () => unsubscribe();
+  }, [activeTab, page]);
+
   // Toggle feedback actioned status
-  const toggleActionedStatus = async (feedbackId, isActioned) => {
+  const toggleActionedStatus = async (sessionId, isActioned) => {
     const { data, error } = await supabase
       .from('feedback')
       .update({ is_actioned: !isActioned })
-      .eq('id', feedbackId)
+      .eq('session_id', sessionId)
       .select();
 
     if (error) {
@@ -89,12 +121,6 @@ const TablesPage = () => {
     const total = questions.reduce((sum, question) => sum + (question.rating || 0), 0);
     return (total / questions.length).toFixed(1);
   };
-
-  useEffect(() => {
-    fetchFeedback();
-    const unsubscribe = setupRealtimeUpdates();
-    return () => unsubscribe();
-  }, [activeTab, page]);
 
   return (
     <DashboardFrame>
@@ -128,7 +154,7 @@ const TablesPage = () => {
         {/* Feedback Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {feedback.map((fb) => (
-            <div key={fb.id} className="bg-white rounded-lg shadow-md p-6">
+            <div key={fb.session_id} className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
               <p className="text-sm text-gray-500">
                 {new Date(fb.timestamp).toLocaleString()}
@@ -153,7 +179,7 @@ const TablesPage = () => {
               {/* Toggle Actioned Status */}
               <div className="mt-4 flex justify-end">
                 <button
-                  onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
+                  onClick={() => toggleActionedStatus(fb.session_id, fb.is_actioned)}
                   className={`p-2 rounded-full ${
                     fb.is_actioned
                       ? 'bg-green-500 text-white'
@@ -176,7 +202,7 @@ const TablesPage = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {feedback.map((fb) => (
-              <div key={fb.id} className="bg-white rounded-lg shadow-md p-6">
+              <div key={fb.session_id} className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
                 <p className="text-sm text-gray-500">
                   {new Date(fb.timestamp).toLocaleString()}
@@ -201,7 +227,7 @@ const TablesPage = () => {
                 {/* Toggle Actioned Status */}
                 <div className="mt-4 flex justify-end">
                   <button
-                    onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
+                    onClick={() => toggleActionedStatus(fb.session_id, fb.is_actioned)}
                     className={`p-2 rounded-full ${
                       fb.is_actioned
                         ? 'bg-green-500 text-white'
