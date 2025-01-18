@@ -140,17 +140,14 @@ const CustomerFeedbackPage = () => {
   };
 
   const handleNPSRating = async (rating) => {
-    // Log the NPS rating without a session_id
+    // Log the NPS rating to the nps_scores table
     const { data, error } = await supabase
-      .from('feedback')
+      .from('nps_scores')
       .insert([
         {
           venue_id: venueId,
-          question_id: 'nps', // Use 'nps' as the question_id for the NPS question
-          sentiment: null,
-          rating: rating,
+          score: rating, // Store the NPS score
           table_number: tableNumber || null, // Include table number
-          session_id: null, // Exclude session_id for the NPS question
         },
       ])
       .select(); // Use .select() to return the inserted data
@@ -160,6 +157,7 @@ const CustomerFeedbackPage = () => {
       toast.error(`Failed to save NPS rating: ${error.message}`); // Show detailed error message
     } else {
       console.log('NPS rating saved successfully:', data); // Debugging
+      // Move to the next question or show additional feedback
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
