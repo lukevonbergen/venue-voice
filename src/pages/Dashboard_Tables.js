@@ -147,30 +147,30 @@ const TablesPage = () => {
 
   return (
     <DashboardFrame>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Today's Feedback</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Today's Feedback</h1>
 
         {/* Tabs for Actioned/Unactioned Feedback */}
-        <div className="flex space-x-4 mb-6">
+        <div className="flex space-x-2 mb-4">
           <button
             onClick={() => setActiveTab('unactioned')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+            className={`px-3 py-1 rounded-lg text-sm font-medium ${
               activeTab === 'unactioned'
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Unactioned ({unactionedCount}) {/* Always show the correct count */}
+            Unactioned ({unactionedCount})
           </button>
           <button
             onClick={() => setActiveTab('actioned')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+            className={`px-3 py-1 rounded-lg text-sm font-medium ${
               activeTab === 'actioned'
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Actioned ({actionedCount}) {/* Always show the correct count */}
+            Actioned ({actionedCount})
           </button>
         </div>
 
@@ -179,13 +179,13 @@ const TablesPage = () => {
           dataLength={feedback.length}
           next={loadMoreFeedback}
           hasMore={hasMore}
-          loader={hasMore ? <p>Loading...</p> : null}
+          loader={null} // Remove the "Loading..." text
         >
-          <div className="space-y-4">
+          <div className="space-y-3">
             {feedback
               .filter((fb) => (activeTab === 'unactioned' ? !fb.is_actioned : fb.is_actioned))
               .map((fb) => (
-                <div key={fb.id} className="bg-white rounded-lg shadow-md p-6">
+                <div key={fb.id} className="bg-white rounded-lg shadow-md p-4">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
@@ -195,18 +195,18 @@ const TablesPage = () => {
                     </div>
                     <button
                       onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
-                      className={`p-2 rounded-full ${
+                      className={`p-1 rounded-full ${
                         fb.is_actioned
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
                     >
-                      <FaCheckSquare />
+                      <FaCheckSquare className="text-green-600" /> {/* Green tick */}
                     </button>
                   </div>
 
                   {/* Average Rating */}
-                  <div className="mt-4">
+                  <div className="mt-2">
                     <p className="font-semibold">Average Rating:</p>
                     <p className="text-sm text-gray-600">
                       {calculateAverageRating(fb.questions)} / 5
@@ -215,7 +215,7 @@ const TablesPage = () => {
 
                   {/* Additional Feedback */}
                   {fb.additional_feedback && (
-                    <div className="mt-4">
+                    <div className="mt-2">
                       <p className="font-semibold">Additional Feedback:</p>
                       <p className="text-sm text-gray-600">{fb.additional_feedback}</p>
                     </div>
