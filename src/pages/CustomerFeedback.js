@@ -31,7 +31,7 @@ const CustomerFeedbackPage = () => {
   });
   const [tableNumber, setTableNumber] = useState('');
   const [hasCollectedTableNumber, setHasCollectedTableNumber] = useState(false);
-  const [sessionId, setSessionId] = useState(null); // Add sessionId state
+  const [sessionId, setSessionId] = useState(uuidv4()); // Generate sessionId on component mount
 
   // Disable scrolling when this page is active
   useEffect(() => {
@@ -114,7 +114,7 @@ const CustomerFeedbackPage = () => {
         sentiment: emoji,
         rating: rating,
         table_number: tableNumber || null, // Include table number
-        session_id: sessionId, // Include session_id
+        session_id: sessionId, // Use the same session_id for all feedback entries
       }));
 
     console.log('Feedback data being sent:', feedbackData); // Debugging
@@ -251,10 +251,7 @@ const CustomerFeedbackPage = () => {
           </select>
           <button
             className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            onClick={() => {
-              setSessionId(uuidv4()); // Generate a unique session ID
-              setHasCollectedTableNumber(true);
-            }}
+            onClick={() => setHasCollectedTableNumber(true)}
           >
             Next
           </button>
