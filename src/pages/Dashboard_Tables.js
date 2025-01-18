@@ -26,6 +26,7 @@ const TablesPage = () => {
 
     if (error) {
       console.error('Error fetching feedback:', error);
+      toast.error('Failed to fetch feedback');
     } else {
       setFeedback((prev) => (page === 1 ? data : [...prev, ...data]));
       setHasMore(data.length === 10);
@@ -67,20 +68,20 @@ const TablesPage = () => {
   }, [activeTab, page]);
 
   const toggleActionedStatus = async (feedbackId, isActioned) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('feedback')
       .update({ is_actioned: !isActioned })
-      .eq('id', feedbackId);
+      .eq('id', feedbackId)
+      .select(); // Use .select() to return the updated row
 
     if (error) {
       console.error('Error toggling feedback status:', error);
+      toast.error(`Failed to update feedback status: ${error.message}`);
     } else {
-      toast.success(`Feedback marked as ${isActioned ? 'unactioned' : 'actioned'}`);
-      setFeedback((prev) =>
-        prev.map((fb) =>
-          fb.id === feedbackId ? { ...fb, is_actioned: !isActioned } : fb
-        )
-      );
+      console.log('Updated feedback:', data); // Log the updated row
+      toast.success(`Feedback marked as ${!isActioned ? 'actioned' : 'unactioned'}`);
+      // Refetch feedback after update
+      fetchFeedback();
     }
   };
 
