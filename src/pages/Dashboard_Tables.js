@@ -86,7 +86,7 @@ const TablesPage = () => {
   // Calculate average rating for a feedback entry
   const calculateAverageRating = (questions) => {
     if (!questions || questions.length === 0) return 0;
-    const total = questions.reduce((sum, question) => sum + question.rating, 0);
+    const total = questions.reduce((sum, question) => sum + (question.rating || 0), 0);
     return (total / questions.length).toFixed(1);
   };
 
