@@ -5,13 +5,17 @@ const MetricCard = ({ title, feedback, startTime, endTime, previousStartTime, pr
   // Helper function to filter feedback within a time range
   const filterFeedbackByTime = (feedback, startTime, endTime) => {
     const filteredFeedback = feedback.filter((f) => {
-      const feedbackTime = new Date(f.timestamp); // Convert timestamp to Date object
-      const start = new Date(startTime);
-      const end = new Date(endTime);
+      const feedbackTime = new Date(f.timestamp); // Parse feedback timestamp
+      const start = new Date(startTime); // Parse start time
+      const end = new Date(endTime); // Parse end time
 
       console.log(`Feedback time: ${feedbackTime}, Start: ${start}, End: ${end}`); // Debugging
 
-      return feedbackTime >= start && feedbackTime < end;
+      // Check if feedback time is within the range
+      const isWithinRange = feedbackTime >= start && feedbackTime < end;
+      console.log(`Is within range: ${isWithinRange}`); // Debugging
+
+      return isWithinRange;
     });
 
     console.log(`Filtered feedback for ${title}:`, filteredFeedback); // Debugging
