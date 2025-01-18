@@ -1,10 +1,13 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, AlertTriangle, Clock, Users, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 
 const MetricCard = ({ title, feedback, startTime, endTime, previousStartTime, previousEndTime, icon: Icon }) => {
   // Calculate feedback count for the given time range
   const calculateFeedbackCount = (feedback, startTime, endTime) => {
-    return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime).length;
+    return feedback.filter((f) => {
+      const feedbackTime = new Date(f.timestamp); // Convert to Date object
+      return feedbackTime >= new Date(startTime) && feedbackTime < new Date(endTime);
+    }).length;
   };
 
   // Calculate percentage change between two feedback counts

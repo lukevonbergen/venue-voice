@@ -169,7 +169,7 @@ const DashboardPage = () => {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <MetricCard
+          <MetricCard
               title="Last 30 Minutes"
               feedback={feedback}
               startTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()}
