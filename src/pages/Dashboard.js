@@ -19,6 +19,10 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Feedback data updated:', feedback); // Debugging
+  }, [feedback]);
+
+  useEffect(() => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -89,6 +93,7 @@ const DashboardPage = () => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
         async (payload) => {
+          console.log('New feedback received:', payload.new); // Debugging
           setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
         }
       )
@@ -169,7 +174,7 @@ const DashboardPage = () => {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <MetricCard
+            <MetricCard
               title="Last 30 Minutes"
               feedback={feedback}
               startTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()}
