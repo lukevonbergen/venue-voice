@@ -36,6 +36,8 @@ const DashboardPage = () => {
   }, [navigate]);
 
   const fetchVenueId = async (email) => {
+    console.log('Fetching venue ID for email:', email); // Debugging
+
     const { data: venueData, error: venueError } = await supabase
       .from('venues')
       .select('id, is_paid')
@@ -45,6 +47,8 @@ const DashboardPage = () => {
     if (venueError) {
       console.error('Error fetching venue ID:', venueError);
     } else {
+      console.log('Fetched venue data:', venueData); // Debugging
+
       if (!venueData.is_paid) {
         navigate('/pricing');
         return;
@@ -52,7 +56,7 @@ const DashboardPage = () => {
 
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
-      fetchFeedback(venueData.id);
+      fetchFeedback(venueData.id); // Fetch feedback for the venue
       if (liveUpdatesEnabled) {
         setupRealtimeUpdates(venueData.id);
       }
@@ -74,6 +78,8 @@ const DashboardPage = () => {
   };
 
   const fetchFeedback = async (venueId) => {
+    console.log('Fetching feedback for venue ID:', venueId); // Debugging
+
     const { data, error } = await supabase
       .from('feedback')
       .select('*')
@@ -88,6 +94,8 @@ const DashboardPage = () => {
   };
 
   const setupRealtimeUpdates = (venueId) => {
+    console.log('Setting up real-time updates for venue ID:', venueId); // Debugging
+
     const feedbackSubscription = supabase
       .channel('feedback')
       .on(
