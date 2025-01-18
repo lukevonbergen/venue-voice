@@ -53,6 +53,7 @@ const TablesPage = () => {
         if (fb.question_id) {
           acc[key].questions.push({
             question_id: fb.question_id,
+            question_text: fb.question_text, // Assuming question_text is available
             sentiment: fb.sentiment,
             rating: fb.rating,
           });
@@ -211,6 +212,18 @@ const TablesPage = () => {
                     <p className="text-sm text-gray-600">
                       {calculateAverageRating(fb.questions)} / 5
                     </p>
+                  </div>
+
+                  {/* Questions and Ratings */}
+                  <div className="mt-2">
+                    <p className="font-semibold">Questions:</p>
+                    <ul className="list-disc list-inside text-sm text-gray-600">
+                      {fb.questions.map((question, index) => (
+                        <li key={question.question_id}>
+                          {index + 1}. {question.question_text} Rating {question.rating}/5
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
                   {/* Additional Feedback */}
