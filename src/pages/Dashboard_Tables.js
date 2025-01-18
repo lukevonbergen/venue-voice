@@ -312,8 +312,7 @@ const FeedbackCard = ({ fb, onDelete, onToggleAction }) => {
             >
               <div className="flex justify-between items-start gap-4">
                 <p className="text-sm text-gray-600 flex-1">
-                  <span className="font-medium text-gray-900">Q{index + 1}.</span>{' '}
-                  {question.question_text}
+                  <span className="font-medium text-gray-900">{question.question_text}</span>
                 </p>
                 <div className="flex items-center gap-1">
                   <span className="font-medium">{question.rating}</span>
