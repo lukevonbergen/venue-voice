@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
-import { FaCheckSquare } from 'react-icons/fa';
+import { FaCheckSquare, FaTrash } from 'react-icons/fa'; // Import trash icon
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -12,6 +12,7 @@ const TablesPage = () => {
   const [sortBy, setSortBy] = useState('mostRecent');
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(null); // Track which feedback item shows the delete confirmation
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
@@ -130,6 +131,12 @@ const TablesPage = () => {
     }
   };
 
+  // Remove feedback from the list (not from the database)
+  const handleDelete = (feedbackId) => {
+    setFeedback((prev) => prev.filter((fb) => fb.id !== feedbackId));
+    setShowDeleteConfirmation(null); // Hide the confirmation tooltip
+  };
+
   // Load more feedback for infinite scroll
   const loadMoreFeedback = () => {
     setPage((prev) => prev + 1);
@@ -194,16 +201,48 @@ const TablesPage = () => {
                         {new Date(fb.timestamp).toLocaleString()}
                       </p>
                     </div>
-                    <button
-                      onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
-                      className={`p-1 rounded-full ${
-                        fb.is_actioned
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      <FaCheckSquare className="text-green-600" /> {/* Green tick */}
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      {/* Mark as actioned button */}
+                      <button
+                        onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
+                        className={`px-3 py-1 text-sm font-medium rounded-lg ${
+                          fb.is_actioned
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        Mark as {fb.is_actioned ? 'Unactioned' : 'Actioned'}
+                      </button>
+
+                      {/* Delete button with confirmation tooltip */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowDeleteConfirmation(fb.id)}
+                          className="p-2 text-gray-500 hover:text-red-500"
+                        >
+                          <FaTrash />
+                        </button>
+                        {showDeleteConfirmation === fb.id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-10">
+                            <p className="text-sm text-gray-700">Are you sure?</p>
+                            <div className="flex justify-end space-x-2 mt-2">
+                              <button
+                                onClick={() => setShowDeleteConfirmation(null)}
+                                className="text-sm text-gray-500 hover:text-gray-700"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleDelete(fb.id)}
+                                className="text-sm text-red-500 hover:text-red-700"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Average Rating */}
