@@ -108,6 +108,12 @@ const TablesPage = () => {
 
   // Toggle feedback actioned status
   const toggleActionedStatus = async (sessionId, isActioned) => {
+    if (!sessionId) {
+      console.error('Session ID is null or undefined');
+      toast.error('Failed to update feedback status: Session ID is missing');
+      return;
+    }
+
     console.log('Toggling feedback status:', sessionId, isActioned); // Debugging
 
     const { data, error } = await supabase
