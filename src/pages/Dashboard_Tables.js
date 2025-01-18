@@ -166,61 +166,33 @@ const TablesPage = () => {
         </div>
 
         {/* Feedback Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {feedback.map((fb) => (
-            <div key={fb.session_id} className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
-              <p className="text-sm text-gray-500">
-                {new Date(fb.timestamp).toLocaleString()}
-              </p>
-
-              {/* Average Rating */}
-              <div className="mt-4">
-                <p className="font-semibold">Average Rating:</p>
-                <p className="text-sm text-gray-600">
-                  {calculateAverageRating(fb.questions)} / 5
-                </p>
-              </div>
-
-              {/* Additional Feedback */}
-              {fb.additional_feedback && (
-                <div className="mt-4">
-                  <p className="font-semibold">Additional Feedback:</p>
-                  <p className="text-sm text-gray-600">{fb.additional_feedback}</p>
-                </div>
-              )}
-
-              {/* Toggle Actioned Status */}
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={() => toggleActionedStatus(fb.session_id, fb.is_actioned)}
-                  className={`p-2 rounded-full ${
-                    fb.is_actioned
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  ✓
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Infinite Scroll */}
         <InfiniteScroll
           dataLength={feedback.length}
           next={loadMoreFeedback}
           hasMore={hasMore}
           loader={<p>Loading...</p>}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-4">
             {feedback.map((fb) => (
               <div key={fb.session_id} className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
-                <p className="text-sm text-gray-500">
-                  {new Date(fb.timestamp).toLocaleString()}
-                </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
+                    <p className="text-sm text-gray-500">
+                      {new Date(fb.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => toggleActionedStatus(fb.session_id, fb.is_actioned)}
+                    className={`p-2 rounded-full ${
+                      fb.is_actioned
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    ✓
+                  </button>
+                </div>
 
                 {/* Average Rating */}
                 <div className="mt-4">
@@ -237,20 +209,6 @@ const TablesPage = () => {
                     <p className="text-sm text-gray-600">{fb.additional_feedback}</p>
                   </div>
                 )}
-
-                {/* Toggle Actioned Status */}
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={() => toggleActionedStatus(fb.session_id, fb.is_actioned)}
-                    className={`p-2 rounded-full ${
-                      fb.is_actioned
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    ✓
-                  </button>
-                </div>
               </div>
             ))}
           </div>
