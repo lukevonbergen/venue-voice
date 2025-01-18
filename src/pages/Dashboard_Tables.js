@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
-import { FaCheckSquare, FaTrash } from 'react-icons/fa'; // Import trash icon
+import { Star, Trash2, CheckCircle, XCircle } from 'lucide-react'; // Import icons from lucide-react
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -12,7 +12,6 @@ const TablesPage = () => {
   const [sortBy, setSortBy] = useState('mostRecent');
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(null); // Track which feedback item shows the delete confirmation
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
@@ -134,7 +133,6 @@ const TablesPage = () => {
   // Remove feedback from the list (not from the database)
   const handleDelete = (feedbackId) => {
     setFeedback((prev) => prev.filter((fb) => fb.id !== feedbackId));
-    setShowDeleteConfirmation(null); // Hide the confirmation tooltip
   };
 
   // Load more feedback for infinite scroll
@@ -193,86 +191,12 @@ const TablesPage = () => {
             {feedback
               .filter((fb) => (activeTab === 'unactioned' ? !fb.is_actioned : fb.is_actioned))
               .map((fb) => (
-                <div key={fb.id} className="bg-white rounded-lg shadow-md p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(fb.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {/* Mark as actioned button */}
-                      <button
-                        onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
-                        className={`px-3 py-1 text-sm font-medium rounded-lg ${
-                          fb.is_actioned
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                      >
-                        Mark as {fb.is_actioned ? 'Unactioned' : 'Actioned'}
-                      </button>
-
-                      {/* Delete button with confirmation tooltip */}
-                      <div className="relative">
-                        <button
-                          onClick={() => setShowDeleteConfirmation(fb.id)}
-                          className="p-2 text-gray-500 hover:text-red-500"
-                        >
-                          <FaTrash />
-                        </button>
-                        {showDeleteConfirmation === fb.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-10">
-                            <p className="text-sm text-gray-700">Are you sure?</p>
-                            <div className="flex justify-end space-x-2 mt-2">
-                              <button
-                                onClick={() => setShowDeleteConfirmation(null)}
-                                className="text-sm text-gray-500 hover:text-gray-700"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => handleDelete(fb.id)}
-                                className="text-sm text-red-500 hover:text-red-700"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Average Rating */}
-                  <div className="mt-2">
-                    <p className="font-semibold">Average Rating:</p>
-                    <p className="text-sm text-gray-600">
-                      {calculateAverageRating(fb.questions)} / 5
-                    </p>
-                  </div>
-
-                  {/* Questions and Ratings */}
-                  <div className="mt-2">
-                    <p className="font-semibold">Questions:</p>
-                    <ul className="list-disc list-inside text-sm text-gray-600">
-                      {fb.questions.map((question, index) => (
-                        <li key={question.question_id}>
-                          {index + 1}. {question.question_text} Rating {question.rating}/5
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Additional Feedback */}
-                  {fb.additional_feedback && (
-                    <div className="mt-2">
-                      <p className="font-semibold">Additional Feedback:</p>
-                      <p className="text-sm text-gray-600">{fb.additional_feedback}</p>
-                    </div>
-                  )}
-                </div>
+                <FeedbackCard
+                  key={fb.id}
+                  fb={fb}
+                  onDelete={handleDelete}
+                  onToggleAction={toggleActionedStatus}
+                />
               ))}
           </div>
         </InfiniteScroll>
@@ -281,6 +205,136 @@ const TablesPage = () => {
         <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </DashboardFrame>
+  );
+};
+
+// FeedbackCard Component
+const FeedbackCard = ({ fb, onDelete, onToggleAction }) => {
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  const calculateAverageRating = (questions) => {
+    const sum = questions.reduce((acc, q) => acc + q.rating, 0);
+    return (sum / questions.length).toFixed(1);
+  };
+
+  const handleDelete = () => {
+    onDelete(fb.id);
+    setShowDeleteConfirmation(false);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-200 hover:shadow-xl border border-gray-100">
+      {/* Header Section */}
+      <div className="flex justify-between items-start gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-bold text-gray-900">Table {fb.table_number}</h3>
+            {fb.is_actioned && (
+              <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                Actioned
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500">
+            {new Date(fb.timestamp).toLocaleString()}
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onToggleAction(fb.id, fb.is_actioned)}
+            className={`
+              inline-flex items-center gap-1 px-4 py-2 rounded-lg font-medium text-sm
+              transition-colors duration-200
+              ${fb.is_actioned
+                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-green-500 text-white hover:bg-green-600'}
+            `}
+          >
+            {fb.is_actioned ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+            {fb.is_actioned ? 'Mark Unactioned' : 'Mark Actioned'}
+          </button>
+
+          {/* Delete Button with Confirmation Tooltip */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDeleteConfirmation(!showDeleteConfirmation)}
+              className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+
+            {showDeleteConfirmation && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-10">
+                <p className="text-sm text-gray-600 font-medium">Are you sure you want to delete this feedback?</p>
+                <div className="flex justify-end gap-2 mt-3">
+                  <button
+                    onClick={() => setShowDeleteConfirmation(false)}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Rating Section */}
+      <div className="mt-6 flex items-center gap-6">
+        <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">
+          <p className="text-sm text-gray-600 font-medium">Average Rating</p>
+          <div className="flex items-center gap-1 mt-1">
+            <span className="text-2xl font-bold text-gray-900">
+              {calculateAverageRating(fb.questions)}
+            </span>
+            <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Questions Section */}
+      <div className="mt-6">
+        <h4 className="font-semibold text-gray-900 mb-3">Feedback Details</h4>
+        <div className="space-y-3">
+          {fb.questions.map((question, index) => (
+            <div
+              key={question.question_id}
+              className="bg-gray-50 rounded-lg p-4"
+            >
+              <div className="flex justify-between items-start gap-4">
+                <p className="text-sm text-gray-600 flex-1">
+                  <span className="font-medium text-gray-900">Q{index + 1}.</span>{' '}
+                  {question.question_text}
+                </p>
+                <div className="flex items-center gap-1">
+                  <span className="font-medium">{question.rating}</span>
+                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Additional Feedback Section */}
+      {fb.additional_feedback && (
+        <div className="mt-6">
+          <h4 className="font-semibold text-gray-900 mb-3">Additional Comments</h4>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <p className="text-sm text-gray-600 italic">"{fb.additional_feedback}"</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
