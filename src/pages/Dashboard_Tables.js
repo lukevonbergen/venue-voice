@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
-import { FaCheckSquare } from 'react-icons/fa'; // Correct import
+import { FaCheckSquare } from 'react-icons/fa'; // React icon for the action button
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -25,7 +25,7 @@ const TablesPage = () => {
 
     const { data, error } = await supabase
       .from('feedback')
-      .select('*')
+      .select('*') // Ensure 'id' is included in the response
       .not('table_number', 'is', null)
       .eq('is_actioned', activeTab === 'actioned')
       .gte('timestamp', `${today}T00:00:00Z`) // Filter for today's feedback
@@ -37,10 +37,12 @@ const TablesPage = () => {
       console.error('Error fetching feedback:', error);
       toast.error('Failed to fetch feedback');
     } else {
-      // Group feedback by session_id
+      // Group feedback by session_id or id if session_id is missing
       const groupedFeedback = data.reduce((acc, fb) => {
-        if (!acc[fb.session_id]) {
-          acc[fb.session_id] = {
+        const key = fb.session_id || fb.id; // Use session_id if available, otherwise use id
+        if (!acc[key]) {
+          acc[key] = {
+            id: fb.id, // Include the feedback ID
             session_id: fb.session_id,
             table_number: fb.table_number,
             timestamp: fb.timestamp,
@@ -50,14 +52,14 @@ const TablesPage = () => {
           };
         }
         if (fb.question_id) {
-          acc[fb.session_id].questions.push({
+          acc[key].questions.push({
             question_id: fb.question_id,
             sentiment: fb.sentiment,
             rating: fb.rating,
           });
         }
         if (fb.additional_feedback) {
-          acc[fb.session_id].additional_feedback = fb.additional_feedback;
+          acc[key].additional_feedback = fb.additional_feedback;
         }
         return acc;
       }, {});
@@ -108,19 +110,19 @@ const TablesPage = () => {
   }, [activeTab, page]);
 
   // Toggle feedback actioned status
-  const toggleActionedStatus = async (sessionId, isActioned) => {
-    if (!sessionId) {
-      console.error('Session ID is null or undefined');
-      toast.error('Failed to update feedback status: Session ID is missing');
+  const toggleActionedStatus = async (feedbackId, isActioned) => {
+    if (!feedbackId) {
+      console.error('Feedback ID is null or undefined');
+      toast.error('Failed to update feedback status: Feedback ID is missing');
       return;
     }
 
-    console.log('Toggling feedback status:', sessionId, isActioned); // Debugging
+    console.log('Toggling feedback status:', feedbackId, isActioned); // Debugging
 
     const { data, error } = await supabase
       .from('feedback')
       .update({ is_actioned: !isActioned })
-      .eq('session_id', sessionId)
+      .eq('id', feedbackId) // Use the feedback ID to identify the entry
       .select();
 
     if (error) {
@@ -183,7 +185,7 @@ const TablesPage = () => {
         >
           <div className="space-y-4">
             {feedback.map((fb) => (
-              <div key={fb.session_id} className="bg-white rounded-lg shadow-md p-6">
+              <div key={fb.id} className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
@@ -192,7 +194,7 @@ const TablesPage = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => toggleActionedStatus(fb.session_id, fb.is_actioned)}
+                    onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)} // Use fb.id instead of fb.session_id
                     className={`p-2 rounded-full ${
                       fb.is_actioned
                         ? 'bg-green-500 text-white'
