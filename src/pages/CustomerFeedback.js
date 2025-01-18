@@ -117,15 +117,19 @@ const CustomerFeedbackPage = () => {
         session_id: sessionId, // Include session_id
       }));
 
+    console.log('Feedback data being sent:', feedbackData); // Debugging
+
     // Save all feedback entries to the database
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('feedback')
-      .insert(feedbackData);
+      .insert(feedbackData)
+      .select(); // Use .select() to return the inserted data
 
     if (error) {
       console.error('Error saving feedback:', error);
-      toast.error('Failed to save feedback'); // Use toast here
+      toast.error(`Failed to save feedback: ${error.message}`); // Show detailed error message
     } else {
+      console.log('Feedback saved successfully:', data); // Debugging
       // Move to the next question or show additional feedback
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -137,7 +141,7 @@ const CustomerFeedbackPage = () => {
 
   const handleNPSRating = async (rating) => {
     // Log the NPS rating without a session_id
-    await supabase
+    const { data, error } = await supabase
       .from('feedback')
       .insert([
         {
@@ -148,18 +152,25 @@ const CustomerFeedbackPage = () => {
           table_number: tableNumber || null, // Include table number
           session_id: null, // Exclude session_id for the NPS question
         },
-      ]);
+      ])
+      .select(); // Use .select() to return the inserted data
 
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (error) {
+      console.error('Error saving NPS rating:', error);
+      toast.error(`Failed to save NPS rating: ${error.message}`); // Show detailed error message
     } else {
-      setShowAdditionalFeedback(true);
+      console.log('NPS rating saved successfully:', data); // Debugging
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      } else {
+        setShowAdditionalFeedback(true);
+      }
     }
   };
 
   const handleAdditionalFeedback = async () => {
     if (additionalFeedback.trim() !== '') {
-      await supabase
+      const { data, error } = await supabase
         .from('feedback')
         .insert([
           {
@@ -171,7 +182,15 @@ const CustomerFeedbackPage = () => {
             table_number: tableNumber || null, // Include table number
             session_id: sessionId, // Include session_id
           },
-        ]);
+        ])
+        .select(); // Use .select() to return the inserted data
+
+      if (error) {
+        console.error('Error saving additional feedback:', error);
+        toast.error(`Failed to save additional feedback: ${error.message}`); // Show detailed error message
+      } else {
+        console.log('Additional feedback saved successfully:', data); // Debugging
+      }
     }
 
     setIsFinished(true);
