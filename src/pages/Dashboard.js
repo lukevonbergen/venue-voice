@@ -32,13 +32,6 @@ const DashboardPage = () => {
       }
     };
 
-    // Load feedback data from local storage on page load
-    const savedFeedback = localStorage.getItem('feedback');
-    if (savedFeedback) {
-      console.log('Loaded feedback data from local storage:', JSON.parse(savedFeedback)); // Debugging
-      setFeedback(JSON.parse(savedFeedback));
-    }
-
     fetchSession();
   }, [navigate]);
 
@@ -59,7 +52,7 @@ const DashboardPage = () => {
 
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
-      fetchFeedback(venueData.id);
+      fetchFeedback(venueData.id); // Fetch feedback data on page load
       if (liveUpdatesEnabled) {
         setupRealtimeUpdates(venueData.id);
       }
@@ -91,7 +84,6 @@ const DashboardPage = () => {
     } else {
       console.log('Fetched feedback data:', data); // Debugging
       setFeedback(data);
-      localStorage.setItem('feedback', JSON.stringify(data)); // Save to local storage
     }
   };
 
@@ -103,11 +95,7 @@ const DashboardPage = () => {
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
         async (payload) => {
           console.log('New feedback received:', payload.new); // Debugging
-          setFeedback((prevFeedback) => {
-            const updatedFeedback = [...prevFeedback, payload.new];
-            localStorage.setItem('feedback', JSON.stringify(updatedFeedback)); // Update local storage
-            return updatedFeedback;
-          });
+          setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
         }
       )
       .subscribe();
