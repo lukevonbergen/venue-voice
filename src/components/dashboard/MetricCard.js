@@ -2,27 +2,35 @@ import React from 'react';
 import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 
 const MetricCard = ({ title, feedback, startTime, endTime, previousStartTime, previousEndTime, icon: Icon }) => {
-  // Calculate feedback count for the given time range
-  const calculateFeedbackCount = (feedback, startTime, endTime) => {
+  // Helper function to filter feedback within a time range
+  const filterFeedbackByTime = (feedback, startTime, endTime) => {
     const filteredFeedback = feedback.filter((f) => {
-      const feedbackTime = new Date(f.timestamp); // Convert to Date object
-      return feedbackTime >= new Date(startTime) && feedbackTime < new Date(endTime);
+      const feedbackTime = new Date(f.timestamp); // Convert timestamp to Date object
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+
+      console.log(`Feedback time: ${feedbackTime}, Start: ${start}, End: ${end}`); // Debugging
+
+      return feedbackTime >= start && feedbackTime < end;
     });
+
     console.log(`Filtered feedback for ${title}:`, filteredFeedback); // Debugging
-    return filteredFeedback.length;
+    return filteredFeedback;
   };
+
+  // Calculate feedback count for the given time range
+  const currentFeedback = filterFeedbackByTime(feedback, startTime, endTime);
+  const previousFeedback = filterFeedbackByTime(feedback, previousStartTime, previousEndTime);
+
+  const currentCount = currentFeedback.length;
+  const previousCount = previousFeedback.length;
 
   // Calculate percentage change between two feedback counts
   const calculatePercentageChange = (currentCount, previousCount) => {
     if (previousCount === 0) return 0;
-    const change = (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
-    console.log(`Percentage change for ${title}:`, change); // Debugging
-    return change;
+    return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
   };
 
-  // Calculate current and previous feedback counts
-  const currentCount = calculateFeedbackCount(feedback, startTime, endTime);
-  const previousCount = calculateFeedbackCount(feedback, previousStartTime, previousEndTime);
   const trendValue = calculatePercentageChange(currentCount, previousCount);
   const trend = trendValue >= 0 ? 'up' : 'down';
 

@@ -175,42 +175,42 @@ const DashboardPage = () => {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <MetricCard
-              title="Last 30 Minutes"
-              feedback={feedback}
-              startTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()}
-              endTime={now.toISOString()}
-              previousStartTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()}
-              previousEndTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()}
-              icon={Clock}
-            />
-            <MetricCard
-              title="Last Hour"
-              feedback={feedback}
-              startTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()}
-              endTime={now.toISOString()}
-              previousStartTime={new Date(now.getTime() - 120 * 60 * 1000).toISOString()}
-              previousEndTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()}
-              icon={Users}
-            />
-            <MetricCard
-              title="Today"
-              feedback={feedback}
-              startTime={new Date(now.toISOString().split('T')[0]).toISOString()}
-              endTime={now.toISOString()}
-              previousStartTime={new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0]}
-              previousEndTime={new Date(now.toISOString().split('T')[0]).toISOString()}
-              icon={Calendar}
-            />
-            <MetricCard
-              title="Last 7 Days"
-              feedback={feedback}
-              startTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()}
-              endTime={now.toISOString()}
-              previousStartTime={new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()}
-              previousEndTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()}
-              icon={TrendingUp}
-            />
+          <MetricCard
+            title="Last 30 Minutes"
+            feedback={feedback}
+            startTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()} // Last 30 minutes
+            endTime={now.toISOString()} // Current time
+            previousStartTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()} // 1 hour ago
+            previousEndTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()} // 30 minutes ago
+            icon={Clock}
+          />
+          <MetricCard
+            title="Last Hour"
+            feedback={feedback}
+            startTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()} // Last hour
+            endTime={now.toISOString()} // Current time
+            previousStartTime={new Date(now.getTime() - 120 * 60 * 1000).toISOString()} // 2 hours ago
+            previousEndTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()} // 1 hour ago
+            icon={Users}
+          />
+          <MetricCard
+            title="Today"
+            feedback={feedback}
+            startTime={new Date(now.toISOString().split('T')[0]).toISOString()} // Start of today
+            endTime={now.toISOString()} // Current time
+            previousStartTime={new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0]} // Start of yesterday
+            previousEndTime={new Date(now.toISOString().split('T')[0]).toISOString()} // End of yesterday
+            icon={Calendar}
+          />
+          <MetricCard
+            title="Last 7 Days"
+            feedback={feedback}
+            startTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()} // 7 days ago
+            endTime={now.toISOString()} // Current time
+            previousStartTime={new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()} // 14 days ago
+            previousEndTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()} // 7 days ago
+            icon={TrendingUp}
+          />
           </div>
         </div>
 
