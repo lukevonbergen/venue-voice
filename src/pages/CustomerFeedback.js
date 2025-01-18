@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for generating session IDs
+import { toast } from 'react-toastify'; // Import toast
+import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
 
 // Helper function to calculate luminance
 const getLuminance = (color) => {
@@ -52,6 +54,7 @@ const CustomerFeedbackPage = () => {
 
       if (questionsError) {
         console.error('Error fetching questions:', questionsError);
+        toast.error('Failed to fetch questions'); // Use toast here
       } else {
         // Add NPS question at the end
         const npsQuestion = {
@@ -73,6 +76,7 @@ const CustomerFeedbackPage = () => {
 
       if (brandingError) {
         console.error('Error fetching branding:', brandingError);
+        toast.error('Failed to fetch branding'); // Use toast here
       } else {
         setVenueBranding({
           logo: brandingData.logo,
@@ -120,7 +124,7 @@ const CustomerFeedbackPage = () => {
 
     if (error) {
       console.error('Error saving feedback:', error);
-      toast.error('Failed to save feedback');
+      toast.error('Failed to save feedback'); // Use toast here
     } else {
       // Move to the next question or show additional feedback
       if (currentQuestionIndex < questions.length - 1) {
