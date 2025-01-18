@@ -29,6 +29,12 @@ const FeedbackTableCard = ({ feedback, onToggleActioned }) => {
               <p className="text-sm text-gray-600">Answer: {question.answer}</p>
             </div>
           ))}
+          {feedback.additional_feedback && (
+            <div className="mt-4">
+              <p className="font-semibold">Additional Feedback:</p>
+              <p className="text-sm text-gray-600">{feedback.additional_feedback}</p>
+            </div>
+          )}
         </div>
       )}
 
