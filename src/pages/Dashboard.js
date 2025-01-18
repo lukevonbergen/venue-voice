@@ -110,101 +110,7 @@ const DashboardPage = () => {
     }
   };
 
-  const calculateAverageRating = (questionId) => {
-    const relevantFeedback = feedback.filter((f) => f.question_id === questionId);
-    if (relevantFeedback.length === 0) return 0;
-
-    const totalRating = relevantFeedback.reduce((sum, f) => sum + f.rating, 0);
-    return (totalRating / relevantFeedback.length).toFixed(1);
-  };
-
-  const calculateOverallAverageRating = () => {
-    if (feedback.length === 0) return 0;
-
-    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
-    return (totalRating / feedback.length).toFixed(1);
-  };
-
-  const filterFeedbackByTime = (startTime, endTime = new Date().toISOString()) => {
-    return feedback.filter((f) => f.timestamp >= startTime && f.timestamp < endTime);
-  };
-
-  const calculateFeedbackCount = (startTime, endTime) => {
-    return filterFeedbackByTime(startTime, endTime).length;
-  };
-
-  const calculatePercentageChange = (currentCount, previousCount) => {
-    if (previousCount === 0) return 0;
-    return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
-  };
-
   const now = new Date();
-
-  // Feedback counts for metric cards
-  const last30MinutesCount = calculateFeedbackCount(
-    new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
-    now.toISOString()
-  );
-  const previous30MinutesCount = calculateFeedbackCount(
-    new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
-    new Date(now.getTime() - 30 * 60 * 1000).toISOString()
-  );
-  const last30MinutesTrend = calculatePercentageChange(last30MinutesCount, previous30MinutesCount);
-
-  const lastHourCount = calculateFeedbackCount(
-    new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
-    now.toISOString()
-  );
-  const previousHourCount = calculateFeedbackCount(
-    new Date(now.getTime() - 120 * 60 * 1000).toISOString(),
-    new Date(now.getTime() - 60 * 60 * 1000).toISOString()
-  );
-  const lastHourTrend = calculatePercentageChange(lastHourCount, previousHourCount);
-
-  const todayCount = calculateFeedbackCount(
-    new Date(now.toISOString().split('T')[0]).toISOString(),
-    now.toISOString()
-  );
-  const yesterdayCount = calculateFeedbackCount(
-    new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0],
-    new Date(now.toISOString().split('T')[0]).toISOString()
-  );
-  const todayTrend = calculatePercentageChange(todayCount, yesterdayCount);
-
-  const last7DaysCount = calculateFeedbackCount(
-    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    now.toISOString()
-  );
-  const previous7DaysCount = calculateFeedbackCount(
-    new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-  );
-  const last7DaysTrend = calculatePercentageChange(last7DaysCount, previous7DaysCount);
-
-  const questionToSuggestionMap = {
-    'How is the music?': 'Consider updating the playlist or adjusting the volume.',
-    'How was the service?': 'Provide additional staff training to improve service quality.',
-    'Was the venue clean?': 'Increase the frequency of cleaning schedules.',
-    'How was the food?': 'Consider revising the menu or improving food quality.',
-  };
-
-  const generateSuggestedActions = () => {
-    const suggestedActions = [];
-    const ratingThreshold = 3.5;
-
-    questions.forEach((q) => {
-      const averageRating = calculateAverageRating(q.id);
-      if (averageRating < ratingThreshold && questionToSuggestionMap[q.question]) {
-        suggestedActions.push({
-          question: q.question,
-          rating: averageRating,
-          suggestion: questionToSuggestionMap[q.question],
-        });
-      }
-    });
-
-    return suggestedActions;
-  };
 
   return (
     <DashboardFrame>
@@ -229,34 +135,38 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <MetricCard
               title="Last 30 Minutes"
-              value={last30MinutesCount}
-              trend={last30MinutesTrend >= 0 ? 'up' : 'down'}
-              trendValue={Math.abs(last30MinutesTrend)}
-              compareText="Compared to previous 30 mins"
+              feedback={feedback}
+              startTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()}
+              endTime={now.toISOString()}
+              previousStartTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()}
+              previousEndTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()}
               icon={Clock}
             />
             <MetricCard
               title="Last Hour"
-              value={lastHourCount}
-              trend={lastHourTrend >= 0 ? 'up' : 'down'}
-              trendValue={Math.abs(lastHourTrend)}
-              compareText="Compared to previous hour"
+              feedback={feedback}
+              startTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()}
+              endTime={now.toISOString()}
+              previousStartTime={new Date(now.getTime() - 120 * 60 * 1000).toISOString()}
+              previousEndTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()}
               icon={Users}
             />
             <MetricCard
               title="Today"
-              value={todayCount}
-              trend={todayTrend >= 0 ? 'up' : 'down'}
-              trendValue={Math.abs(todayTrend)}
-              compareText="Compared to yesterday"
+              feedback={feedback}
+              startTime={new Date(now.toISOString().split('T')[0]).toISOString()}
+              endTime={now.toISOString()}
+              previousStartTime={new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0]}
+              previousEndTime={new Date(now.toISOString().split('T')[0]).toISOString()}
               icon={Calendar}
             />
             <MetricCard
               title="Last 7 Days"
-              value={last7DaysCount}
-              trend={last7DaysTrend >= 0 ? 'up' : 'down'}
-              trendValue={Math.abs(last7DaysTrend)}
-              compareText="Compared to previous week"
+              feedback={feedback}
+              startTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()}
+              endTime={now.toISOString()}
+              previousStartTime={new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()}
+              previousEndTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()}
               icon={TrendingUp}
             />
           </div>
@@ -264,8 +174,8 @@ const DashboardPage = () => {
 
         {/* Middle Section: Feedback Trends and Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <FeedbackTrendsChart feedback={feedback} /> {/* All-time feedback */}
-          <FeedbackDistributionChart feedback={feedback} /> {/* All-time feedback */}
+          <FeedbackTrendsChart feedback={feedback} />
+          <FeedbackDistributionChart feedback={feedback} />
         </div>
 
         {/* Bottom Section: Suggested Actions and Live Feedback Feed */}
@@ -287,7 +197,7 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <FeedbackFeed feedback={feedback} /> {/* All-time feedback */}
+          <FeedbackFeed feedback={feedback} />
         </div>
       </div>
     </DashboardFrame>
