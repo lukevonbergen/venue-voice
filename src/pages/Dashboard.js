@@ -52,7 +52,7 @@ const DashboardPage = () => {
 
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
-      fetchFeedback(venueData.id); // Fetch feedback data on page load
+      fetchFeedback(venueData.id);
       if (liveUpdatesEnabled) {
         setupRealtimeUpdates(venueData.id);
       }
@@ -152,7 +152,77 @@ const DashboardPage = () => {
     return suggestedActions;
   };
 
+  // Function to filter feedback within a time range
+  const filterFeedbackByTime = (startTime, endTime) => {
+    return feedback.filter((f) => {
+      const feedbackTime = new Date(f.timestamp); // Parse feedback timestamp
+      const start = new Date(startTime); // Parse start time
+      const end = new Date(endTime); // Parse end time
+
+      console.log(`Feedback time: ${feedbackTime}, Start: ${start}, End: ${end}`); // Debugging
+
+      // Check if feedback time is within the range
+      const isWithinRange = feedbackTime >= start && feedbackTime < end;
+      console.log(`Is within range: ${isWithinRange}`); // Debugging
+
+      return isWithinRange;
+    });
+  };
+
+  // Function to calculate feedback counts and trends
+  const calculateFeedbackMetrics = (startTime, endTime, previousStartTime, previousEndTime) => {
+    const currentFeedback = filterFeedbackByTime(startTime, endTime);
+    const previousFeedback = filterFeedbackByTime(previousStartTime, previousEndTime);
+
+    const currentCount = currentFeedback.length;
+    const previousCount = previousFeedback.length;
+
+    const calculatePercentageChange = (currentCount, previousCount) => {
+      if (previousCount === 0) return 0;
+      return (((currentCount - previousCount) / previousCount) * 100).toFixed(1);
+    };
+
+    const trendValue = calculatePercentageChange(currentCount, previousCount);
+    const trend = trendValue >= 0 ? 'up' : 'down';
+
+    return {
+      currentCount,
+      trendValue: Math.abs(trendValue),
+      trend,
+      hasDataToCompare: previousCount !== 0,
+    };
+  };
+
   const now = new Date();
+
+  // Calculate metrics for each time range
+  const last30MinutesMetrics = calculateFeedbackMetrics(
+    new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
+    now.toISOString(),
+    new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
+    new Date(now.getTime() - 30 * 60 * 1000).toISOString()
+  );
+
+  const lastHourMetrics = calculateFeedbackMetrics(
+    new Date(now.getTime() - 60 * 60 * 1000).toISOString(),
+    now.toISOString(),
+    new Date(now.getTime() - 120 * 60 * 1000).toISOString(),
+    new Date(now.getTime() - 60 * 60 * 1000).toISOString()
+  );
+
+  const todayMetrics = calculateFeedbackMetrics(
+    new Date(now.toISOString().split('T')[0]).toISOString(),
+    now.toISOString(),
+    new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0],
+    new Date(now.toISOString().split('T')[0]).toISOString()
+  );
+
+  const last7DaysMetrics = calculateFeedbackMetrics(
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    now.toISOString(),
+    new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  );
 
   return (
     <DashboardFrame>
@@ -175,42 +245,38 @@ const DashboardPage = () => {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <MetricCard
-            title="Last 30 Minutes"
-            feedback={feedback}
-            startTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()} // Last 30 minutes
-            endTime={now.toISOString()} // Current time
-            previousStartTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()} // 1 hour ago
-            previousEndTime={new Date(now.getTime() - 30 * 60 * 1000).toISOString()} // 30 minutes ago
-            icon={Clock}
-          />
-          <MetricCard
-            title="Last Hour"
-            feedback={feedback}
-            startTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()} // Last hour
-            endTime={now.toISOString()} // Current time
-            previousStartTime={new Date(now.getTime() - 120 * 60 * 1000).toISOString()} // 2 hours ago
-            previousEndTime={new Date(now.getTime() - 60 * 60 * 1000).toISOString()} // 1 hour ago
-            icon={Users}
-          />
-          <MetricCard
-            title="Today"
-            feedback={feedback}
-            startTime={new Date(now.toISOString().split('T')[0]).toISOString()} // Start of today
-            endTime={now.toISOString()} // Current time
-            previousStartTime={new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0]} // Start of yesterday
-            previousEndTime={new Date(now.toISOString().split('T')[0]).toISOString()} // End of yesterday
-            icon={Calendar}
-          />
-          <MetricCard
-            title="Last 7 Days"
-            feedback={feedback}
-            startTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()} // 7 days ago
-            endTime={now.toISOString()} // Current time
-            previousStartTime={new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()} // 14 days ago
-            previousEndTime={new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()} // 7 days ago
-            icon={TrendingUp}
-          />
+            <MetricCard
+              title="Last 30 Minutes"
+              value={last30MinutesMetrics.currentCount}
+              trend={last30MinutesMetrics.trend}
+              trendValue={last30MinutesMetrics.trendValue}
+              compareText="Compared to previous 30 mins"
+              icon={Clock}
+            />
+            <MetricCard
+              title="Last Hour"
+              value={lastHourMetrics.currentCount}
+              trend={lastHourMetrics.trend}
+              trendValue={lastHourMetrics.trendValue}
+              compareText="Compared to previous hour"
+              icon={Users}
+            />
+            <MetricCard
+              title="Today"
+              value={todayMetrics.currentCount}
+              trend={todayMetrics.trend}
+              trendValue={todayMetrics.trendValue}
+              compareText="Compared to yesterday"
+              icon={Calendar}
+            />
+            <MetricCard
+              title="Last 7 Days"
+              value={last7DaysMetrics.currentCount}
+              trend={last7DaysMetrics.trend}
+              trendValue={last7DaysMetrics.trendValue}
+              compareText="Compared to previous week"
+              icon={TrendingUp}
+            />
           </div>
         </div>
 
