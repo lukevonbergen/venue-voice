@@ -4,6 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
+import { FaCheckSquare } from 'react-icons/fa'; // Import the icon
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -198,7 +199,7 @@ const TablesPage = () => {
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                   >
-                    ✓
+                    <FaCheckSquare /> {/* Use the React icon here */}
                   </button>
                 </div>
 
