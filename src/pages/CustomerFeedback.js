@@ -101,37 +101,48 @@ const CustomerFeedbackPage = () => {
     };
     const rating = emojiToRating[emoji];
 
-    // Save feedback to the database
+    // Log all questions except the NPS question
+    const feedbackData = questions
+      .filter((question) => question.id !== 'nps') // Exclude the NPS question
+      .map((question) => ({
+        venue_id: venueId,
+        question_id: question.id,
+        sentiment: emoji,
+        rating: rating,
+        table_number: tableNumber || null, // Include table number
+        session_id: sessionId, // Include session_id
+      }));
+
+    // Save all feedback entries to the database
+    const { error } = await supabase
+      .from('feedback')
+      .insert(feedbackData);
+
+    if (error) {
+      console.error('Error saving feedback:', error);
+      toast.error('Failed to save feedback');
+    } else {
+      // Move to the next question or show additional feedback
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      } else {
+        setShowAdditionalFeedback(true);
+      }
+    }
+  };
+
+  const handleNPSRating = async (rating) => {
+    // Log the NPS rating without a session_id
     await supabase
       .from('feedback')
       .insert([
         {
           venue_id: venueId,
-          question_id: questions[currentQuestionIndex].id,
-          sentiment: emoji,
+          question_id: 'nps', // Use 'nps' as the question_id for the NPS question
+          sentiment: null,
           rating: rating,
           table_number: tableNumber || null, // Include table number
-          session_id: sessionId, // Include session_id
-        },
-      ]);
-
-    // Move to the next question or show additional feedback
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      setShowAdditionalFeedback(true);
-    }
-  };
-
-  const handleNPSRating = async (rating) => {
-    await supabase
-      .from('nps_scores')
-      .insert([
-        {
-          venue_id: venueId,
-          score: rating,
-          table_number: tableNumber || null, // Include table number
-          session_id: sessionId, // Include session_id
+          session_id: null, // Exclude session_id for the NPS question
         },
       ]);
 
