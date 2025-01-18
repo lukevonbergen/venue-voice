@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FeedbackTableCard = ({ feedback, onMarkAsActioned, onMoveBackToUnactioned }) => {
+const FeedbackTableCard = ({ feedback, onToggleActioned }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -32,22 +32,17 @@ const FeedbackTableCard = ({ feedback, onMarkAsActioned, onMoveBackToUnactioned 
         </div>
       )}
 
-      <div className="mt-4">
-        {feedback.is_actioned ? (
-          <button
-            onClick={() => onMoveBackToUnactioned(feedback.id)}
-            className="text-sm text-red-500 hover:text-red-700"
-          >
-            Move back to unactioned
-          </button>
-        ) : (
-          <button
-            onClick={() => onMarkAsActioned(feedback.id)}
-            className="text-sm text-green-500 hover:text-green-700"
-          >
-            Mark as actioned
-          </button>
-        )}
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={onToggleActioned}
+          className={`p-2 rounded-full ${
+            feedback.is_actioned
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          ✓
+        </button>
       </div>
     </div>
   );

@@ -66,31 +66,21 @@ const TablesPage = () => {
     return () => unsubscribe();
   }, [activeTab, page]);
 
-  const handleMarkAsActioned = async (feedbackId) => {
+  const toggleActionedStatus = async (feedbackId, isActioned) => {
     const { error } = await supabase
       .from('feedback')
-      .update({ is_actioned: true })
+      .update({ is_actioned: !isActioned })
       .eq('id', feedbackId);
 
     if (error) {
-      console.error('Error marking feedback as actioned:', error);
+      console.error('Error toggling feedback status:', error);
     } else {
-      toast.success('Marked as actioned');
-      setFeedback((prev) => prev.filter((fb) => fb.id !== feedbackId));
-    }
-  };
-
-  const handleMoveBackToUnactioned = async (feedbackId) => {
-    const { error } = await supabase
-      .from('feedback')
-      .update({ is_actioned: false })
-      .eq('id', feedbackId);
-
-    if (error) {
-      console.error('Error moving feedback back to unactioned:', error);
-    } else {
-      toast.success('Moved back to unactioned');
-      setFeedback((prev) => prev.filter((fb) => fb.id !== feedbackId));
+      toast.success(`Feedback marked as ${isActioned ? 'unactioned' : 'actioned'}`);
+      setFeedback((prev) =>
+        prev.map((fb) =>
+          fb.id === feedbackId ? { ...fb, is_actioned: !isActioned } : fb
+        )
+      );
     }
   };
 
@@ -108,20 +98,31 @@ const TablesPage = () => {
           <SortFilterDropdown sortBy={sortBy} setSortBy={setSortBy} />
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {feedback.map((fb) => (
+            <FeedbackTableCard
+              key={fb.id}
+              feedback={fb}
+              onToggleActioned={() => toggleActionedStatus(fb.id, fb.is_actioned)}
+            />
+          ))}
+        </div>
+
         <InfiniteScroll
           dataLength={feedback.length}
           next={loadMoreFeedback}
           hasMore={hasMore}
           loader={<p>Loading...</p>}
         >
-          {feedback.map((fb) => (
-            <FeedbackTableCard
-              key={fb.id}
-              feedback={fb}
-              onMarkAsActioned={handleMarkAsActioned}
-              onMoveBackToUnactioned={handleMoveBackToUnactioned}
-            />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {feedback.map((fb) => (
+              <FeedbackTableCard
+                key={fb.id}
+                feedback={fb}
+                onToggleActioned={() => toggleActionedStatus(fb.id, fb.is_actioned)}
+              />
+            ))}
+          </div>
         </InfiniteScroll>
 
         <ToastContainer position="top-right" autoClose={3000} />
