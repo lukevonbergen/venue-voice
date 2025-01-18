@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
-import { FaCheckSquare } from 'react-icons/fa'; // Import the icon
+import { FaCheckSquare } from 'react-icons/fa'; // Correct import
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);
