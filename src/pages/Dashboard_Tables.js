@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
-import { FaCheckSquare } from 'react-icons/fa'; // React icon for the action button
+import { FaCheckSquare } from 'react-icons/fa';
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -16,19 +16,18 @@ const TablesPage = () => {
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+    return today.toISOString().split('T')[0];
   };
 
   // Fetch feedback from Supabase
   const fetchFeedback = async () => {
-    const today = getTodayDate(); // Get today's date
+    const today = getTodayDate();
 
     const { data, error } = await supabase
       .from('feedback')
-      .select('*') // Ensure 'id' is included in the response
+      .select('*')
       .not('table_number', 'is', null)
-      .eq('is_actioned', activeTab === 'actioned')
-      .gte('timestamp', `${today}T00:00:00Z`) // Filter for today's feedback
+      .gte('timestamp', `${today}T00:00:00Z`)
       .lte('timestamp', `${today}T23:59:59Z`)
       .order('timestamp', { ascending: false })
       .range((page - 1) * 10, page * 10 - 1);
@@ -39,10 +38,10 @@ const TablesPage = () => {
     } else {
       // Group feedback by session_id or id if session_id is missing
       const groupedFeedback = data.reduce((acc, fb) => {
-        const key = fb.session_id || fb.id; // Use session_id if available, otherwise use id
+        const key = fb.session_id || fb.id;
         if (!acc[key]) {
           acc[key] = {
-            id: fb.id, // Include the feedback ID
+            id: fb.id,
             session_id: fb.session_id,
             table_number: fb.table_number,
             timestamp: fb.timestamp,
@@ -78,12 +77,10 @@ const TablesPage = () => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: 'table_number=not.is.null' },
         (payload) => {
-          if (!payload.new.is_actioned && activeTab === 'unactioned') {
-            const today = getTodayDate();
-            const feedbackDate = new Date(payload.new.timestamp).toISOString().split('T')[0];
-            if (feedbackDate === today) {
-              setFeedback((prev) => [payload.new, ...prev]);
-            }
+          const today = getTodayDate();
+          const feedbackDate = new Date(payload.new.timestamp).toISOString().split('T')[0];
+          if (feedbackDate === today) {
+            setFeedback((prev) => [payload.new, ...prev]);
           }
         }
       )
@@ -117,21 +114,18 @@ const TablesPage = () => {
       return;
     }
 
-    console.log('Toggling feedback status:', feedbackId, isActioned); // Debugging
-
     const { data, error } = await supabase
       .from('feedback')
       .update({ is_actioned: !isActioned })
-      .eq('id', feedbackId) // Use the feedback ID to identify the entry
+      .eq('id', feedbackId)
       .select();
 
     if (error) {
       console.error('Error toggling feedback status:', error);
       toast.error(`Failed to update feedback status: ${error.message}`);
     } else {
-      console.log('Updated feedback:', data); // Debugging
       toast.success(`Feedback marked as ${!isActioned ? 'actioned' : 'unactioned'}`);
-      fetchFeedback(); // Refetch feedback after update
+      fetchFeedback();
     }
   };
 
@@ -146,6 +140,10 @@ const TablesPage = () => {
     const total = questions.reduce((sum, question) => sum + (question.rating || 0), 0);
     return (total / questions.length).toFixed(1);
   };
+
+  // Calculate counts for unactioned and actioned feedback
+  const unactionedCount = feedback.filter((fb) => !fb.is_actioned).length;
+  const actionedCount = feedback.filter((fb) => fb.is_actioned).length;
 
   return (
     <DashboardFrame>
@@ -162,7 +160,7 @@ const TablesPage = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Unactioned ({feedback.filter((fb) => !fb.is_actioned).length})
+            Unactioned ({unactionedCount}) {/* Always show the correct count */}
           </button>
           <button
             onClick={() => setActiveTab('actioned')}
@@ -172,7 +170,7 @@ const TablesPage = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Actioned ({feedback.filter((fb) => fb.is_actioned).length})
+            Actioned ({actionedCount}) {/* Always show the correct count */}
           </button>
         </div>
 
@@ -181,47 +179,49 @@ const TablesPage = () => {
           dataLength={feedback.length}
           next={loadMoreFeedback}
           hasMore={hasMore}
-          loader={hasMore ? <p>Loading...</p> : null} // Only show "Loading..." if there's more data
+          loader={hasMore ? <p>Loading...</p> : null}
         >
           <div className="space-y-4">
-            {feedback.map((fb) => (
-              <div key={fb.id} className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
-                    <p className="text-sm text-gray-500">
-                      {new Date(fb.timestamp).toLocaleString()}
+            {feedback
+              .filter((fb) => (activeTab === 'unactioned' ? !fb.is_actioned : fb.is_actioned))
+              .map((fb) => (
+                <div key={fb.id} className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-bold">Table {fb.table_number}</h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(fb.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)}
+                      className={`p-2 rounded-full ${
+                        fb.is_actioned
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      <FaCheckSquare />
+                    </button>
+                  </div>
+
+                  {/* Average Rating */}
+                  <div className="mt-4">
+                    <p className="font-semibold">Average Rating:</p>
+                    <p className="text-sm text-gray-600">
+                      {calculateAverageRating(fb.questions)} / 5
                     </p>
                   </div>
-                  <button
-                    onClick={() => toggleActionedStatus(fb.id, fb.is_actioned)} // Use fb.id instead of fb.session_id
-                    className={`p-2 rounded-full ${
-                      fb.is_actioned
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    <FaCheckSquare /> {/* Use the React icon here */}
-                  </button>
-                </div>
 
-                {/* Average Rating */}
-                <div className="mt-4">
-                  <p className="font-semibold">Average Rating:</p>
-                  <p className="text-sm text-gray-600">
-                    {calculateAverageRating(fb.questions)} / 5
-                  </p>
+                  {/* Additional Feedback */}
+                  {fb.additional_feedback && (
+                    <div className="mt-4">
+                      <p className="font-semibold">Additional Feedback:</p>
+                      <p className="text-sm text-gray-600">{fb.additional_feedback}</p>
+                    </div>
+                  )}
                 </div>
-
-                {/* Additional Feedback */}
-                {fb.additional_feedback && (
-                  <div className="mt-4">
-                    <p className="font-semibold">Additional Feedback:</p>
-                    <p className="text-sm text-gray-600">{fb.additional_feedback}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
           </div>
         </InfiniteScroll>
 
