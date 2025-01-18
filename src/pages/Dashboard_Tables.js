@@ -12,13 +12,23 @@ const TablesPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
 
+  // Helper function to get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+  };
+
   // Fetch feedback from Supabase
   const fetchFeedback = async () => {
+    const today = getTodayDate(); // Get today's date
+
     const { data, error } = await supabase
       .from('feedback')
       .select('*')
       .not('table_number', 'is', null)
       .eq('is_actioned', activeTab === 'actioned')
+      .gte('timestamp', `${today}T00:00:00Z`) // Filter for today's feedback
+      .lte('timestamp', `${today}T23:59:59Z`)
       .order('timestamp', { ascending: false })
       .range((page - 1) * 10, page * 10 - 1);
 
@@ -66,7 +76,11 @@ const TablesPage = () => {
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: 'table_number=not.is.null' },
         (payload) => {
           if (!payload.new.is_actioned && activeTab === 'unactioned') {
-            setFeedback((prev) => [payload.new, ...prev]);
+            const today = getTodayDate();
+            const feedbackDate = new Date(payload.new.timestamp).toISOString().split('T')[0];
+            if (feedbackDate === today) {
+              setFeedback((prev) => [payload.new, ...prev]);
+            }
           }
         }
       )
@@ -125,7 +139,7 @@ const TablesPage = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Tables Feedback</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Today's Feedback</h1>
 
         {/* Tabs for Actioned/Unactioned Feedback */}
         <div className="flex space-x-4 mb-6">
