@@ -110,6 +110,42 @@ const DashboardPage = () => {
     }
   };
 
+  // Function to calculate the average rating for a specific question
+  const calculateAverageRating = (questionId) => {
+    const relevantFeedback = feedback.filter((f) => f.question_id === questionId);
+    if (relevantFeedback.length === 0) return 0;
+
+    const totalRating = relevantFeedback.reduce((sum, f) => sum + f.rating, 0);
+    return (totalRating / relevantFeedback.length).toFixed(1);
+  };
+
+  // Function to calculate the overall average rating across all feedback
+  const calculateOverallAverageRating = () => {
+    if (feedback.length === 0) return 0;
+
+    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
+    return (totalRating / feedback.length).toFixed(1);
+  };
+
+  // Function to generate suggested actions based on low-rated questions
+  const generateSuggestedActions = () => {
+    const suggestedActions = [];
+    const ratingThreshold = 3.5;
+
+    questions.forEach((q) => {
+      const averageRating = calculateAverageRating(q.id);
+      if (averageRating < ratingThreshold) {
+        suggestedActions.push({
+          question: q.question,
+          rating: averageRating,
+          suggestion: `Consider improving ${q.question.toLowerCase()}.`,
+        });
+      }
+    });
+
+    return suggestedActions;
+  };
+
   const now = new Date();
 
   return (
