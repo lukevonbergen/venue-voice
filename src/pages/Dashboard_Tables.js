@@ -76,18 +76,30 @@ const TablesPage = () => {
       .channel('feedback')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'feedback', filter: 'table_number=not.is.null' },
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'feedback', 
+          filter: 'table_number=not.is.null' 
+        },
         (payload) => {
           const today = getTodayDate();
           const feedbackDate = new Date(payload.new.timestamp).toISOString().split('T')[0];
-          if (feedbackDate === today) {
+          
+          // Only add feedback if it's from today and not already in the state
+          if (feedbackDate === today && !feedback.some(fb => fb.id === payload.new.id)) {
             setFeedback((prev) => [payload.new, ...prev]);
           }
         }
       )
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'feedback', filter: 'table_number=not.is.null' },
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'feedback', 
+          filter: 'table_number=not.is.null' 
+        },
         (payload) => {
           setFeedback((prev) =>
             prev.map((fb) => (fb.session_id === payload.new.session_id ? payload.new : fb))
