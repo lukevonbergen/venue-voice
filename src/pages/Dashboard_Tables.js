@@ -25,7 +25,10 @@ const TablesPage = () => {
 
     const { data, error } = await supabase
       .from('feedback')
-      .select('*')
+      .select(`
+        *,
+        questions!inner (question_text)
+      `)
       .not('table_number', 'is', null)
       .gte('timestamp', `${today}T00:00:00Z`)
       .lte('timestamp', `${today}T23:59:59Z`)
@@ -46,20 +49,14 @@ const TablesPage = () => {
             table_number: fb.table_number,
             timestamp: fb.timestamp,
             is_actioned: fb.is_actioned,
-            questions: [],
-            additional_feedback: null,
+            questions: fb.questions.map(q => ({
+              question_id: q.question_id,
+              question_text: q.question_text, // Fetch question_text from the joined table
+              sentiment: fb.sentiment,
+              rating: fb.rating,
+            })),
+            additional_feedback: fb.additional_feedback,
           };
-        }
-        if (fb.question_id) {
-          acc[key].questions.push({
-            question_id: fb.question_id,
-            question_text: fb.question_text, // Assuming question_text is available
-            sentiment: fb.sentiment,
-            rating: fb.rating,
-          });
-        }
-        if (fb.additional_feedback) {
-          acc[key].additional_feedback = fb.additional_feedback;
         }
         return acc;
       }, {});
