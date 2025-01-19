@@ -49,12 +49,12 @@ const TablesPage = () => {
             table_number: fb.table_number,
             timestamp: fb.timestamp,
             is_actioned: fb.is_actioned,
-            questions: fb.questions.map(q => ({
+            questions: fb.questions ? fb.questions.map(q => ({
               question_id: q.id, // Use q.id instead of q.question_id
               question_text: q.question, // Use q.question instead of q.question_text
               sentiment: fb.sentiment,
               rating: fb.rating,
-            })),
+            })) : [], // Handle null or undefined questions
             additional_feedback: fb.additional_feedback,
           };
         }
@@ -222,6 +222,7 @@ const FeedbackCard = ({ fb, onDelete, onToggleAction }) => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const calculateAverageRating = (questions) => {
+    if (!questions || questions.length === 0) return 0; // Handle empty questions
     const sum = questions.reduce((acc, q) => acc + q.rating, 0);
     return (sum / questions.length).toFixed(1);
   };
@@ -314,22 +315,26 @@ const FeedbackCard = ({ fb, onDelete, onToggleAction }) => {
       <div className="mt-6">
         <h4 className="font-semibold text-gray-900 mb-3">Feedback Details</h4>
         <div className="space-y-3">
-          {fb.questions.map((question, index) => (
-            <div
-              key={question.question_id}
-              className="bg-gray-50 rounded-lg p-4"
-            >
-              <div className="flex justify-between items-start gap-4">
-                <p className="text-sm text-gray-600 flex-1">
-                  <span className="font-medium text-gray-900">{question.question_text}</span>
-                </p>
-                <div className="flex items-center gap-1">
-                  <span className="font-medium">{question.rating}</span>
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+          {fb.questions && fb.questions.length > 0 ? (
+            fb.questions.map((question, index) => (
+              <div
+                key={question.question_id}
+                className="bg-gray-50 rounded-lg p-4"
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <p className="text-sm text-gray-600 flex-1">
+                    <span className="font-medium text-gray-900">{question.question_text}</span>
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium">{question.rating}</span>
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">No questions available.</p>
+          )}
         </div>
       </div>
 
