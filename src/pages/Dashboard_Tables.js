@@ -27,7 +27,7 @@ const TablesPage = () => {
       .from('feedback')
       .select(`
         *,
-        questions!inner (question_text)
+        questions (question)  // Use "question" instead of "question_text"
       `)
       .not('table_number', 'is', null)
       .gte('timestamp', `${today}T00:00:00Z`)
@@ -50,8 +50,8 @@ const TablesPage = () => {
             timestamp: fb.timestamp,
             is_actioned: fb.is_actioned,
             questions: fb.questions.map(q => ({
-              question_id: q.question_id,
-              question_text: q.question_text, // Fetch question_text from the joined table
+              question_id: q.id, // Use q.id instead of q.question_id
+              question_text: q.question, // Use q.question instead of q.question_text
               sentiment: fb.sentiment,
               rating: fb.rating,
             })),
