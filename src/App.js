@@ -68,22 +68,6 @@ function App() {
     };
   }, []);
 
-  // Add the Cookiebot script to the DOM
-  useEffect(() => {
-    const cookiebotScript = document.createElement('script');
-    cookiebotScript.id = 'Cookiebot';
-    cookiebotScript.src = 'https://consent.cookiebot.com/uc.js';
-    cookiebotScript.setAttribute('data-cbid', '3bca70ec-7544-44e3-8041-edb93db0d970');
-    cookiebotScript.setAttribute('data-blockingmode', 'auto');
-    cookiebotScript.type = 'text/javascript';
-    document.body.appendChild(cookiebotScript);
-
-    // Cleanup function to remove the script when the component unmounts
-    return () => {
-      document.body.removeChild(cookiebotScript);
-    };
-  }, []);
-
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
@@ -121,7 +105,7 @@ const AppWrapper = () => (
   <Router>
     <App />
     <Analytics />
-    <SpeedInsights />
+    <SpeedInsights /> {/* Add SpeedInsights here */}
   </Router>
 );
 
