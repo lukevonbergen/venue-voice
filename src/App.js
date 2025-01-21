@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'; // Import useEffect
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react'; // Import the Analytics component
+import { SpeedInsights } from "@vercel/speed-insights/react"; // Import SpeedInsights
 import LandingPage from './pages/LandingPage';
 import 'antd/dist/reset.css';
 import DashboardPage from './pages/Dashboard';
@@ -104,6 +105,7 @@ const AppWrapper = () => (
   <Router>
     <App />
     <Analytics />
+    <SpeedInsights /> {/* Add SpeedInsights here */}
   </Router>
 );
 
