@@ -103,19 +103,6 @@ const ContactPage = () => {
                     <p className="text-lg font-medium text-gray-900">+44 7932 065 904</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Visit us at</p>
-                    <p className="text-lg font-medium text-gray-900">
-                      123 Feedback Lane
-                      <br />
-                      London, UK
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
