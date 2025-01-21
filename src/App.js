@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // Import useEffect
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react'; // Import the Analytics component
 import LandingPage from './pages/LandingPage';
@@ -31,6 +31,21 @@ import ResetPassword from './pages/ResetPassword';
 import './index.css';
 
 function App() {
+  // Add the HubSpot script to the DOM
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//js.hs-scripts.com/48822376.js';
+    script.async = true;
+    script.defer = true;
+    script.id = 'hs-script-loader';
+    document.body.appendChild(script);
+
+    // Cleanup function to remove the script when the component unmounts
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
