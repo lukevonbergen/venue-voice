@@ -33,16 +33,37 @@ import './index.css';
 function App() {
   // Add the HubSpot script to the DOM
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = '//js.hs-scripts.com/48822376.js';
-    script.async = true;
-    script.defer = true;
-    script.id = 'hs-script-loader';
-    document.body.appendChild(script);
+    const hubspotScript = document.createElement('script');
+    hubspotScript.src = '//js.hs-scripts.com/48822376.js';
+    hubspotScript.async = true;
+    hubspotScript.defer = true;
+    hubspotScript.id = 'hs-script-loader';
+    document.body.appendChild(hubspotScript);
 
     // Cleanup function to remove the script when the component unmounts
     return () => {
-      document.body.removeChild(script);
+      document.body.removeChild(hubspotScript);
+    };
+  }, []);
+
+  // Add the Google Analytics (gtag.js) script to the DOM
+  useEffect(() => {
+    const gtagScript = document.createElement('script');
+    gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-QQHE0F4NQR';
+    gtagScript.async = true;
+    document.head.appendChild(gtagScript);
+
+    // Initialize Google Analytics
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      window.dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'G-QQHE0F4NQR');
+
+    // Cleanup function to remove the script when the component unmounts
+    return () => {
+      document.head.removeChild(gtagScript);
     };
   }, []);
 
