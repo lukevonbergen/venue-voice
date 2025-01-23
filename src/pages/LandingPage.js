@@ -109,23 +109,33 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Social Proof Section */}
-      {/* <div className="bg-white py-16">
+      {/* Dynamic Statistics Section */}
+      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Trusted by Leading Venues</h2>
-            <div className="flex justify-center items-center space-x-12 mt-8 grayscale opacity-60">
-              <div className="h-12 w-32 bg-gray-200 rounded"></div>
-              <div className="h-12 w-32 bg-gray-200 rounded"></div>
-              <div className="h-12 w-32 bg-gray-200 rounded"></div>
-              <div className="h-12 w-32 bg-gray-200 rounded"></div>
-            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us?</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              See how we make a difference
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { value: "8.5X", label: "More Memorable", desc: "Viewers retain 95% of a message when they watch it in a video." },
+              { value: "20X", label: "Your Reach", desc: "Members on social media are 20x more likely to share and engage with a video." },
+              { value: "$30K", label: "In Cost Savings", desc: "Save on video editing and production costs." }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center">
+                <h3 className="text-4xl font-bold text-green-600 mb-2">{stat.value}</h3>
+                <p className="text-xl font-semibold text-gray-900 mb-2">{stat.label}</p>
+                <p className="text-gray-600">{stat.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* How It Works Section */}
-      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
+      <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
@@ -172,7 +182,7 @@ const LandingPage = () => {
       </div>
 
       {/* Features Section with Zigzag Layout */}
-      <div className="bg-white py-16">
+      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need to Succeed</h2>
@@ -228,16 +238,16 @@ const LandingPage = () => {
       </div>
 
       {/* Call to Action Section */}
-      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
+      <div className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Delight More Guests?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+          <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-3xl shadow-xl p-8 md:p-12 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">Ready to Delight More Guests?</h2>
+            <p className="text-gray-200 max-w-2xl mx-auto mb-8">
               Join other hospitality teams who are using Chatters to prevent issues and maintain service excellence.
             </p>
             <button
               onClick={openDemoModal}
-              className="px-8 py-3 text-base font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center space-x-2 mx-auto"
+              className="px-8 py-3 text-base font-medium rounded-xl text-green-600 bg-white hover:bg-gray-50 transition-colors flex items-center space-x-2 mx-auto"
             >
               <span>Book your demo</span>
               <ArrowRight className="h-4 w-4" />
