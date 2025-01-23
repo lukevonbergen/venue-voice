@@ -49,30 +49,30 @@ const LandingPage = () => {
       <Navbar />
 
       {/* New Hero Section */}
-      <section className="pt-12 bg-gray-50 sm:pt-16">
+      <section className="pt-24 bg-gray-50 sm:pt-32">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="px-6 text-lg text-gray-600 font-inter">Smart email campaign builder, made for Developers</h1>
+            <h1 className="px-6 text-lg text-gray-600 font-inter">Real-time customer feedback platform</h1>
             <p className="mt-5 text-4xl font-bold leading-tight text-gray-900 sm:leading-tight sm:text-5xl lg:text-6xl lg:leading-tight font-pj">
-              Turn your visitors into profitable
               <span className="relative inline-flex sm:inline">
-                <span className="bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] blur-lg filter opacity-30 w-full h-full absolute inset-0"></span>
-                <span className="relative"> business </span>
+                <span className="bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 blur-lg filter opacity-30 w-full h-full absolute inset-0"></span>
+                <span className="relative">Prevent Bad Reviews</span>
               </span>
+              <span className="block mt-4">Before They Happen</span>
             </p>
 
             <div className="px-8 sm:items-center sm:justify-center sm:px-0 sm:space-x-5 sm:flex mt-9">
               <a
-                href="#"
+                href="/pricing"
                 title=""
                 className="inline-flex items-center justify-center w-full px-8 py-3 text-lg font-bold text-white transition-all duration-200 bg-gray-900 border-2 border-transparent sm:w-auto rounded-xl font-pj hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
                 role="button"
               >
-                Get more customers
+                Pricing
               </a>
 
               <a
-                href="#"
+                href="/demo"
                 title=""
                 className="inline-flex items-center justify-center w-full px-6 py-3 mt-4 text-lg font-bold text-gray-900 transition-all duration-200 border-2 border-gray-400 sm:w-auto sm:mt-0 rounded-xl font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 hover:bg-gray-900 focus:bg-gray-900 hover:text-white focus:text-white hover:border-gray-900 focus:border-gray-900"
                 role="button"
@@ -86,11 +86,11 @@ const LandingPage = () => {
                     strokeLinejoin="round"
                   />
                 </svg>
-                Watch free demo
+                Schedule a Demo
               </a>
             </div>
 
-            <p className="mt-8 text-base text-gray-500 font-inter">60 Days free trial · No credit card required</p>
+            <p className="mt-8 text-base text-gray-500 font-inter">Easy Setup · No Hardware</p>
           </div>
         </div>
 
@@ -104,7 +104,7 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </section>
+</section>
 
       {/* Dynamic Statistics Section */}
       <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
