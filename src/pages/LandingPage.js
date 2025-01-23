@@ -57,7 +57,7 @@ const LandingPage = () => {
         <span className="relative inline-flex sm:inline">
           <span className="relative">Prevent Bad Reviews</span>
         </span>
-        <span className="block mt-2">Before They Happen</span>
+        <span className="block">Before They Happen</span>
       </p>
 
       <div className="px-8 sm:items-center sm:justify-center sm:px-0 sm:space-x-5 sm:flex mt-9">
@@ -98,7 +98,7 @@ const LandingPage = () => {
       <div className="absolute inset-0 h-2/3 bg-gray-50"></div>
       <div className="relative mx-auto">
         <div className="lg:max-w-6xl lg:mx-auto">
-          <img className="transform scale-110" src="https://cdn.rareblocks.xyz/collection/clarity/images/hero/2/illustration.png" alt="" />
+          <img className="transform scale-110" src="/public/img/hero-product-img.png" alt="Chatters Dashboard Showing NPS Score Dashboard" />
         </div>
       </div>
     </div>
