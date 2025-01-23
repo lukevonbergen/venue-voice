@@ -120,9 +120,9 @@ const LandingPage = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { value: "8.5X", label: "More Memorable", desc: "Viewers retain 95% of a message when they watch it in a video." },
-              { value: "20X", label: "Your Reach", desc: "Members on social media are 20x more likely to share and engage with a video." },
-              { value: "$30K", label: "In Cost Savings", desc: "Save on video editing and production costs." }
+              { value: "73%", label: "Issues Prevented", desc: "Proactively resolve issues before they escalate." },
+              { value: "89%", label: "Faster Response", desc: "Significantly improve response times to guest needs." },
+              { value: "94%", label: "Guest Satisfaction", desc: "Achieve higher guest satisfaction and positive reviews." }
             ].map((stat, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center">
                 <h3 className="text-4xl font-bold text-green-600 mb-2">{stat.value}</h3>
