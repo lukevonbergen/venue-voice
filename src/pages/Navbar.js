@@ -114,7 +114,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-3">
                   <Link
                     to="/signin"
-                    className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                    className="px-4 py-2 text-white bg-black rounded-lg hover:bg-black transition-colors flex items-center space-x-2"
                   >
                     <span>Login</span>
                     <ArrowRight className="h-4 w-4" />
@@ -175,7 +175,7 @@ const Navbar = () => {
                 <div className="flex flex-col space-y-3">
                   <Link
                     to="/signin"
-                    className="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                    className="px-4 py-2 text-white bg-black rounded-lg hover:bg-black transition-colors flex items-center space-x-2"
                   >
                     <span>Login</span>
                     <ArrowRight className="h-4 w-4" />
