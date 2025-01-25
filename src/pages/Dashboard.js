@@ -8,7 +8,7 @@ import SatisfactionCard from '../components/dashboard/SatisfactionCard';
 import ActionCard from '../components/dashboard/ActionCard';
 import FeedbackFeed from '../components/dashboard/FeedbackFeed';
 import LiveUpdatesToggle from '../components/dashboard/LiveUpdatesToggle';
-import MetricCard from '../components/dashboard/MetricCard';
+import MetricsSection from '../components/dashboard/MetricsSection'; // Import MetricsSection
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -158,8 +158,8 @@ const DashboardPage = () => {
             difference={Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}
           />
 
-          {/* Use the MetricsCards component */}
-          <MetricCard venueId={venueId} />
+          {/* Use the MetricsSection component */}
+          <MetricsSection venueId={venueId} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
