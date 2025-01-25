@@ -81,20 +81,22 @@ const Navbar = () => {
             </button>
             {isFeaturesDropdownOpen && (
               <div
-                className="z-50 flex w-full flex-col rounded-lg px-5 py-5 lg:absolute lg:top-20 lg:w-[500px] bg-gray-100 lg:flex-row lg:flex-wrap lg:py-7 xl:w-[600px]"
+                className="z-50 absolute top-full left-0 mt-2 w-[500px] bg-white rounded-lg shadow-lg border border-gray-200"
                 onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
                 onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
               >
-                {features.map((feature, index) => (
-                  <Link
-                    key={index}
-                    to={feature.path}
-                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    {feature.icon}
-                    <span className="text-gray-700 whitespace-nowrap">{feature.name}</span>
-                  </Link>
-                ))}
+                <div className="p-6 grid grid-cols-2 gap-4">
+                  {features.map((feature, index) => (
+                    <Link
+                      key={index}
+                      to={feature.path}
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      {feature.icon}
+                      <span className="text-gray-700 whitespace-nowrap">{feature.name}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
