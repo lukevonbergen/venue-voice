@@ -3,89 +3,117 @@ import { Globe, MessageSquare, Check } from 'lucide-react';
 
 const HowItWorksSection = () => {
   return (
-    <section>
+<section className="py-12">
       {/* Container */}
-      <div className="mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-20">
-        {/* Title */}
-        <h2 className="text-center text-3xl font-bold md:text-5xl">
-          How it works
-        </h2>
-        <p className="mx-auto mb-8 mt-4 max-w-3xl text-center text-sm text-gray-500 sm:text-base md:mb-12 lg:mb-16">
-          How does using Chatters help you meet your KPI's? Here's a step-by-step guide.
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-5 py-16 md:px-10 md:py-20">
+        {/* HEADING TEXT */}
+        <p className="font-inter mb-2 text-center text-sm font-medium">
+          3 EASY STEPS
         </p>
-        {/* Content */}
-        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
-          {/* List */}
-          <div className="flex h-full flex-col [grid-area:2/1/3/2] lg:[grid-area:1/2/2/3]">
-            {/* Item */}
-            <a
-              className="mb-8 flex max-w-lg justify-center gap-4 rounded-xl border-b border-solid border-gray-300 px-6 py-5 text-black"
-              href="#w-tabs-0-data-w-pane-0"
+        <h1 className="text-center text-3xl font-bold lg:text-4xl">
+          How it works
+        </h1>
+        <p className="font-inter mx-auto mb-12 mt-4 max-w-lg px-5 text-center text-base font-light text-gray-500">
+         Using Chatters is as easy as 1, 2, 3. Here's how it works.
+        </p>
+        {/* HOW IT WORKS STEPS */}
+        <div className="flex flex-col items-start justify-center lg:flex-row">
+          {/* BLOCK */}
+          <div className="relative my-8 flex w-full rounded-md lg:mx-8 lg:flex-col">
+            <div className="flex h-16 w-16 items-center justify-center rounded-md bg-gray-200">
+              <h2 className="text-3xl font-medium">1</h2>
+            </div>
+            <div className="ml-6 lg:ml-0">
+              <h2 className="mb-5 text-xl font-medium lg:mt-8">
+                Guests scan QR code
+              </h2>
+              <p className="font-inter max-w-md pr-5 text-base text-gray-500">
+                A guest scans the QR code at their table to leave feedback.
+              </p>
+            </div>
+            {/* MOBILE - HOW IT WORKS LINE */}
+            <svg
+              className="absolute -bottom-[48px] left-[28px] lg:hidden"
+              width="12"
+              height="70"
+              viewBox="0 0 12 95"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
-                <p className="text-sm font-bold sm:text-base">1</p>
-              </div>
-              <div className="ml-4 flex flex-col gap-2">
-                <h5 className="text-xl font-bold">
-                  Guests scan a QR code
-                </h5>
-                <p className="text-sm text-gray-500">
-                  Your guests scan a QR code, allowing them to leave real-time feedback, while they're at the table.
-                </p>
-              </div>
-            </a>
-            {/* Item */}
-            <a
-              className="mb-8 flex max-w-lg justify-center gap-4 px-6 py-5 border-b border-solid border-gray-300 text-black"
-              href="#w-tabs-0-data-w-pane-1"
+              <path
+                d="M6 0.226497L0.226497 6L6 11.7735L11.7735 6L6 0.226497ZM6 94.7735L11.7735 89L6 83.2265L0.226497 89L6 94.7735ZM5 6V10.15H7V6H5ZM5 18.45V26.75H7L7 18.45H5ZM5 35.05L5 43.35H7V35.05H5ZM5 51.65L5 59.95H7L7 51.65H5ZM5 68.25L5 76.55H7L7 68.25H5ZM5 84.85L5 89H7V84.85H5Z"
+                fill="black"
+              ></path>
+            </svg>
+            {/* DESKTOP - HOW IT WORKS LINE */}
+            <svg
+              className="absolute right-0 top-7 hidden lg:block"
+              width="170"
+              height="12"
+              viewBox="0 0 170 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
-                <p className="text-sm font-bold sm:text-base">2</p>
-              </div>
-              <div className="ml-4 flex flex-col gap-2">
-                <h5 className="text-xl font-bold">Real-time data</h5>
-                <p className="text-sm text-gray-500">
-                  Once a guest has left feedback, you'll receive a notification in real-time, allowing you to act quickly.
-                </p>
-              </div>
-            </a>
-            {/* Item */}
-            <a
-              className="mb-8 flex max-w-lg justify-center gap-4 px-6 py-5 border-b border-solid border-gray-300 text-black"
-              href="#w-tabs-0-data-w-pane-2"
-            >
-              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
-                <p className="text-sm font-bold sm:text-base">3</p>
-              </div>
-              <div className="ml-4 flex flex-col gap-2">
-                <h5 className="text-xl font-bold">Actioning Feedback</h5>
-                <p className="text-sm text-gray-500">
-                 Use the feedback to improve your service, and prevent negative reviews from being made.
-                </p>
-              </div>
-            </a>
-            {/* Item */}
-            <a
-              className="mb-8 flex max-w-lg justify-center gap-4 px-6 py-5 text-black"
-              href="#w-tabs-0-data-w-pane-2"
-            >
-              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
-                <p className="text-sm font-bold sm:text-base">4</p>
-              </div>
-              <div className="ml-4 flex flex-col gap-2">
-                <h5 className="text-xl font-bold">View your NPS Score</h5>
-                <p className="text-sm text-gray-500">
-                  You can view your NPS Score, and see how your service is improving over time.
-                </p>
-              </div>
-            </a>
+              <path
+                d="M0.226497 6L6 11.7735L11.7735 6L6 0.226497L0.226497 6ZM169.773 6L164 0.226497L158.227 6L164 11.7735L169.773 6ZM6 7H9.95V5H6V7ZM17.85 7H25.75V5H17.85V7ZM33.65 7H41.55V5H33.65V7ZM49.45 7H57.35V5H49.45V7ZM65.25 7H73.15V5H65.25V7ZM81.05 7H88.95V5H81.05V7ZM96.85 7H104.75V5H96.85V7ZM112.65 7H120.55V5H112.65V7ZM128.45 7H136.35V5H128.45V7ZM144.25 7H152.15V5H144.25V7ZM160.05 7H164V5H160.05V7Z"
+                fill="black"
+              />
+            </svg>
           </div>
-          {/* Image */}
-          <img
-            alt=""
-            src="https://firebasestorage.googleapis.com/v0/b/flowspark-1f3e0.appspot.com/o/Tailspark%20Images%2FPlaceholder%20Image.svg?alt=media&token=375a1ea3-a8b6-4d63-b975-aac8d0174074"
-            className="block h-full w-full overflow-hidden [grid-area:1/1/2/2] lg:[grid-area:1/1/2/2]"
-          />
+          {/* BLOCK */}
+          <div className="relative my-8 flex w-full rounded-md lg:mx-8 lg:flex-col">
+            <div className="flex h-16 w-16 items-center justify-center rounded-md bg-gray-200">
+              <h2 className="text-3xl font-medium">2</h2>
+            </div>
+            <div className="ml-6 lg:ml-0">
+              <h2 className="mb-5 text-xl font-medium lg:mt-8">
+                Real-time feedback
+              </h2>
+              <p className="font-inter max-w-md pr-5 text-base text-gray-500">
+                In real-time, you receive feedback and can respond immediately.
+              </p>
+            </div>
+            {/* MOBILE - HOW IT WORKS LINE */}
+            <svg
+              className="absolute -bottom-[48px] left-[28px] lg:hidden"
+              width="12"
+              height="70"
+              viewBox="0 0 12 95"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 0.226497L0.226497 6L6 11.7735L11.7735 6L6 0.226497ZM6 94.7735L11.7735 89L6 83.2265L0.226497 89L6 94.7735ZM5 6V10.15H7V6H5ZM5 18.45V26.75H7L7 18.45H5ZM5 35.05L5 43.35H7V35.05H5ZM5 51.65L5 59.95H7L7 51.65H5ZM5 68.25L5 76.55H7L7 68.25H5ZM5 84.85L5 89H7V84.85H5Z"
+                fill="black"
+              ></path>
+            </svg>
+            {/* DESKTOP - HOW IT WORKS LINE */}
+            <svg
+              className="absolute right-0 top-7 hidden lg:block"
+              width="170"
+              height="12"
+              viewBox="0 0 170 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.226497 6L6 11.7735L11.7735 6L6 0.226497L0.226497 6ZM169.773 6L164 0.226497L158.227 6L164 11.7735L169.773 6ZM6 7H9.95V5H6V7ZM17.85 7H25.75V5H17.85V7ZM33.65 7H41.55V5H33.65V7ZM49.45 7H57.35V5H49.45V7ZM65.25 7H73.15V5H65.25V7ZM81.05 7H88.95V5H81.05V7ZM96.85 7H104.75V5H96.85V7ZM112.65 7H120.55V5H112.65V7ZM128.45 7H136.35V5H128.45V7ZM144.25 7H152.15V5H144.25V7ZM160.05 7H164V5H160.05V7Z"
+                fill="black"
+              />
+            </svg>
+          </div>
+          {/* BLOCK */}
+          <div className="relative my-8 flex w-full rounded-md lg:mx-8 lg:flex-col">
+            <div className="flex h-16 w-16 items-center justify-center rounded-md bg-gray-200">
+              <h2 className="text-3xl font-medium">3</h2>
+            </div>
+            <div className="ml-6 lg:ml-0">
+              <h2 className="mb-5 text-xl font-medium lg:mt-8">Action</h2>
+              <p className="font-inter max-w-md pr-5 text-base text-gray-500">
+                Based on the live feedback, you can take immediate action to improve the guest experience.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
