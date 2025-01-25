@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowRight, QrCode, BarChart, Gauge, Paintbrush, ClipboardList, LayoutDashboard } from 'lucide-react';
+import { Menu, X, QrCode, BarChart, Gauge, Paintbrush, ClipboardList, LayoutDashboard } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -61,6 +61,14 @@ const Navbar = () => {
           />
         </Link>
 
+        {/* Mobile Menu Toggle Button */}
+        <button
+          onClick={toggleMobileMenu}
+          className="absolute right-5 lg:hidden"
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
         {/* Desktop Navigation Links */}
         <div className={`mt-14 flex flex-col space-y-8 lg:mt-0 lg:flex lg:flex-row lg:space-x-8 lg:space-y-0 ${isMobileMenuOpen ? "" : "hidden"}`}>
           <div
@@ -69,6 +77,7 @@ const Navbar = () => {
             onMouseLeave={handleMouseLeave}
           >
             <button
+              onClick={toggleFeaturesDropdown}
               className={`flex flex-row rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isFeaturesDropdownOpen ? "text-gray-800 lg:border lg:border-gray-600 lg:bg-gray-50" : "text-black lg:border lg:border-white"}`}
             >
               Features
@@ -81,7 +90,7 @@ const Navbar = () => {
             </button>
             {isFeaturesDropdownOpen && (
               <div
-                className="z-50 absolute top-full left-0 mt-2 w-[500px] bg-white rounded-lg shadow-lg border border-gray-200"
+                className={`z-50 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[500px] bg-white rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
                 onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
                 onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
               >
@@ -113,14 +122,6 @@ const Navbar = () => {
             Docs
           </Link>
         </div>
-
-        {/* Mobile Menu Toggle Button */}
-        <button
-          onClick={toggleMobileMenu}
-          className="absolute right-5 lg:hidden"
-        >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
 
         {/* Desktop Sign Up and Login Buttons */}
         <div className={`flex flex-col space-y-8 lg:flex lg:flex-row lg:space-x-3 lg:space-y-0 ${isMobileMenuOpen ? "" : "hidden"}`}>
