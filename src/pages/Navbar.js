@@ -5,6 +5,7 @@ import { Menu, X, ArrowRight, QrCode, BarChart, Gauge, Paintbrush, ClipboardList
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeaturesDropdownOpen, setIsFeaturesDropdownOpen] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState(null); // Timeout for hover delay
   const location = useLocation();
 
   const toggleMobileMenu = () => {
@@ -17,6 +18,26 @@ const Navbar = () => {
 
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  const handleMouseEnter = () => {
+    // Clear any existing timeout to prevent premature closing
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    // Set a timeout to open the dropdown after 300ms
+    const timeout = setTimeout(() => {
+      setIsFeaturesDropdownOpen(true);
+    }, 300);
+    setHoverTimeout(timeout);
+  };
+
+  const handleMouseLeave = () => {
+    // Clear any existing timeout to prevent premature opening
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    // Set a timeout to close the dropdown after 300ms
+    const timeout = setTimeout(() => {
+      setIsFeaturesDropdownOpen(false);
+    }, 300);
+    setHoverTimeout(timeout);
   };
 
   const features = [
@@ -42,9 +63,12 @@ const Navbar = () => {
 
         {/* Desktop Navigation Links */}
         <div className={`mt-14 flex flex-col space-y-8 lg:mt-0 lg:flex lg:flex-row lg:space-x-8 lg:space-y-0 ${isMobileMenuOpen ? "" : "hidden"}`}>
-          <div className="relative flex flex-col">
+          <div
+            className="relative flex flex-col"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             <button
-              onClick={toggleFeaturesDropdown}
               className={`flex flex-row rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isFeaturesDropdownOpen ? "text-gray-800 lg:border lg:border-gray-600 lg:bg-gray-50" : "text-black lg:border lg:border-white"}`}
             >
               Features
@@ -56,19 +80,19 @@ const Navbar = () => {
               </svg>
             </button>
             {isFeaturesDropdownOpen && (
-              <div className="z-50 flex w-full flex-col rounded-lg px-5 py-5 lg:absolute lg:top-20 lg:w-[800px] bg-gray-100 lg:flex-row lg:flex-wrap lg:py-7 xl:w-[950px]">
+              <div
+                className="z-50 flex w-full flex-col rounded-lg px-5 py-5 lg:absolute lg:top-20 lg:w-[500px] bg-gray-100 lg:flex-row lg:flex-wrap lg:py-7 xl:w-[600px]"
+                onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
+                onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
+              >
                 {features.map((feature, index) => (
                   <Link
                     key={index}
                     to={feature.path}
-                    className="flex grow flex-col rounded-lg px-5 py-5 lg:basis-60 xl:px-8"
+                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <div className="relative">
-                      {feature.icon}
-                    </div>
-                    <h2 className="font-inter mb-1 mt-5 text-lg font-medium text-black">
-                      {feature.name}
-                    </h2>
+                    {feature.icon}
+                    <span className="text-gray-700 whitespace-nowrap">{feature.name}</span>
                   </Link>
                 ))}
               </div>
