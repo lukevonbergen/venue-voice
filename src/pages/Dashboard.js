@@ -8,7 +8,7 @@ import SatisfactionCard from '../components/dashboard/SatisfactionCard';
 import ActionCard from '../components/dashboard/ActionCard';
 import FeedbackFeed from '../components/dashboard/FeedbackFeed';
 import LiveUpdatesToggle from '../components/dashboard/LiveUpdatesToggle';
-import MetricsCards from '../components/dashboard/MetricsCards'; // Import the new component
+import MetricsCards from '../components/dashboard/MetricsCard'; // Import the new component
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
