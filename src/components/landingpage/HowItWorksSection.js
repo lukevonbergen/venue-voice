@@ -60,7 +60,7 @@ const HowItWorksSection = () => {
               <div className="ml-4 flex flex-col gap-2">
                 <h5 className="text-xl font-bold">Actioning Feedback</h5>
                 <p className="text-sm text-gray-500">
-s                  Use the feedback to improve your service, and prevent negative reviews from being made.
+                 Use the feedback to improve your service, and prevent negative reviews from being made.
                 </p>
               </div>
             </a>
