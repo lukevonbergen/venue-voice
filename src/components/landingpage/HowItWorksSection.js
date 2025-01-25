@@ -3,51 +3,92 @@ import { Globe, MessageSquare, Check } from 'lucide-react';
 
 const HowItWorksSection = () => {
   return (
-    <div className="bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Turn feedback into instant action in three simple steps
-          </p>
-        </div>
-        
-        {/* Timeline Steps */}
-        <div className="flex flex-col md:flex-row justify-between items-start mt-12 relative">
-          {/* Connection Line */}
-          <div className="hidden md:block absolute top-24 left-0 right-0 h-1 bg-green-200 z-0"></div>
-          
-          {/* Steps */}
-          {[
-            {
-              icon: Globe,
-              title: "Guest Scans QR",
-              desc: "Strategically placed QR codes make it easy for guests to share feedback"
-            },
-            {
-              icon: MessageSquare,
-              title: "Instant Alert",
-              desc: "Your team gets notified immediately when attention is needed"
-            },
-            {
-              icon: Check,
-              title: "Swift Resolution",
-              desc: "Address concerns before they become negative reviews"
-            }
-          ].map((step, i) => (
-            <div key={i} className="flex-1 relative z-10 px-4 mb-8 md:mb-0">
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <step.icon className="h-6 w-6 text-green-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-gray-600">{step.desc}</p>
+    <section>
+      {/* Container */}
+      <div className="mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-20">
+        {/* Title */}
+        <h2 className="text-center text-3xl font-bold md:text-5xl">
+          How it works
+        </h2>
+        <p className="mx-auto mb-8 mt-4 max-w-3xl text-center text-sm text-gray-500 sm:text-base md:mb-12 lg:mb-16">
+          How does using Chatters help you meet your KPI's? Here's a step-by-step guide.
+        </p>
+        {/* Content */}
+        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          {/* List */}
+          <div className="flex h-full flex-col [grid-area:2/1/3/2] lg:[grid-area:1/2/2/3]">
+            {/* Item */}
+            <a
+              className="mb-8 flex max-w-lg justify-center gap-4 rounded-xl border-b border-solid border-gray-300 px-6 py-5 text-black"
+              href="#w-tabs-0-data-w-pane-0"
+            >
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
+                <p className="text-sm font-bold sm:text-base">1</p>
               </div>
-            </div>
-          ))}
+              <div className="ml-4 flex flex-col gap-2">
+                <h5 className="text-xl font-bold">
+                  Guests scan a QR code
+                </h5>
+                <p className="text-sm text-gray-500">
+                  Your guests scan a QR code, allowing them to leave real-time feedback, while they're at the table.
+                </p>
+              </div>
+            </a>
+            {/* Item */}
+            <a
+              className="mb-8 flex max-w-lg justify-center gap-4 px-6 py-5 border-b border-solid border-gray-300 text-black"
+              href="#w-tabs-0-data-w-pane-1"
+            >
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
+                <p className="text-sm font-bold sm:text-base">2</p>
+              </div>
+              <div className="ml-4 flex flex-col gap-2">
+                <h5 className="text-xl font-bold">Real-time data</h5>
+                <p className="text-sm text-gray-500">
+                  Once a guest has left feedback, you'll receive a notification in real-time, allowing you to act quickly.
+                </p>
+              </div>
+            </a>
+            {/* Item */}
+            <a
+              className="mb-8 flex max-w-lg justify-center gap-4 px-6 py-5 border-b border-solid border-gray-300 text-black"
+              href="#w-tabs-0-data-w-pane-2"
+            >
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
+                <p className="text-sm font-bold sm:text-base">3</p>
+              </div>
+              <div className="ml-4 flex flex-col gap-2">
+                <h5 className="text-xl font-bold">Actioning Feedback</h5>
+                <p className="text-sm text-gray-500">
+s                  Use the feedback to improve your service, and prevent negative reviews from being made.
+                </p>
+              </div>
+            </a>
+            {/* Item */}
+            <a
+              className="mb-8 flex max-w-lg justify-center gap-4 px-6 py-5 text-black"
+              href="#w-tabs-0-data-w-pane-2"
+            >
+              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-100">
+                <p className="text-sm font-bold sm:text-base">4</p>
+              </div>
+              <div className="ml-4 flex flex-col gap-2">
+                <h5 className="text-xl font-bold">View your NPS Score</h5>
+                <p className="text-sm text-gray-500">
+                  You can view your NPS Score, and see how your service is improving over time.
+                </p>
+              </div>
+            </a>
+          </div>
+          {/* Image */}
+          <img
+            alt=""
+            src="https://firebasestorage.googleapis.com/v0/b/flowspark-1f3e0.appspot.com/o/Tailspark%20Images%2FPlaceholder%20Image.svg?alt=media&token=375a1ea3-a8b6-4d63-b975-aac8d0174074"
+            className="block h-full w-full overflow-hidden [grid-area:1/1/2/2] lg:[grid-area:1/1/2/2]"
+          />
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
