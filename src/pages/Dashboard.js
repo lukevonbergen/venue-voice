@@ -8,7 +8,7 @@ import SatisfactionCard from '../components/dashboard/SatisfactionCard';
 import ActionCard from '../components/dashboard/ActionCard';
 import FeedbackFeed from '../components/dashboard/FeedbackFeed';
 import LiveUpdatesToggle from '../components/dashboard/LiveUpdatesToggle';
-import MetricsCards from '../components/dashboard/MetricCard';
+import MetricCard from '../components/dashboard/MetricCard';
 
 const DashboardPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -159,7 +159,7 @@ const DashboardPage = () => {
           />
 
           {/* Use the MetricsCards component */}
-          <MetricsCards venueId={venueId} />
+          <MetricCard venueId={venueId} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
