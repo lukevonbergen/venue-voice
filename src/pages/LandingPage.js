@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import HeroSection from '../components/landingpage/HeroSection';
-// import WhyChooseUsSection from '../components/landingpage/WhyChooseUsSection';
 import HowItWorksSection from '../components/landingpage/HowItWorksSection';
 import FeaturesSection from '../components/landingpage/FeaturesSection';
 import CallToActionSection from '../components/landingpage/CallToActionSection';
@@ -25,10 +24,9 @@ const LandingPage = () => {
   }, [isDemoModalOpen]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
       <HeroSection />
-      {/* <WhyChooseUsSection /> */}
       <HowItWorksSection />
       <FeaturesSection />
       <CallToActionSection openDemoModal={openDemoModal} />
