@@ -81,7 +81,7 @@ const PricingPage = () => {
       </section>
 
       {/* FAQ Section */}
-      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
+      <div className="bg-gray-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
