@@ -7,7 +7,7 @@ import { loadStripe } from '@stripe/stripe-js'; // Import loadStripe
 const PrivacyPolicyPage = () => {
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       <Navbar />
 
       {/* Hero Section */}
