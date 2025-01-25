@@ -59,7 +59,6 @@ const MetricsSection = ({ venueId }) => {
     };
   }, [venueId]);
 
-  // Rest of the component code remains the same...
   // Filter feedback by time range
   const filterFeedbackByTime = (startTime, endTime) => {
     return feedback.filter((f) => {
@@ -95,6 +94,20 @@ const MetricsSection = ({ venueId }) => {
     };
   };
 
+  // Helper function to get start of day in UTC
+  const getStartOfDayUTC = (date) => {
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    return startOfDay.toISOString();
+  };
+
+  // Helper function to get end of day in UTC
+  const getEndOfDayUTC = (date) => {
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    return endOfDay.toISOString();
+  };
+
   const now = new Date();
 
   // Calculate metrics for each timeframe
@@ -113,17 +126,17 @@ const MetricsSection = ({ venueId }) => {
   );
 
   const todayMetrics = calculateFeedbackMetrics(
-    new Date(now.setHours(0, 0, 0, 0)).toISOString(), // Start of today
-    now.toISOString(),
-    new Date(new Date(now).setDate(now.getDate() - 1)).toISOString(), // Start of yesterday
-    new Date(now.setHours(0, 0, 0, 0)).toISOString() // End of yesterday
+    getStartOfDayUTC(now), // Start of today in UTC
+    now.toISOString(), // Current time
+    getStartOfDayUTC(new Date(now.getTime() - 24 * 60 * 60 * 1000)), // Start of yesterday in UTC
+    getEndOfDayUTC(new Date(now.getTime() - 24 * 60 * 60 * 1000)) // End of yesterday in UTC
   );
 
   const last7DaysMetrics = calculateFeedbackMetrics(
-    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    now.toISOString(),
-    new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(), // Start of last 7 days
+    now.toISOString(), // Current time
+    new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(), // Start of previous 7 days
+    new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString() // End of previous 7 days
   );
 
   // Render a single metric card
