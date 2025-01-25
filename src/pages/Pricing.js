@@ -11,11 +11,11 @@ const PricingPage = () => {
       price: '£29',
       description: 'For growing businesses with more feedback needs',
       features: [
-        'Unlimited feedback submissions/month',
+        'Unlimited feedback submissions',
         'Advanced analytics',
         'AI-powered insights (Coming soon)',
         'Customisable forms',
-        'Priority email support',
+        'Support',
       ],
       cta: 'Start now',
       ctaLink: '/signup',
@@ -30,66 +30,51 @@ const PricingPage = () => {
       <Navbar />
 
       {/* New Pricing Section */}
-      <section className="bg-white">
-        <div className="mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-20">
-          <div className="rounded-xl bg-gray-100 px-6 py-12 sm:px-12 sm:py-16 md:py-20">
-            {/* Heading Container */}
-            <div className="mx-auto mb-8 flex max-w-3xl flex-col text-center md:mb-12 lg:mb-16">
-              <h2 className="text-3xl font-bold md:text-5xl">Simple &amp; Affordable Pricing</h2>
-              <div className="mx-auto mt-4 rounded-3xl bg-gray-300 px-6 py-2">
-                <p className="text-sm sm:text-base">30 days money-back guarantee</p>
-              </div>
-            </div>
+      <section>
+        {/* Container */}
+        <div className="mx-auto max-w-5xl px-5 py-16 md:px-10 md:py-20">
+          {/* Heading Container */}
+          <div className="mx-auto mb-8 text-center md:mb-12 lg:mb-16">
+            {/* Heading */}
+            <h2 className="text-3xl md:text-5xl font-bold">Simple &amp; Affordable Pricing</h2>
+            {/* Subheading */}
+            <p className="mt-5 text-gray-500">30 days money-back guarantee</p>
+          </div>
 
-            {/* Pricing Plan Content */}
-            <div className="mx-auto grid h-auto w-full gap-4 rounded-md px-0 py-12 lg:grid-cols-1">
-              {pricingPlans.map((plan, index) => (
-                <div
-                  key={index}
-                  className={`relative p-8 bg-white rounded-3xl shadow-lg border ${
-                    plan.popular ? 'border-green-500' : 'border-gray-100'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-green-600 text-white text-xs font-semibold px-4 py-1 rounded-full">
-                      Most Popular
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900">{plan.title}</h2>
-                    <p className="mt-2 text-gray-600">{plan.description}</p>
-                    <div className="mt-6">
-                      <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                      {plan.price !== 'Free' && plan.price !== 'Custom' && (
-                        <span className="text-gray-500">/month</span>
-                      )}
-                      {plan.annualPrice && (
-                        <p className="text-sm text-gray-500 mt-2">{plan.annualPrice}</p>
-                      )}
-                    </div>
-                    <ul className="mt-8 space-y-4">
-                      {plan.features.map((feature, i) => (
-                        <li key={i} className="flex items-center justify-center space-x-3">
-                          <Check className="h-5 w-5 text-green-500" />
-                          <span className="text-gray-600">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mt-8">
-                      <Link
-                        to={plan.ctaLink}
-                        className={`w-full px-6 py-3 rounded-lg text-center font-medium ${
-                          plan.popular
-                            ? 'bg-green-600 text-white hover:bg-green-700'
-                            : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                        } transition-colors`}
-                      >
-                        {plan.cta}
-                      </Link>
-                    </div>
-                  </div>
+          {/* Content */}
+          <div className="mx-auto mb-8 grid grid-cols-[1.25fr] gap-4 rounded-md bg-gray-100 px-16 py-12 md:mb-12 md:grid-cols-[1.25fr_0.25fr_0.75fr] lg:px-20">
+            {/* List Feature */}
+            <div className="grid h-full grid-cols-1 gap-4 sm:grid-cols-2">
+              {pricingPlans[0].features.map((feature, index) => (
+                <div key={index} className="flex items-center">
+                  <img
+                    src="https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a9453a6e6cf6e_Vector%20(2).svg"
+                    alt=""
+                    className="mr-4 inline-block h-4 w-4"
+                  />
+                  <p className="max-sm:text-sm">{feature}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Vertical Divider */}
+            <div className="mx-auto h-full border border-l-1px"></div>
+
+            {/* Price */}
+            <div>
+              <h2 className="mb-4 text-3xl font-bold md:text-5xl">
+                {pricingPlans[0].price}
+                <span className="text-sm font-light sm:text-sm">/month</span>
+              </h2>
+              <Link
+                to={pricingPlans[0].ctaLink}
+                className="inline-block w-full rounded-md bg-black px-6 py-3 text-center font-semibold text-white"
+              >
+                {pricingPlans[0].cta}
+              </Link>
+              {pricingPlans[0].annualPrice && (
+                <p className="mt-2 text-sm text-gray-500">{pricingPlans[0].annualPrice}</p>
+              )}
             </div>
           </div>
         </div>
