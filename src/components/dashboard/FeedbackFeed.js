@@ -7,7 +7,7 @@ const FeedbackFeed = ({ feedback }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100">
       <h2 className="text-xl font-bold text-gray-900 mb-4">Live Feedback Feed</h2>
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-[400px] overflow-y-auto"> {/* Add max-height and overflow */}
         {filteredFeedback.length > 0 ? (
           filteredFeedback.map((f, index) => (
             <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
