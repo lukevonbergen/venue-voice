@@ -145,11 +145,11 @@ const DashboardPage = () => {
 
   const filterFeedbackByTime = (startTime, endTime) => {
     return feedback.filter((f) => {
-      const feedbackTime = new Date(f.timestamp);
-      const start = new Date(startTime);
-      const end = new Date(endTime);
+      const feedbackTime = new Date(f.timestamp).getTime();
+      const start = new Date(startTime).getTime();
+      const end = new Date(endTime).getTime();
 
-      return feedbackTime >= start && feedbackTime < end;
+      return feedbackTime >= start && feedbackTime <= end;
     });
   };
 
@@ -193,10 +193,10 @@ const DashboardPage = () => {
   );
 
   const todayMetrics = calculateFeedbackMetrics(
-    new Date(now.toISOString().split('T')[0]).toISOString(),
+    new Date(now.setHours(0, 0, 0, 0)).toISOString(),
     now.toISOString(),
-    new Date(new Date(now).setDate(now.getDate() - 1)).toISOString().split('T')[0],
-    new Date(now.toISOString().split('T')[0]).toISOString()
+    new Date(new Date(now).setDate(now.getDate() - 1)).toISOString(),
+    new Date(now.setHours(0, 0, 0, 0)).toISOString()
   );
 
   const last7DaysMetrics = calculateFeedbackMetrics(
