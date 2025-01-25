@@ -23,20 +23,20 @@ const Navbar = () => {
   const handleMouseEnter = () => {
     // Clear any existing timeout to prevent premature closing
     if (hoverTimeout) clearTimeout(hoverTimeout);
-    // Set a timeout to open the dropdown after 300ms
+    // Set a timeout to open the dropdown after 100ms (quicker response)
     const timeout = setTimeout(() => {
       setIsFeaturesDropdownOpen(true);
-    }, 300);
+    }, 100); // Reduced delay to 100ms
     setHoverTimeout(timeout);
   };
 
   const handleMouseLeave = () => {
     // Clear any existing timeout to prevent premature opening
     if (hoverTimeout) clearTimeout(hoverTimeout);
-    // Set a timeout to close the dropdown after 300ms
+    // Set a timeout to close the dropdown after 100ms
     const timeout = setTimeout(() => {
       setIsFeaturesDropdownOpen(false);
-    }, 300);
+    }, 100); // Reduced delay to 100ms
     setHoverTimeout(timeout);
   };
 
