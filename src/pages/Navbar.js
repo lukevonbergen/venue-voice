@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, QrCode, BarChart, Gauge, Paintbrush, ClipboardList, LayoutDashboard } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -41,12 +41,12 @@ const Navbar = () => {
   };
 
   const features = [
-    { name: 'QR Codes', icon: <QrCode className="h-5 w-5 text-blue-500" />, path: '/features/qr-codes' },
-    { name: 'NPS Score', icon: <BarChart className="h-5 w-5 text-green-500" />, path: '/features/nps-score' },
-    { name: 'Real-time stats', icon: <Gauge className="h-5 w-5 text-purple-500" />, path: '/features/real-time-stats' },
-    { name: 'Custom Branding', icon: <Paintbrush className="h-5 w-5 text-yellow-500" />, path: '/features/custom-branding' },
-    { name: 'Custom Questions', icon: <ClipboardList className="h-5 w-5 text-red-500" />, path: '/features/custom-questions' },
-    { name: 'Dashboards', icon: <LayoutDashboard className="h-5 w-5 text-indigo-500" />, path: '/features/dashboards' },
+    { name: 'QR Codes', path: '/features/qr-codes' },
+    { name: 'NPS Score', path: '/features/nps-score' },
+    { name: 'Real-time stats', path: '/features/real-time-stats' },
+    { name: 'Custom Branding', path: '/features/custom-branding' },
+    { name: 'Custom Questions', path: '/features/custom-questions' },
+    { name: 'Dashboards', path: '/features/dashboards' },
   ];
 
   return (
@@ -90,19 +90,18 @@ const Navbar = () => {
             </button>
             {isFeaturesDropdownOpen && (
               <div
-                className={`z-50 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[500px] bg-white rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
+                className={`z-50 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[200px] bg-white rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
                 onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
                 onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
               >
-                <div className="p-6 grid grid-cols-2 gap-4">
+                <div className={`${isMobileMenuOpen ? "flex flex-col space-y-2 p-2" : "p-4"}`}>
                   {features.map((feature, index) => (
                     <Link
                       key={index}
                       to={feature.path}
-                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className={`block p-2 rounded-lg hover:bg-gray-50 transition-colors ${isMobileMenuOpen ? "text-left" : ""}`}
                     >
-                      {feature.icon}
-                      <span className="text-gray-700 whitespace-nowrap">{feature.name}</span>
+                      {feature.name}
                     </Link>
                   ))}
                 </div>
