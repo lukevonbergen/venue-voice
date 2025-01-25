@@ -2,7 +2,7 @@ import React from 'react';
 
 const HeroSection = () => {
   return (
-<header>
+    <header>
       {/* Hero Container */}
       <div className="mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-20">
         {/* Component */}
@@ -14,7 +14,7 @@ const HeroSection = () => {
               Eliminate negative reviews before they're made
             </h1>
             <p className="mb-6 max-w-lg text-sm text-gray-500 sm:text-xl md:mb-10 lg:mb-12">
-            Get instant notifications when guests need attention. Resolve concerns before they escalate into complaints.
+              Get instant notifications when guests need attention. Resolve concerns before they escalate into complaints.
             </p>
             {/* Hero Button */}
             <div className="flex items-center">
@@ -24,11 +24,19 @@ const HeroSection = () => {
               >
                 Demo
               </a>
-              <a href="/pricing" className="flex max-w-full items-center font-bold">
+              <a href="/pricing" className="group flex max-w-full items-center font-bold relative">
+                {/* First Arrow (slides out) */}
                 <img
                   src="https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a94bd85e6cf98_ArrowUpRight%20(4).svg"
                   alt=""
-                  className="mr-2 inline-block max-h-4 w-5"
+                  className="mr-2 inline-block max-h-4 w-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-0"
+                />
+                {/* Second Arrow (slides in) */}
+                <img
+                  src="https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a94bd85e6cf98_ArrowUpRight%20(4).svg"
+                  alt=""
+                  className="absolute mr-2 inline-block max-h-4 w-5 transition-transform duration-300 opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-100"
+                  style={{ bottom: '-10px', right: '-10px' }}
                 />
                 <p>Pricing</p>
               </a>
