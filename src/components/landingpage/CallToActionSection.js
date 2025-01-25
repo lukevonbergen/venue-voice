@@ -6,7 +6,7 @@ const CallToActionSection = ({ openDemoModal }) => {
     <section>
       {/* Container */}
       <div className="px-5 py-16 md:px-10 md:py-20">
-        <div className="mx-auto w-full max-w-7xl bg-gray-100 px-4 py-32 text-center">
+        <div className="mx-auto w-full bg-gray-100 px-4 py-32 text-center">
           {/* Title */}
           <h2 className="mx-auto mb-6 max-w-3xl flex-col text-3xl font-bold md:mb-10 md:text-5xl lg:mb-12">
             Ready to get started?
