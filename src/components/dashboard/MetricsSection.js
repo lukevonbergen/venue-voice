@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, Users, Calendar, TrendingUp } from 'lucide-react';
+import { Clock, Users, Calendar, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import supabase from '../../utils/supabase';
 
 const MetricsSection = ({ venueId }) => {
