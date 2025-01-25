@@ -19,10 +19,6 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Feedback data updated:', feedback); // Debugging
-  }, [feedback]);
-
-  useEffect(() => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -36,8 +32,6 @@ const DashboardPage = () => {
   }, [navigate]);
 
   const fetchVenueId = async (email) => {
-    console.log('Fetching venue ID for email:', email); // Debugging
-
     const { data: venueData, error: venueError } = await supabase
       .from('venues')
       .select('id, is_paid')
@@ -47,8 +41,6 @@ const DashboardPage = () => {
     if (venueError) {
       console.error('Error fetching venue ID:', venueError);
     } else {
-      console.log('Fetched venue data:', venueData); // Debugging
-
       if (!venueData.is_paid) {
         navigate('/pricing');
         return;
@@ -56,7 +48,7 @@ const DashboardPage = () => {
 
       setVenueId(venueData.id);
       fetchQuestions(venueData.id);
-      fetchFeedback(venueData.id); // Fetch feedback for the venue
+      fetchFeedback(venueData.id);
       if (liveUpdatesEnabled) {
         setupRealtimeUpdates(venueData.id);
       }
@@ -78,8 +70,6 @@ const DashboardPage = () => {
   };
 
   const fetchFeedback = async (venueId) => {
-    console.log('Fetching feedback for venue ID:', venueId); // Debugging
-
     const { data, error } = await supabase
       .from('feedback')
       .select('*')
@@ -88,21 +78,17 @@ const DashboardPage = () => {
     if (error) {
       console.error('Error fetching feedback:', error);
     } else {
-      console.log('Fetched feedback data:', data); // Debugging
       setFeedback(data);
     }
   };
 
   const setupRealtimeUpdates = (venueId) => {
-    console.log('Setting up real-time updates for venue ID:', venueId); // Debugging
-
     const feedbackSubscription = supabase
       .channel('feedback')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
         async (payload) => {
-          console.log('New feedback received:', payload.new); // Debugging
           setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
         }
       )
@@ -124,7 +110,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Function to calculate the average rating for a specific question
   const calculateAverageRating = (questionId) => {
     const relevantFeedback = feedback.filter((f) => f.question_id === questionId);
     if (relevantFeedback.length === 0) return 0;
@@ -133,7 +118,6 @@ const DashboardPage = () => {
     return (totalRating / relevantFeedback.length).toFixed(1);
   };
 
-  // Function to calculate the overall average rating across all feedback
   const calculateOverallAverageRating = () => {
     if (feedback.length === 0) return 0;
 
@@ -141,7 +125,6 @@ const DashboardPage = () => {
     return (totalRating / feedback.length).toFixed(1);
   };
 
-  // Function to generate suggested actions based on low-rated questions
   const generateSuggestedActions = () => {
     const suggestedActions = [];
     const ratingThreshold = 3.5;
@@ -160,24 +143,16 @@ const DashboardPage = () => {
     return suggestedActions;
   };
 
-  // Function to filter feedback within a time range
   const filterFeedbackByTime = (startTime, endTime) => {
     return feedback.filter((f) => {
-      const feedbackTime = new Date(f.timestamp); // Parse feedback timestamp
-      const start = new Date(startTime); // Parse start time
-      const end = new Date(endTime); // Parse end time
+      const feedbackTime = new Date(f.timestamp);
+      const start = new Date(startTime);
+      const end = new Date(endTime);
 
-      console.log(`Feedback time: ${feedbackTime}, Start: ${start}, End: ${end}`); // Debugging
-
-      // Check if feedback time is within the range
-      const isWithinRange = feedbackTime >= start && feedbackTime < end;
-      console.log(`Is within range: ${isWithinRange}`); // Debugging
-
-      return isWithinRange;
+      return feedbackTime >= start && feedbackTime < end;
     });
   };
 
-  // Function to calculate feedback counts and trends
   const calculateFeedbackMetrics = (startTime, endTime, previousStartTime, previousEndTime) => {
     const currentFeedback = filterFeedbackByTime(startTime, endTime);
     const previousFeedback = filterFeedbackByTime(previousStartTime, previousEndTime);
@@ -203,7 +178,6 @@ const DashboardPage = () => {
 
   const now = new Date();
 
-  // Calculate metrics for each time range
   const last30MinutesMetrics = calculateFeedbackMetrics(
     new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
     now.toISOString(),
@@ -235,15 +209,12 @@ const DashboardPage = () => {
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Page Title and Live Updates Toggle */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Venue Dashboard</h1>
           <LiveUpdatesToggle liveUpdatesEnabled={liveUpdatesEnabled} toggleLiveUpdates={toggleLiveUpdates} />
         </div>
 
-        {/* Top Section: Overall Satisfaction and Key Metrics */}
         <div className="grid grid-cols-1 gap-6 mb-8">
-          {/* Overall Satisfaction */}
           <SatisfactionCard
             title="Overall Satisfaction"
             rating={calculateOverallAverageRating()}
@@ -251,7 +222,6 @@ const DashboardPage = () => {
             difference={Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}
           />
 
-          {/* Key Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <MetricCard
               title="Last 30 Minutes"
@@ -288,13 +258,11 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Middle Section: Feedback Trends and Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <FeedbackTrendsChart feedback={feedback} />
           <FeedbackDistributionChart feedback={feedback} />
         </div>
 
-        {/* Bottom Section: Suggested Actions and Live Feedback Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-gray-50 rounded-xl p-6">
             <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
