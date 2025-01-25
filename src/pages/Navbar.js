@@ -5,7 +5,6 @@ import { Menu, X, ArrowRight, QrCode, BarChart, Gauge, Paintbrush, ClipboardList
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeaturesDropdownOpen, setIsFeaturesDropdownOpen] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState(null); // Timeout for hover delay
   const location = useLocation();
 
   const toggleMobileMenu = () => {
@@ -20,20 +19,6 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  const handleMouseEnter = () => {
-    // Clear any existing timeout to prevent premature closing
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-    setIsFeaturesDropdownOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    // Set a timeout to close the dropdown after 300ms
-    const timeout = setTimeout(() => {
-      setIsFeaturesDropdownOpen(false);
-    }, 300);
-    setHoverTimeout(timeout);
-  };
-
   const features = [
     { name: 'QR Codes', icon: <QrCode className="h-5 w-5 text-blue-500" />, path: '/features/qr-codes' },
     { name: 'NPS Score', icon: <BarChart className="h-5 w-5 text-green-500" />, path: '/features/nps-score' },
@@ -44,146 +29,87 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed w-full top-4 z-50 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white/95 rounded-2xl shadow-lg backdrop-blur-sm border border-gray-200/50">
-          <div className="px-6 py-4">
-            <div className="flex justify-between items-center">
-              {/* Logo */}
-              <div className="flex items-center">
-                <Link to="/">
-                  <img
-                    src="/img/getchatters_logo.svg"
-                    alt="Chatter Logo"
-                    className="h-8"
-                  />
-                </Link>
-              </div>
+    <nav className="font-inter mx-auto h-auto w-full max-w-screen-2xl lg:relative lg:top-0">
+      <div className="flex flex-col px-6 py-6 lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:py-4 xl:px-20">
+        {/* Logo */}
+        <Link to="/">
+          <img
+            src="/img/getchatters_logo.svg"
+            alt="Chatter Logo"
+            className="h-8"
+          />
+        </Link>
 
-              {/* Desktop Navigation Links (Hidden on Mobile) */}
-              <div className="hidden md:flex items-center space-x-8">
-                <Link
-                  to="/pricing"
-                  className={`text-gray-600 hover:text-gray-900 ${
-                    isActive('/pricing') ? 'font-semibold' : ''
-                  }`}
-                >
-                  Pricing
-                </Link>
-                <div
-                  className="relative group"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <button
-                    className={`text-gray-600 hover:text-gray-900 ${
-                      isActive('/features') ? 'font-semibold' : ''
-                    }`}
-                  >
-                    Features
-                  </button>
-                  {isFeaturesDropdownOpen && (
-                    <div
-                      className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[500px] bg-white rounded-lg shadow-lg border border-gray-200"
-                      onMouseEnter={handleMouseEnter} // Keep dropdown open when hovering over it
-                      onMouseLeave={handleMouseLeave} // Close dropdown when leaving it
-                    >
-                      <div className="p-6 grid grid-cols-2 gap-4">
-                        {features.map((feature, index) => (
-                          <Link
-                            key={index}
-                            to={feature.path}
-                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                          >
-                            {feature.icon}
-                            <span className="text-gray-700 whitespace-nowrap">{feature.name}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <Link
-                  to="https://chatters.canny.io/changelog"
-                  className={`text-gray-600 hover:text-gray-900 ${
-                    isActive('/docs') ? 'font-semibold' : ''
-                  }`}
-                >
-                  Docs
-                </Link>
-                <div className="flex items-center space-x-3">
-                  <Link
-                    to="/signin"
-                    className="px-4 py-2 text-white bg-black rounded-lg hover:bg-black transition-colors flex items-center space-x-2"
-                  >
-                    <span>Login</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Mobile Menu Toggle Button (Visible on Mobile) */}
-              <button
-                onClick={toggleMobileMenu}
-                className="md:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+        {/* Desktop Navigation Links */}
+        <div className={`mt-14 flex flex-col space-y-8 lg:mt-0 lg:flex lg:flex-row lg:space-x-8 lg:space-y-0 ${isMobileMenuOpen ? "" : "hidden"}`}>
+          <div className="relative flex flex-col">
+            <button
+              onClick={toggleFeaturesDropdown}
+              className={`flex flex-row rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isFeaturesDropdownOpen ? "text-gray-800 lg:border lg:border-gray-600 lg:bg-gray-50" : "text-black lg:border lg:border-white"}`}
+            >
+              Features
+              <svg
+                className={`w-6 h-6 fill-current transition-transform duration-300 ${isFeaturesDropdownOpen ? "rotate-180" : "rotate-0"}`}
+                viewBox="0 0 24 24"
               >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-
-            {/* Mobile Menu (Dropdown) */}
-            {isMobileMenuOpen && (
-              <div className="md:hidden mt-4 space-y-4">
-                <Link
-                  to="/pricing"
-                  className={`block text-gray-600 hover:text-gray-900 ${
-                    isActive('/pricing') ? 'font-semibold' : ''
-                  }`}
-                >
-                  Pricing
-                </Link>
-                <button
-                  onClick={toggleFeaturesDropdown}
-                  className={`block text-gray-600 hover:text-gray-900 ${
-                    isActive('/features') ? 'font-semibold' : ''
-                  }`}
-                >
-                  Features
-                </button>
-                {isFeaturesDropdownOpen && (
-                  <div className="pl-4 space-y-4">
-                    {features.map((feature, index) => (
-                      <Link
-                        key={index}
-                        to={feature.path}
-                        className="flex items-center space-x-3"
-                      >
-                        {feature.icon}
-                        <span className="text-gray-700">{feature.name}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-                <Link
-                  to="/docs"
-                  className={`block text-gray-600 hover:text-gray-900 ${
-                    isActive('/docs') ? 'font-semibold' : ''
-                  }`}
-                >
-                  Docs
-                </Link>
-                <div className="flex flex-col space-y-3">
+                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path>
+              </svg>
+            </button>
+            {isFeaturesDropdownOpen && (
+              <div className="z-50 flex w-full flex-col rounded-lg px-5 py-5 lg:absolute lg:top-20 lg:w-[800px] bg-gray-100 lg:flex-row lg:flex-wrap lg:py-7 xl:w-[950px]">
+                {features.map((feature, index) => (
                   <Link
-                    to="/signin"
-                    className="px-4 py-2 text-white bg-black rounded-lg hover:bg-black transition-colors flex items-center space-x-2"
+                    key={index}
+                    to={feature.path}
+                    className="flex grow flex-col rounded-lg px-5 py-5 lg:basis-60 xl:px-8"
                   >
-                    <span>Login</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <div className="relative">
+                      {feature.icon}
+                    </div>
+                    <h2 className="font-inter mb-1 mt-5 text-lg font-medium text-black">
+                      {feature.name}
+                    </h2>
                   </Link>
-                </div>
+                ))}
               </div>
             )}
           </div>
+          <Link
+            to="/pricing"
+            className={`font-inter rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isActive('/pricing') ? 'font-semibold' : ''}`}
+          >
+            Pricing
+          </Link>
+          <Link
+            to="/docs"
+            className={`font-inter rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isActive('/docs') ? 'font-semibold' : ''}`}
+          >
+            Docs
+          </Link>
+        </div>
+
+        {/* Mobile Menu Toggle Button */}
+        <button
+          onClick={toggleMobileMenu}
+          className="absolute right-5 lg:hidden"
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
+        {/* Desktop Sign Up and Login Buttons */}
+        <div className={`flex flex-col space-y-8 lg:flex lg:flex-row lg:space-x-3 lg:space-y-0 ${isMobileMenuOpen ? "" : "hidden"}`}>
+          <Link
+            to="/signup"
+            className="font-inter rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800"
+          >
+            Sign Up
+          </Link>
+          <Link
+            to="/signin"
+            className="font-inter rounded-lg bg-black px-8 py-4 text-center text-white hover:bg-gray-800"
+          >
+            Login
+          </Link>
         </div>
       </div>
     </nav>
