@@ -50,84 +50,277 @@ const LandingPage = () => {
 
       {/* New Hero Section */}
       <section className="pt-32 bg-gray-50 sm:pt-40">
-  <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-    <div className="max-w-2xl mx-auto text-center">
-      <h1 className="px-6 text-lg text-gray-600 font-pj">Real-time customer feedback platform</h1>
-      <p className="mt-5 text-4xl font-bold leading-tight text-gray-900 sm:leading-tight sm:text-5xl lg:text-6xl lg:leading-tight font-pj">
-        <span className="relative inline-flex sm:inline">
-          <span className="relative">Prevent Bad Reviews</span>
-        </span>
-        <span className="block">Before They Happen</span>
-      </p>
-
-      <div className="px-8 sm:items-center sm:justify-center sm:px-0 sm:space-x-5 sm:flex mt-9">
-        <a
-          href="/pricing"
-          title=""
-          className="inline-flex items-center justify-center w-full px-8 py-3 text-lg font-bold text-white transition-all duration-200 bg-gray-900 border-2 border-transparent sm:w-auto rounded-xl font-pj hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-          role="button"
-        >
-          Pricing
-        </a>
-
-        <a
-          href="/demo"
-          title=""
-          className="inline-flex items-center justify-center w-full px-6 py-3 mt-4 text-lg font-bold text-gray-900 transition-all duration-200 border-2 border-gray-400 sm:w-auto sm:mt-0 rounded-xl font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 hover:bg-gray-900 focus:bg-gray-900 hover:text-white focus:text-white hover:border-gray-900 focus:border-gray-900"
-          role="button"
-        >
-          <svg className="w-5 h-5 mr-2" viewBox="0 0 18 18" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M8.18003 13.4261C6.8586 14.3918 5 13.448 5 11.8113V5.43865C5 3.80198 6.8586 2.85821 8.18003 3.82387L12.5403 7.01022C13.6336 7.80916 13.6336 9.44084 12.5403 10.2398L8.18003 13.4261Z"
-              strokeWidth="2"
-              strokeMiterlimit="10"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Schedule a Demo
-        </a>
-      </div>
-
-      <p className="mt-8 text-base text-gray-500 font-pj">Easy Setup · No Hardware</p>
-    </div>
-  </div>
-
-  {/* Image Section */}
-  <div className="relative pb-12">
-    <div className="absolute inset-0 h-2/3 bg-gray-50"></div>
-    <div className="relative mx-auto">
-      <div className="lg:max-w-6xl lg:mx-auto">
-        <img className="transform scale-110" src="/img/hero-product-img-new.png" alt="Chatters Dashboard Showing NPS Score Dashboard" />
-      </div>
-    </div>
-  </div>
-</section>
-
-      {/* Dynamic Statistics Section */}
-      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              See how we make a difference
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="px-6 text-lg text-gray-600 font-pj">Real-time customer feedback platform</h1>
+            <p className="mt-5 text-4xl font-bold leading-tight text-gray-900 sm:leading-tight sm:text-5xl lg:text-6xl lg:leading-tight font-pj">
+              <span className="relative inline-flex sm:inline">
+                <span className="relative">Prevent Bad Reviews</span>
+              </span>
+              <span className="block">Before They Happen</span>
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { value: "73%", label: "Issues Prevented", desc: "Proactively resolve issues before they escalate." },
-              { value: "89%", label: "Faster Response", desc: "Significantly improve response times to guest needs." },
-              { value: "94%", label: "Guest Satisfaction", desc: "Achieve higher guest satisfaction and positive reviews." }
-            ].map((stat, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center">
-                <h3 className="text-4xl font-bold text-green-600 mb-2">{stat.value}</h3>
-                <p className="text-xl font-semibold text-gray-900 mb-2">{stat.label}</p>
-                <p className="text-gray-600">{stat.desc}</p>
-              </div>
-            ))}
+
+            <div className="px-8 sm:items-center sm:justify-center sm:px-0 sm:space-x-5 sm:flex mt-9">
+              <a
+                href="/pricing"
+                title=""
+                className="inline-flex items-center justify-center w-full px-8 py-3 text-lg font-bold text-white transition-all duration-200 bg-gray-900 border-2 border-transparent sm:w-auto rounded-xl font-pj hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+                role="button"
+              >
+                Pricing
+              </a>
+
+              <a
+                href="/demo"
+                title=""
+                className="inline-flex items-center justify-center w-full px-6 py-3 mt-4 text-lg font-bold text-gray-900 transition-all duration-200 border-2 border-gray-400 sm:w-auto sm:mt-0 rounded-xl font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 hover:bg-gray-900 focus:bg-gray-900 hover:text-white focus:text-white hover:border-gray-900 focus:border-gray-900"
+                role="button"
+              >
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 18 18" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M8.18003 13.4261C6.8586 14.3918 5 13.448 5 11.8113V5.43865C5 3.80198 6.8586 2.85821 8.18003 3.82387L12.5403 7.01022C13.6336 7.80916 13.6336 9.44084 12.5403 10.2398L8.18003 13.4261Z"
+                    strokeWidth="2"
+                    strokeMiterlimit="10"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Schedule a Demo
+              </a>
+            </div>
+
+            <p className="mt-8 text-base text-gray-500 font-pj">Easy Setup · No Hardware</p>
           </div>
         </div>
-      </div>
+
+        {/* Image Section */}
+        <div className="relative pb-12">
+          <div className="absolute inset-0 h-2/3 bg-gray-50"></div>
+          <div className="relative mx-auto">
+            <div className="lg:max-w-6xl lg:mx-auto">
+              <img className="transform scale-110" src="/img/hero-product-img-new.png" alt="Chatters Dashboard Showing NPS Score Dashboard" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* New Why Choose Us Section */}
+      <section>
+        {/* Container */}
+        <div className="mx-auto w-full px-5 py-12 md:px-10 md:py-16 lg:py-20 max-w-7xl">
+          {/* Heading */}
+          <h2 className="mx-auto mb-12 text-center text-3xl max-w-sm md:max-w-xl font-bold md:mb-28 md:text-5xl">
+            Why Choose Us?
+          </h2>
+          {/* How it Works */}
+          <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+            {/* Item */}
+            <div className="bg-gray-100 w-full p-6 rounded-lg  flex items-center lg:-mt-30 relative">
+              <div className="flex-shrink-0 bg-gray-300 p-4 rounded-full">
+                <svg
+                  width="32"
+                  height="33"
+                  viewBox="0 0 32 33"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    opacity="0.2"
+                    d="M29 21.1836L16.4875 28.2836C16.3374 28.3635 16.17 28.4053 16 28.4053C15.83 28.4053 15.6626 28.3635 15.5125 28.2836L3 21.1836L16 13.8086L29 21.1836Z"
+                    fill="black"
+                  />
+                  <path
+                    d="M29 13.1846L16 20.5596L3 13.1846L15.5125 6.08455C15.6626 6.00467 15.83 5.96289 16 5.96289C16.17 5.96289 16.3374 6.00467 16.4875 6.08455L29 13.1846Z"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M29 21.1836L16.4875 28.2836C16.3374 28.3635 16.17 28.4053 16 28.4053C15.83 28.4053 15.6626 28.3635 15.5125 28.2836L3 21.1836L16 13.8086L29 21.1836Z"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M29 13.1836V21.1836"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M3 13.1836V21.1836"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 20.5586V28.4086"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 5.95898V13.809"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <p className="text-lg font-semibold">
+                  Proactively resolve issues before they escalate.
+                </p>
+              </div>
+              <div className="absolute top-0 right-10 bg-white border-2 border-gray-100 rounded-full h-8 w-8 flex items-center justify-center -mt-4 -mr-4">
+                <span className="text-gray-700 font-bold">1</span>
+              </div>
+            </div>
+            {/* Item */}
+            <div className="bg-gray-100 w-full p-6 rounded-lg  flex items-center md:transform md:translate-y-14 relative">
+              <div className="flex-shrink-0 bg-gray-300 p-4 rounded-full">
+                <svg
+                  width="32"
+                  height="33"
+                  viewBox="0 0 32 33"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    opacity="0.2"
+                    d="M29 21.1836L16.4875 28.2836C16.3374 28.3635 16.17 28.4053 16 28.4053C15.83 28.4053 15.6626 28.3635 15.5125 28.2836L3 21.1836L16 13.8086L29 21.1836Z"
+                    fill="black"
+                  />
+                  <path
+                    d="M29 13.1846L16 20.5596L3 13.1846L15.5125 6.08455C15.6626 6.00467 15.83 5.96289 16 5.96289C16.17 5.96289 16.3374 6.00467 16.4875 6.08455L29 13.1846Z"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M29 21.1836L16.4875 28.2836C16.3374 28.3635 16.17 28.4053 16 28.4053C15.83 28.4053 15.6626 28.3635 15.5125 28.2836L3 21.1836L16 13.8086L29 21.1836Z"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M29 13.1836V21.1836"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M3 13.1836V21.1836"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 20.5586V28.4086"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 5.95898V13.809"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <p className="text-lg font-semibold">
+                  Significantly improve response times to guest needs.
+                </p>
+              </div>
+              <div className="absolute top-0 right-10 bg-white border-2 border-gray-100 rounded-full h-8 w-8 flex items-center justify-center -mt-4 -mr-4">
+                <span className="text-gray-700 font-bold">2</span>
+              </div>
+            </div>
+            {/* Item */}
+            <div className="bg-gray-100 w-full p-6 rounded-lg  flex items-center md:transform md:translate-y-28 relative">
+              <div className="flex-shrink-0 bg-gray-300 p-4 rounded-full">
+                <svg
+                  width="32"
+                  height="33"
+                  viewBox="0 0 32 33"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    opacity="0.2"
+                    d="M29 21.1836L16.4875 28.2836C16.3374 28.3635 16.17 28.4053 16 28.4053C15.83 28.4053 15.6626 28.3635 15.5125 28.2836L3 21.1836L16 13.8086L29 21.1836Z"
+                    fill="black"
+                  />
+                  <path
+                    d="M29 13.1846L16 20.5596L3 13.1846L15.5125 6.08455C15.6626 6.00467 15.83 5.96289 16 5.96289C16.17 5.96289 16.3374 6.00467 16.4875 6.08455L29 13.1846Z"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M29 21.1836L16.4875 28.2836C16.3374 28.3635 16.17 28.4053 16 28.4053C15.83 28.4053 15.6626 28.3635 15.5125 28.2836L3 21.1836L16 13.8086L29 21.1836Z"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M29 13.1836V21.1836"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M3 13.1836V21.1836"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 20.5586V28.4086"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M16 5.95898V13.809"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <p className="text-lg font-semibold">
+                  Achieve higher guest satisfaction and positive reviews.
+                </p>
+              </div>
+              <div className="absolute top-0 right-10 bg-white border-2 border-gray-100 rounded-full h-8 w-8 flex items-center justify-center -mt-4 -mr-4">
+                <span className="text-gray-700 font-bold">3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* How It Works Section */}
       <div className="bg-white py-16">
