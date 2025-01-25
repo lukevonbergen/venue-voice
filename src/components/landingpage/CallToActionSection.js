@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 
 const CallToActionSection = ({ openDemoModal }) => {
   return (
-<section>
+    <section>
       {/* Container */}
       <div className="px-5 py-16 md:px-10 md:py-20">
         <div className="mx-auto w-full max-w-7xl bg-gray-100 px-4 py-32 text-center">
@@ -29,9 +29,10 @@ const CallToActionSection = ({ openDemoModal }) => {
               <p className="text-sm sm:text-base">No Hardware</p>
             </li>
           </ul>
+          {/* Button with Pointer Cursor */}
           <a
             onClick={openDemoModal}
-            className="mb-4 inline-block items-center bg-black px-6 py-3 text-center font-semibold text-white"
+            className="mb-4 inline-block cursor-pointer items-center bg-black px-6 py-3 text-center font-semibold text-white hover:bg-gray-800"
           >
             Get Started and book a demo!
           </a>
