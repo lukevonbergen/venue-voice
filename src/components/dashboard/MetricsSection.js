@@ -7,9 +7,9 @@ const MetricsSection = ({ venueId }) => {
 
   // Fetch feedback data from Supabase
   useEffect(() => {
-    const fetchFeedback = async () => {
-      if (!venueId) return;
+    if (!venueId) return;
 
+    const fetchFeedback = async () => {
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -23,8 +23,43 @@ const MetricsSection = ({ venueId }) => {
     };
 
     fetchFeedback();
+
+    // Subscribe to real-time updates
+    const feedbackSubscription = supabase
+      .channel('custom-all-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
+        (payload) => {
+          setFeedback((prevFeedback) => {
+            const newFeedback = [...prevFeedback];
+            const index = newFeedback.findIndex((f) => f.id === payload.new.id);
+
+            if (payload.eventType === 'INSERT') {
+              newFeedback.push(payload.new);
+            } else if (payload.eventType === 'UPDATE') {
+              if (index !== -1) {
+                newFeedback[index] = payload.new;
+              }
+            } else if (payload.eventType === 'DELETE') {
+              if (index !== -1) {
+                newFeedback.splice(index, 1);
+              }
+            }
+
+            return newFeedback;
+          });
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      feedbackSubscription.unsubscribe();
+    };
   }, [venueId]);
 
+  // Rest of the component code remains the same...
   // Filter feedback by time range
   const filterFeedbackByTime = (startTime, endTime) => {
     return feedback.filter((f) => {
