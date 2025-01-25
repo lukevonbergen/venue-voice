@@ -1,13 +1,10 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
 
 const CallToActionSection = ({ openDemoModal }) => {
   return (
     <section>
-      {/* Container */}
-      <div className="px-5 py-16 md:px-10 md:py-20">
-        <div className="mx-auto w-full bg-gray-100 px-4 py-32 text-center">
-          {/* Title */}
+      <div className="bg-gray-100 text-center">
+        <div className="mx-auto w-full py-32">
           <h2 className="mx-auto mb-6 max-w-3xl flex-col text-3xl font-bold md:mb-10 md:text-5xl lg:mb-12">
             Ready to get started?
           </h2>
@@ -29,7 +26,6 @@ const CallToActionSection = ({ openDemoModal }) => {
               <p className="text-sm sm:text-base">No Hardware</p>
             </li>
           </ul>
-          {/* Button with Pointer Cursor */}
           <a
             onClick={openDemoModal}
             className="mb-4 inline-block cursor-pointer items-center bg-black px-6 py-3 text-center font-semibold text-white hover:bg-gray-800"
