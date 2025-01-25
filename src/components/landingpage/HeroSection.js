@@ -36,7 +36,7 @@ const HeroSection = () => {
           </div>
           {/* Hero Image */}
           <img
-            src="/public/img/hero-product-img-new.png"
+            src="/img/hero-product-img-new.png"
             alt=""
             className="inline-block h-full w-full max-w-2xl"
           />
