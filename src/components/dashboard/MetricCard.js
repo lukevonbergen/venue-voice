@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, Users, Calendar, TrendingUp } from 'lucide-react';
 import MetricCard from './MetricCard';
-import supabase from '../utils/supabase'; // Import Supabase client
+import supabase from '../../utils/supabase';
 
 const MetricsCards = ({ venueId }) => {
   const [feedback, setFeedback] = useState([]);
