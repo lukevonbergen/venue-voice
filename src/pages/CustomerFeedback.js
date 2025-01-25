@@ -104,38 +104,42 @@ const CustomerFeedbackPage = () => {
       '😍': 5,
     };
     const rating = emojiToRating[emoji];
-
-    // Log all questions except the NPS question
-    const feedbackData = questions
-      .filter((question) => question.id !== 'nps') // Exclude the NPS question
-      .map((question) => ({
+  
+    // Get the current question being answered
+    const currentQuestion = questions[currentQuestionIndex];
+  
+    // Only send feedback for the current question (excluding NPS)
+    if (currentQuestion.id !== 'nps') {
+      const feedbackData = {
         venue_id: venueId,
-        question_id: question.id,
+        question_id: currentQuestion.id,
         sentiment: emoji,
         rating: rating,
         table_number: tableNumber || null, // Include table number
         session_id: sessionId, // Use the same session_id for all feedback entries
-      }));
-
-    console.log('Feedback data being sent:', feedbackData); // Debugging
-
-    // Save all feedback entries to the database
-    const { data, error } = await supabase
-      .from('feedback')
-      .insert(feedbackData)
-      .select(); // Use .select() to return the inserted data
-
-    if (error) {
-      console.error('Error saving feedback:', error);
-      toast.error(`Failed to save feedback: ${error.message}`); // Show detailed error message
-    } else {
-      console.log('Feedback saved successfully:', data); // Debugging
-      // Move to the next question or show additional feedback
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      };
+  
+      console.log('Feedback data being sent:', feedbackData); // Debugging
+  
+      // Save the feedback entry to the database
+      const { data, error } = await supabase
+        .from('feedback')
+        .insert([feedbackData])
+        .select(); // Use .select() to return the inserted data
+  
+      if (error) {
+        console.error('Error saving feedback:', error);
+        toast.error(`Failed to save feedback: ${error.message}`); // Show detailed error message
       } else {
-        setShowAdditionalFeedback(true);
+        console.log('Feedback saved successfully:', data); // Debugging
       }
+    }
+  
+    // Move to the next question or show additional feedback
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setShowAdditionalFeedback(true);
     }
   };
 
