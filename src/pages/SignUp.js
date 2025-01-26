@@ -47,13 +47,13 @@ const SignUpPage = () => {
       // Determine the price ID based on the selected subscription type
       const priceId =
         subscriptionType === 'monthly'
-          ? process.env.STRIPE_PRICE_MONTHLY
-          : process.env.STRIPE_PRICE_YEARLY;
+          ? process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY
+          : process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY;
 
       // Debug logs for subscriptionType and priceId
       console.log('Subscription Type:', subscriptionType);
-      console.log('STRIPE_PRICE_MONTHLY:', process.env.STRIPE_PRICE_MONTHLY);
-      console.log('STRIPE_PRICE_YEARLY:', process.env.STRIPE_PRICE_YEARLY);
+      console.log('STRIPE_PRICE_MONTHLY:', process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY);
+      console.log('STRIPE_PRICE_YEARLY:', process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY);
       console.log('Price ID:', priceId);
 
       // Stripe Checkout
@@ -69,7 +69,7 @@ const SignUpPage = () => {
       }
 
       const { id } = await response.json();
-      const stripe = await loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
       await stripe.redirectToCheckout({ sessionId: id });
     } catch (error) {
       console.error('Signup Error:', error);
