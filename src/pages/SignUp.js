@@ -15,6 +15,9 @@ const SignUpPage = () => {
   const [subscriptionType, setSubscriptionType] = useState('monthly'); // Default to monthly
   const navigate = useNavigate();
 
+  // Debug log to check environment variables
+  console.log('All Environment Variables:', process.env);
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -67,6 +70,10 @@ const SignUpPage = () => {
       }
 
       const { id } = await response.json();
+
+      // Debug log for Stripe publishable key
+      console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
       await stripe.redirectToCheckout({ sessionId: id });
     } catch (error) {
