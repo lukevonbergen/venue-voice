@@ -9,9 +9,14 @@ export default async function handler(req, res) {
 
   const { email, priceId } = req.body;
 
+  // Debug logs to check the request payload
+  console.log('Received email:', email);
+  console.log('Received priceId:', priceId);
+
   try {
     // Validate the email and price ID
     if (!email || !priceId) {
+      console.error('Email or priceId is missing');
       return res.status(400).json({ error: 'Email and price ID are required' });
     }
 
@@ -30,18 +35,13 @@ export default async function handler(req, res) {
       customer_email: email,
     });
 
+    // Debug log for the session ID
+    console.log('Checkout session created with ID:', session.id);
+
     // Return the session ID
     res.status(200).json({ id: session.id });
   } catch (error) {
     console.error('Stripe API Error:', error);
-
-    // Handle specific Stripe errors
-    if (error.type === 'StripeCardError') {
-      return res.status(400).json({ error: error.message });
-    } else if (error.type === 'StripeInvalidRequestError') {
-      return res.status(400).json({ error: 'Invalid request to Stripe API' });
-    } else {
-      return res.status(500).json({ error: 'An unexpected error occurred' });
-    }
+    return res.status(500).json({ error: error.message });
   }
 }
