@@ -47,13 +47,11 @@ const SignUpPage = () => {
       // Determine the price ID based on the selected subscription type
       const priceId =
         subscriptionType === 'monthly'
-          ? process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY
-          : process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY;
+          ? 'price_1QlDgJAIlP4JnTHqgmKa1RA4' // Monthly price ID
+          : 'price_1QlDi1AIlP4JnTHqonVauE0k'; // Yearly price ID
 
       // Debug logs for subscriptionType and priceId
       console.log('Subscription Type:', subscriptionType);
-      console.log('STRIPE_PRICE_MONTHLY:', process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY);
-      console.log('STRIPE_PRICE_YEARLY:', process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY);
       console.log('Price ID:', priceId);
 
       // Stripe Checkout
