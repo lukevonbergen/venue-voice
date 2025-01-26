@@ -13,11 +13,23 @@ const ContactPage = () => {
 
     script.onload = () => {
       if (window.hbspt) {
+        console.log('HubSpot script loaded successfully');
         window.hbspt.forms.create({
           portalId: '48822376',
           formId: 'a4b40ec3-1cf5-422e-a540-e405db7d3d02',
-          target: '#hubspot-form', // Target container for the form
+          target: '#hubspot-form',
+          css: '', // Disable inline styles
+          cssClass: 'your-custom-class', // Add a custom class if needed
+          disableInlineStyles: true, // Disable pre-fill
+          onFormReady: (form) => {
+            console.log('Form is ready', form);
+          },
+          onFormSubmit: (form) => {
+            console.log('Form submitted', form);
+          },
         });
+      } else {
+        console.error('HubSpot script failed to load');
       }
     };
 
