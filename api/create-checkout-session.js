@@ -7,16 +7,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { email, priceId } = req.body;
-
-  // Debug logs to check the request payload
-  console.log('Received email:', email);
-  console.log('Received priceId:', priceId);
+  const { email, priceId, firstName, lastName, venueName, password } = req.body;
 
   try {
     // Validate the email and price ID
     if (!email || !priceId) {
-      console.error('Email or priceId is missing');
       return res.status(400).json({ error: 'Email and price ID are required' });
     }
 
@@ -33,10 +28,13 @@ export default async function handler(req, res) {
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/signup`,
       customer_email: email,
+      metadata: {
+        firstName,
+        lastName,
+        venueName,
+        password,
+      },
     });
-
-    // Debug log for the session ID
-    console.log('Checkout session created with ID:', session.id);
 
     // Return the session ID
     res.status(200).json({ id: session.id });

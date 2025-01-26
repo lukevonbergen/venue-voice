@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import supabase from '../utils/supabase';
 import { loadStripe } from '@stripe/stripe-js';
 
 const SignUpPage = () => {
@@ -27,23 +26,6 @@ const SignUpPage = () => {
     }
 
     try {
-      // Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (authError) throw new Error(authError.message);
-
-      // Create venue record
-      const { data: venueData, error: venueError } = await supabase
-        .from('venues')
-        .insert([{ name: venueName, email, first_name: firstName, last_name: lastName }])
-        .select()
-        .single();
-
-      if (venueError) throw new Error(venueError.message);
-
       // Determine the price ID based on the selected subscription type
       const priceId =
         subscriptionType === 'monthly'
@@ -54,7 +36,7 @@ const SignUpPage = () => {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, priceId }),
+        body: JSON.stringify({ email, priceId, firstName, lastName, venueName, password }),
       });
 
       if (!response.ok) {

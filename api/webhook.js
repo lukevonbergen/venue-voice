@@ -57,26 +57,43 @@ export default async function handler(req, res) {
       console.log('Checkout session completed:', JSON.stringify(session, null, 2));
 
       // Validate session data
-      if (!session.customer_email) {
-        console.error('Customer email is missing in session:', session);
-        return res.status(400).json({ message: 'Customer email is missing' });
+      if (!session.customer_email || !session.metadata) {
+        console.error('Customer email or metadata is missing in session:', session);
+        return res.status(400).json({ message: 'Customer email or metadata is missing' });
       }
 
-      console.log('Customer email found:', session.customer_email);
+      const { firstName, lastName, venueName, password } = session.metadata;
+      const email = session.customer_email;
 
-      // Update the venues table with is_paid: true
-      console.log('Updating venue for email:', session.customer_email);
-      const { data, error } = await supabase
-        .from('venues')
-        .update({ is_paid: true })
-        .ilike('email', session.customer_email); // Use ilike for case-insensitive matching
+      console.log('Customer email found:', email);
+      console.log('Metadata:', { firstName, lastName, venueName });
 
-      if (error) {
-        console.error('Error updating venue:', error);
-        return res.status(500).json({ message: 'Database error' });
+      try {
+        // Create user in Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (authError) throw new Error(authError.message);
+
+        console.log('User created in Supabase Auth:', authData);
+
+        // Create venue record in Supabase
+        const { data: venueData, error: venueError } = await supabase
+          .from('venues')
+          .insert([{ name: venueName, email, first_name: firstName, last_name: lastName, is_paid: true }])
+          .select()
+          .single();
+
+        if (venueError) throw new Error(venueError.message);
+
+        console.log('Venue record created:', venueData);
+      } catch (error) {
+        console.error('Error creating user or venue:', error);
+        return res.status(500).json({ message: 'Error creating user or venue' });
       }
 
-      console.log('Venue update result:', data);
       break;
 
     default:
