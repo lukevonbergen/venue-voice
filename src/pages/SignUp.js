@@ -14,42 +14,7 @@ const SignUpPage = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1);
   const navigate = useNavigate();
-
-  const steps = [
-    { id: 1, label: 'First Name', value: firstName, onChange: setFirstName },
-    { id: 2, label: 'Last Name', value: lastName, onChange: setLastName },
-    { id: 3, label: 'Venue Name', value: name, onChange: setName },
-    {
-      id: 4,
-      label: 'Account Details',
-      fields: [
-        { label: 'Email', value: email, onChange: setEmail, type: 'email' },
-        { label: 'Password', value: password, onChange: setPassword, type: 'password' },
-        { label: 'Confirm Password', value: confirmPassword, onChange: setConfirmPassword, type: 'password' },
-      ],
-    },
-  ];
-
-  const handleNext = () => {
-    if (step < steps.length) {
-      setStep(step + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // Prevent form submission
-      handleNext();
-    }
-  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -128,88 +93,103 @@ const SignUpPage = () => {
           )}
 
           <form onSubmit={handleSignUp} className="space-y-4">
-            <AnimatePresence mode="wait">
-              {steps.map(
-                (stepData) =>
-                  step === stepData.id && (
-                    <motion.div
-                      key={stepData.id}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {stepData.fields ? (
-                        // Render multiple fields for step 4
-                        stepData.fields.map((field) => (
-                          <div key={field.label} className="mb-4">
-                            <label htmlFor={field.label.toLowerCase().replace(' ', '-')} className="block text-sm font-medium text-gray-700 mb-2">
-                              {field.label}
-                            </label>
-                            <input
-                              type={field.type}
-                              id={field.label.toLowerCase().replace(' ', '-')}
-                              placeholder={`Enter your ${field.label.toLowerCase()}`}
-                              value={field.value}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              onKeyDown={handleKeyDown}
-                              className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
-                              required
-                            />
-                          </div>
-                        ))
-                      ) : (
-                        // Render single field for other steps
-                        <div>
-                          <label htmlFor={stepData.label.toLowerCase().replace(' ', '-')} className="block text-sm font-medium text-gray-700 mb-2">
-                            {stepData.label}
-                          </label>
-                          <input
-                            type="text"
-                            id={stepData.label.toLowerCase().replace(' ', '-')}
-                            placeholder={`Enter your ${stepData.label.toLowerCase()}`}
-                            value={stepData.value}
-                            onChange={(e) => stepData.onChange(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
-                            required
-                          />
-                        </div>
-                      )}
-                    </motion.div>
-                  )
-              )}
-            </AnimatePresence>
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between">
-              {step > 1 && (
-                <button
-                  type="button"
-                  onClick={handlePrevious}
-                  className="px-4 py-2 md:px-6 md:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm md:text-base"
-                >
-                  Previous
-                </button>
-              )}
-              {step < steps.length ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="px-4 py-2 md:px-6 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
-                >
-                  Next
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-4 py-2 md:px-6 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
-                >
-                  {isLoading ? 'Loading...' : 'Sign Up'}
-                </button>
-              )}
+            <div>
+              <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-2">
+                First Name
+              </label>
+              <input
+                type="text"
+                id="first-name"
+                placeholder="Enter your first name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
+                required
+              />
             </div>
+
+            <div>
+              <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="last-name"
+                placeholder="Enter your last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="venue-name" className="block text-sm font-medium text-gray-700 mb-2">
+                Venue Name
+              </label>
+              <input
+                type="text"
+                id="venue-name"
+                placeholder="Enter your venue name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="confirm-password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full px-4 py-2 md:px-6 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
+            >
+              {isLoading ? 'Loading...' : 'Sign Up'}
+            </button>
           </form>
 
           {/* Confirmation Summary (Visible on Mobile) */}
