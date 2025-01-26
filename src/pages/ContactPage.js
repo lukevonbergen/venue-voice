@@ -1,38 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Mail, Phone } from 'lucide-react';
 import Navbar from './Navbar'; // Import the Navbar component
 import Footer from './Footer'; // Import the Footer component
 
 const ContactPage = () => {
-  const [isSubmitted, setIsSubmitted] = useState(false); // State to track form submission
+  // Load HubSpot form script and initialize the form
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//js.hsforms.net/forms/embed/v2.js';
+    script.charset = 'utf-8';
+    script.async = true;
 
-  // Function to handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-      // Send form data to FormSubmit
-      const response = await fetch('https://formsubmit.co/luke@getchatters.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        setIsSubmitted(true); // Hide the form and show the thank-you message
-      } else {
-        alert('Failed to send message. Please try again.');
+    script.onload = () => {
+      if (window.hbspt) {
+        window.hbspt.forms.create({
+          portalId: '48822376',
+          formId: 'a4b40ec3-1cf5-422e-a540-e405db7d3d02',
+          target: '#hubspot-form', // Target container for the form
+        });
       }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
-    }
-  };
+    };
+
+    document.body.appendChild(script);
+
+    // Cleanup script on component unmount
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
@@ -56,115 +51,10 @@ const ContactPage = () => {
 
           {/* Contact Form and Info */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Contact Form Container */}
+            {/* HubSpot Form Container */}
             <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-              {isSubmitted ? (
-                // Thank-You Message
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Thank You!</h2>
-                  <p className="text-lg text-gray-600">
-                    Your message has been sent successfully. We'll respond within 24 hours.
-                  </p>
-                </div>
-              ) : (
-                // Contact Form
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* First Name */}
-                    <div>
-                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        id="firstName"
-                        name="firstName"
-                        className="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Your first name"
-                        required
-                      />
-                    </div>
-
-                    {/* Last Name */}
-                    <div>
-                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        id="lastName"
-                        name="lastName"
-                        className="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Your last name"
-                        required
-                      />
-                    </div>
-
-                    {/* Business Name */}
-                    <div>
-                      <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
-                        Business Name
-                      </label>
-                      <input
-                        type="text"
-                        id="businessName"
-                        name="businessName"
-                        className="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Your business name"
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        className="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="your.email@example.com"
-                        required
-                      />
-                    </div>
-
-                    {/* Message */}
-                    <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                        Message
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        rows="5"
-                        className="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Your message..."
-                        required
-                      ></textarea>
-                    </div>
-
-                    {/* Hidden Fields for FormSubmit */}
-                    <input type="hidden" name="_captcha" value="false" /> {/* Disable CAPTCHA */}
-                    <input
-                      type="hidden"
-                      name="_next"
-                      value="https://yourwebsite.com/thank-you" // Replace with your thank-you page URL
-                    />
-
-                    {/* Submit Button */}
-                    <div>
-                      <button
-                        type="submit"
-                        className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        Send Message
-                      </button>
-                    </div>
-                  </form>
-                </>
-              )}
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
+              <div id="hubspot-form"></div> {/* HubSpot form will be injected here */}
             </div>
 
             {/* Contact Info */}
