@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import { loadStripe } from '@stripe/stripe-js';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const SignUpPage = () => {
   const [email, setEmail] = useState('');
@@ -11,9 +9,10 @@ const SignUpPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [name, setName] = useState('');
+  const [venueName, setVenueName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [subscriptionType, setSubscriptionType] = useState('monthly'); // Default to monthly
   const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
@@ -39,17 +38,23 @@ const SignUpPage = () => {
       // Create venue record
       const { data: venueData, error: venueError } = await supabase
         .from('venues')
-        .insert([{ name, email, first_name: firstName, last_name: lastName }])
+        .insert([{ name: venueName, email, first_name: firstName, last_name: lastName }])
         .select()
         .single();
 
       if (venueError) throw new Error(venueError.message);
 
+      // Determine the price ID based on the selected subscription type
+      const priceId =
+        subscriptionType === 'monthly'
+          ? process.env.STRIPE_PRICE_MONTHLY
+          : process.env.STRIPE_PRICE_YEARLY;
+
       // Stripe Checkout
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, priceId }),
       });
 
       if (!response.ok) {
@@ -58,10 +63,8 @@ const SignUpPage = () => {
       }
 
       const { id } = await response.json();
-      const stripe = await loadStripe('pk_live_51QdvLmAIlP4JnTHqmk3rZBkK6eFhphYRFP3WOZrI4YZ3IgqvugUBAX16vLH70ZNmVziY908DQMg34hgu8m500xBe00rz1SWx0o');
-      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: id });
-
-      if (stripeError) throw new Error(stripeError.message);
+      const stripe = await loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
+      await stripe.redirectToCheckout({ sessionId: id });
     } catch (error) {
       console.error('Signup Error:', error);
       setError(error.message);
@@ -93,6 +96,7 @@ const SignUpPage = () => {
           )}
 
           <form onSubmit={handleSignUp} className="space-y-4">
+            {/* First Name */}
             <div>
               <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-2">
                 First Name
@@ -108,6 +112,7 @@ const SignUpPage = () => {
               />
             </div>
 
+            {/* Last Name */}
             <div>
               <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-2">
                 Last Name
@@ -123,6 +128,7 @@ const SignUpPage = () => {
               />
             </div>
 
+            {/* Venue Name */}
             <div>
               <label htmlFor="venue-name" className="block text-sm font-medium text-gray-700 mb-2">
                 Venue Name
@@ -131,13 +137,14 @@ const SignUpPage = () => {
                 type="text"
                 id="venue-name"
                 placeholder="Enter your venue name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={venueName}
+                onChange={(e) => setVenueName(e.target.value)}
                 className="w-full px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
                 required
               />
             </div>
 
+            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -153,6 +160,7 @@ const SignUpPage = () => {
               />
             </div>
 
+            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -168,6 +176,7 @@ const SignUpPage = () => {
               />
             </div>
 
+            {/* Confirm Password */}
             <div>
               <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm Password
@@ -183,6 +192,36 @@ const SignUpPage = () => {
               />
             </div>
 
+            {/* Subscription Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Subscription Type
+              </label>
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="monthly"
+                    checked={subscriptionType === 'monthly'}
+                    onChange={() => setSubscriptionType('monthly')}
+                    className="mr-2"
+                  />
+                  Monthly
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="yearly"
+                    checked={subscriptionType === 'yearly'}
+                    onChange={() => setSubscriptionType('yearly')}
+                    className="mr-2"
+                  />
+                  Yearly
+                </label>
+              </div>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -191,30 +230,6 @@ const SignUpPage = () => {
               {isLoading ? 'Loading...' : 'Sign Up'}
             </button>
           </form>
-
-          {/* Confirmation Summary (Visible on Mobile) */}
-          <div className="mt-6 md:hidden">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Your Information</h3>
-            <div className="space-y-2 text-sm">
-              {firstName && <p><strong>First Name:</strong> {firstName}</p>}
-              {lastName && <p><strong>Last Name:</strong> {lastName}</p>}
-              {name && <p><strong>Venue Name:</strong> {name}</p>}
-              {email && <p><strong>Email:</strong> {email}</p>}
-              {password && <p><strong>Password:</strong> ********</p>}
-            </div>
-          </div>
-        </div>
-
-        {/* Confirmation Section (Visible on Desktop) */}
-        <div className="hidden md:block w-1/3 bg-emerald-50 p-6 md:p-8 border-l border-emerald-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Your Information</h3>
-          <div className="space-y-4">
-            {firstName && <p><strong>First Name:</strong> {firstName}</p>}
-            {lastName && <p><strong>Last Name:</strong> {lastName}</p>}
-            {name && <p><strong>Venue Name:</strong> {name}</p>}
-            {email && <p><strong>Email:</strong> {email}</p>}
-            {password && <p><strong>Password:</strong> ********</p>}
-          </div>
         </div>
       </div>
     </div>
