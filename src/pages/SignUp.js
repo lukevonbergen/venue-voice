@@ -50,9 +50,11 @@ const SignUpPage = () => {
           ? process.env.STRIPE_PRICE_MONTHLY
           : process.env.STRIPE_PRICE_YEARLY;
 
-      // Debug logs for email and priceId
-      console.log('Sending email:', email);
-      console.log('Sending priceId:', priceId);
+      // Debug logs for subscriptionType and priceId
+      console.log('Subscription Type:', subscriptionType);
+      console.log('STRIPE_PRICE_MONTHLY:', process.env.STRIPE_PRICE_MONTHLY);
+      console.log('STRIPE_PRICE_YEARLY:', process.env.STRIPE_PRICE_YEARLY);
+      console.log('Price ID:', priceId);
 
       // Stripe Checkout
       const response = await fetch('/api/create-checkout-session', {
