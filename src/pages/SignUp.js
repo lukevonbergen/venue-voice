@@ -15,6 +15,11 @@ const SignUpPage = () => {
   const [subscriptionType, setSubscriptionType] = useState('monthly');
   const navigate = useNavigate();
 
+   // Debug environment variables
+   console.log('Monthly Price ID:', process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY);
+   console.log('Yearly Price ID:', process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY);
+   console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
