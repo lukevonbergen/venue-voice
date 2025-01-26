@@ -12,11 +12,8 @@ const SignUpPage = () => {
   const [venueName, setVenueName] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [subscriptionType, setSubscriptionType] = useState('monthly'); // Default to monthly
+  const [subscriptionType, setSubscriptionType] = useState('monthly');
   const navigate = useNavigate();
-
-  // Debug log to check environment variables
-  console.log('All Environment Variables:', process.env);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -50,12 +47,8 @@ const SignUpPage = () => {
       // Determine the price ID based on the selected subscription type
       const priceId =
         subscriptionType === 'monthly'
-          ? 'price_1QlDgJAIlP4JnTHqgmKa1RA4' // Monthly price ID
-          : 'price_1QlDi1AIlP4JnTHqonVauE0k'; // Yearly price ID
-
-      // Debug logs for subscriptionType and priceId
-      console.log('Subscription Type:', subscriptionType);
-      console.log('Price ID:', priceId);
+          ? process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY // Monthly price ID from env
+          : process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY; // Yearly price ID from env
 
       // Stripe Checkout
       const response = await fetch('/api/create-checkout-session', {
@@ -70,14 +63,9 @@ const SignUpPage = () => {
       }
 
       const { id } = await response.json();
-
-      // Debug log for Stripe publishable key
-      console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
       await stripe.redirectToCheckout({ sessionId: id });
     } catch (error) {
-      console.error('Signup Error:', error);
       setError(error.message);
     } finally {
       setIsLoading(false);
@@ -87,13 +75,8 @@ const SignUpPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row">
-        {/* Form Section */}
         <div className="flex-1 p-6 md:p-8">
           <div className="text-center">
-            <div className="mb-6 inline-flex items-center space-x-2 bg-white/50 px-4 py-1 rounded-full border border-emerald-100">
-              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">New</span>
-              <span className="text-sm text-gray-600">Create your account</span>
-            </div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Sign Up</h2>
             <p className="text-gray-600 mb-6 text-sm md:text-base">
               Join Chatters and start transforming customer feedback into actionable insights.
@@ -107,7 +90,6 @@ const SignUpPage = () => {
           )}
 
           <form onSubmit={handleSignUp} className="space-y-4">
-            {/* First Name */}
             <div>
               <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-2">
                 First Name
@@ -123,7 +105,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Last Name */}
             <div>
               <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-2">
                 Last Name
@@ -139,7 +120,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Venue Name */}
             <div>
               <label htmlFor="venue-name" className="block text-sm font-medium text-gray-700 mb-2">
                 Venue Name
@@ -155,7 +135,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -171,7 +150,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -187,7 +165,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm Password
@@ -203,7 +180,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Subscription Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Subscription Type
@@ -232,7 +208,6 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
