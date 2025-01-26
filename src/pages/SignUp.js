@@ -15,10 +15,10 @@ const SignUpPage = () => {
   const [subscriptionType, setSubscriptionType] = useState('monthly');
   const navigate = useNavigate();
 
-   // Debug environment variables
-   console.log('Monthly Price ID:', process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY);
-   console.log('Yearly Price ID:', process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY);
-   console.log('Stripe Publishable Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  // Debug environment variables
+  console.log('Monthly Price ID:', process.env.REACT_APP_STRIPE_PRICE_MONTHLY);
+  console.log('Yearly Price ID:', process.env.REACT_APP_STRIPE_PRICE_YEARLY);
+  console.log('Stripe Publishable Key:', process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -52,8 +52,8 @@ const SignUpPage = () => {
       // Determine the price ID based on the selected subscription type
       const priceId =
         subscriptionType === 'monthly'
-          ? process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY // Monthly price ID from env
-          : process.env.NEXT_PUBLIC_STRIPE_PRICE_YEARLY; // Yearly price ID from env
+          ? process.env.REACT_APP_STRIPE_PRICE_MONTHLY // Monthly price ID from env
+          : process.env.REACT_APP_STRIPE_PRICE_YEARLY; // Yearly price ID from env
 
       // Stripe Checkout
       const response = await fetch('/api/create-checkout-session', {
@@ -68,7 +68,7 @@ const SignUpPage = () => {
       }
 
       const { id } = await response.json();
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+      const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
       await stripe.redirectToCheckout({ sessionId: id });
     } catch (error) {
       setError(error.message);
