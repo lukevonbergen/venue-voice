@@ -115,8 +115,8 @@ const Navbar = () => {
             Pricing
           </Link>
           <Link
-            to="/docs"
-            className={`font-inter rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isActive('/docs') ? 'font-semibold' : ''}`}
+            to="https://chatters.canny.io/changelog"
+            className={`font-inter rounded-lg lg:px-6 lg:py-4 lg:hover:text-gray-800 ${isActive('https://chatters.canny.io/changelog') ? 'font-semibold' : ''}`}
           >
             Docs
           </Link>
