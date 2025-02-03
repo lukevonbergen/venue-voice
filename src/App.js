@@ -10,6 +10,7 @@ import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
 import TablesDashboard from './pages/Dashboard_Tables';
 import SettingsPage from './pages/SettingsPage';
+import TemplatesPage from './pages/QRTemplates';
 import NPSScores from './pages/NPSScores';
 import QRCodePage_Feature from './pages/Features_QRCode';
 import NPS_Feature from './pages/Features_NPSScore';
@@ -78,6 +79,7 @@ function App() {
       <Route path="/dashboard/tablefeedback" element={<TablesDashboard />} />
       <Route path="/dashboard/nps" element={<NPSScores />} />
       <Route path="/dashboard/settings" element={<SettingsPage />} />
+      <Route path="/dashboard/templates" element={<TemplatesPage />} />
       <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/signin" element={<SignInPage />} />
