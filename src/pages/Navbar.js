@@ -93,6 +93,7 @@ const Navbar = () => {
              className={`z-50 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[200px] rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
              onMouseEnter={handleMouseEnter}
              onMouseLeave={handleMouseLeave}
+             style={{ zIndex: 1000 }}
               >
                 <div className={`${isMobileMenuOpen ? "flex flex-col space-y-2 p-2" : "p-4"}`}>
                   {features.map((feature, index) => (
