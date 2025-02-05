@@ -90,7 +90,7 @@ const Navbar = () => {
             </button>
             {isFeaturesDropdownOpen && (
              <div
-             className={`z-50 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[200px] rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
+             className={`z-1000 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[200px] rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
              onMouseEnter={handleMouseEnter}
              onMouseLeave={handleMouseLeave}
              style={{ zIndex: 1000 }}
