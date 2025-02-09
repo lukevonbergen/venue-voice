@@ -22,19 +22,46 @@ ChartJS.register(
 );
 
 const FeedbackTrendsChart = ({ feedback }) => {
-  // Group feedback by day and calculate average rating
-  const feedbackByDay = feedback.reduce((acc, f) => {
-    const date = new Date(f.timestamp).toLocaleDateString();
-    if (!acc[date]) {
-      acc[date] = { totalRating: 0, count: 0 };
-    }
-    acc[date].totalRating += f.rating;
-    acc[date].count += 1;
-    return acc;
-  }, {});
+  // Helper function to format dates as "MM/DD"
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
 
-  const labels = Object.keys(feedbackByDay).sort();
-  const data = labels.map((date) => (feedbackByDay[date].totalRating / feedbackByDay[date].count).toFixed(2));
+  // Get today's date and the date 30 days ago
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+
+  // Filter feedback to the last 30 days and group by day
+  const feedbackByDay = feedback
+    .filter((f) => new Date(f.timestamp) >= thirtyDaysAgo) // Only include last 30 days
+    .reduce((acc, f) => {
+      const date = new Date(f.timestamp).toLocaleDateString();
+      if (!acc[date]) {
+        acc[date] = { totalRating: 0, count: 0 };
+      }
+      acc[date].totalRating += f.rating;
+      acc[date].count += 1;
+      return acc;
+    }, {});
+
+  // Generate labels and data for the last 30 days
+  const labels = [];
+  const data = [];
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(today.getDate() - i);
+    const formattedDate = date.toLocaleDateString();
+    labels.push(formatDate(formattedDate)); // Format as "MM/DD"
+    if (feedbackByDay[formattedDate]) {
+      data.push((feedbackByDay[formattedDate].totalRating / feedbackByDay[formattedDate].count).toFixed(2));
+    } else {
+      data.push(null); // Use null for days with no feedback
+    }
+  }
 
   const chartData = {
     labels,
@@ -50,6 +77,7 @@ const FeedbackTrendsChart = ({ feedback }) => {
         pointBackgroundColor: 'rgba(99, 102, 241, 1)',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
+        fill: true, // Fill the area under the line
       },
     ],
   };
@@ -66,7 +94,7 @@ const FeedbackTrendsChart = ({ feedback }) => {
       },
       title: {
         display: true,
-        text: 'Feedback Trends Over Time',
+        text: 'Feedback Trends Over the Last 30 Days',
         font: {
           size: 18,
           weight: 'bold',
