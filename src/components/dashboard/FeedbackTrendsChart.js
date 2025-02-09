@@ -35,39 +35,44 @@ const FeedbackTrendsChart = ({ feedback }) => {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(today.getDate() - 30);
 
-  // Filter feedback to the last 30 days and group by day
-  const feedbackByDay = feedback
-    .filter((f) => new Date(f.timestamp) >= thirtyDaysAgo) // Only include last 30 days
-    .reduce((acc, f) => {
-      const date = new Date(f.timestamp).toLocaleDateString();
-      if (!acc[date]) {
-        acc[date] = { totalRating: 0, count: 0 };
-      }
-      acc[date].totalRating += f.rating;
-      acc[date].count += 1;
-      return acc;
-    }, {});
+  // Filter feedback to the last 30 days
+  const last30DaysFeedback = feedback.filter(
+    (f) => new Date(f.timestamp) >= thirtyDaysAgo
+  );
 
   // Generate labels and data for the last 30 days
   const labels = [];
   const data = [];
+  let cumulativeTotalRating = 0;
+  let cumulativeCount = 0;
+
   for (let i = 29; i >= 0; i--) {
     const date = new Date();
     date.setDate(today.getDate() - i);
     const formattedDate = date.toLocaleDateString();
     labels.push(formatDate(formattedDate)); // Format as "MM/DD"
-    if (feedbackByDay[formattedDate]) {
-      data.push((feedbackByDay[formattedDate].totalRating / feedbackByDay[formattedDate].count).toFixed(2));
-    } else {
-      data.push(null); // Use null for days with no feedback
-    }
+
+    // Find all feedback for this specific date
+    const feedbackForDate = last30DaysFeedback.filter(
+      (f) => new Date(f.timestamp).toLocaleDateString() === formattedDate
+    );
+
+    // Update cumulative totals
+    feedbackForDate.forEach((f) => {
+      cumulativeTotalRating += f.rating;
+      cumulativeCount += 1;
+    });
+
+    // Calculate cumulative average rating
+    const cumulativeAverage = cumulativeCount > 0 ? (cumulativeTotalRating / cumulativeCount).toFixed(2) : null;
+    data.push(cumulativeAverage);
   }
 
   const chartData = {
     labels,
     datasets: [
       {
-        label: 'Average Rating',
+        label: 'Cumulative Average Rating',
         data,
         borderColor: 'rgba(99, 102, 241, 1)', // Indigo
         backgroundColor: 'rgba(99, 102, 241, 0.2)',
@@ -94,7 +99,7 @@ const FeedbackTrendsChart = ({ feedback }) => {
       },
       title: {
         display: true,
-        text: 'Feedback Trends Over the Last 30 Days',
+        text: 'Cumulative Average Feedback Rating Over the Last 30 Days',
         font: {
           size: 18,
           weight: 'bold',
@@ -129,7 +134,7 @@ const FeedbackTrendsChart = ({ feedback }) => {
           },
           label: (context) => {
             const value = context.raw;
-            return `Average Rating: ${value}`;
+            return `Cumulative Average Rating: ${value}`;
           },
         },
       },
