@@ -21,9 +21,7 @@ const Navbar = () => {
   };
 
   const handleMouseEnter = () => {
-    // Clear any existing timeout to prevent premature closing
     if (hoverTimeout) clearTimeout(hoverTimeout);
-    // Set a timeout to open the dropdown after 100ms (quicker response)
     const timeout = setTimeout(() => {
       setIsFeaturesDropdownOpen(true);
     }, 100); // Reduced delay to 100ms
@@ -31,9 +29,7 @@ const Navbar = () => {
   };
 
   const handleMouseLeave = () => {
-    // Clear any existing timeout to prevent premature opening
     if (hoverTimeout) clearTimeout(hoverTimeout);
-    // Set a timeout to close the dropdown after 100ms
     const timeout = setTimeout(() => {
       setIsFeaturesDropdownOpen(false);
     }, 100); // Reduced delay to 100ms
@@ -41,12 +37,27 @@ const Navbar = () => {
   };
 
   const features = [
-    { name: 'QR Codes', path: '/features/qr-codes' },
-    { name: 'NPS Score', path: '/features/nps-score' },
-    { name: 'Real-time stats', path: '/features/real-time-stats' },
-    { name: 'Custom Branding', path: '/features/custom-branding' },
-    { name: 'Custom Questions', path: '/features/custom-questions' },
-    { name: 'Dashboards', path: '/features/dashboards' },
+    {
+      category: 'Analytics',
+      items: [
+        { name: 'Real-time Stats', path: '/features/real-time-stats' },
+        { name: 'Dashboards', path: '/features/dashboards' },
+      ],
+    },
+    {
+      category: 'Customization',
+      items: [
+        { name: 'Custom Branding', path: '/features/custom-branding' },
+        { name: 'Custom Questions', path: '/features/custom-questions' },
+      ],
+    },
+    {
+      category: 'Tools',
+      items: [
+        { name: 'QR Codes', path: '/features/qr-codes' },
+        { name: 'NPS Score', path: '/features/nps-score' },
+      ],
+    },
   ];
 
   return (
@@ -89,22 +100,41 @@ const Navbar = () => {
               </svg>
             </button>
             {isFeaturesDropdownOpen && (
-             <div
-             className={`z-1000 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[200px] rounded-lg shadow-lg border border-gray-200 ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
-             onMouseEnter={handleMouseEnter}
-             onMouseLeave={handleMouseLeave}
-             style={{ zIndex: 1000 }}
+              <div
+                className={`z-1000 lg:absolute lg:top-full lg:left-0 lg:mt-2 lg:w-[600px] rounded-lg shadow-lg border border-gray-200 bg-white ${isMobileMenuOpen ? "static mt-2 w-full" : ""}`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                style={{ zIndex: 1000 }}
               >
-                <div className={`${isMobileMenuOpen ? "flex flex-col space-y-2 p-2" : "p-4"}`}>
-                  {features.map((feature, index) => (
+                <div className={`${isMobileMenuOpen ? "flex flex-col space-y-2 p-2" : "p-6"}`}>
+                  <div className="grid grid-cols-3 gap-6">
+                    {features.map((category, index) => (
+                      <div key={index} className="space-y-4">
+                        <h3 className="font-semibold text-gray-900">{category.category}</h3>
+                        <ul className="space-y-2">
+                          {category.items.map((item, idx) => (
+                            <li key={idx}>
+                              <Link
+                                to={item.path}
+                                className="block p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                {item.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Optional: Add a CTA or additional content */}
+                  <div className="mt-6 border-t border-gray-200 pt-6">
                     <Link
-                      key={index}
-                      to={feature.path}
-                      className={`block p-2 rounded-lg hover:bg-gray-50 transition-colors ${isMobileMenuOpen ? "text-left" : ""}`}
+                      to="/all-features"
+                      className="block text-center text-blue-600 hover:text-blue-700 font-semibold"
                     >
-                      {feature.name}
+                      Explore All Features →
                     </Link>
-                  ))}
+                  </div>
                 </div>
               </div>
             )}
