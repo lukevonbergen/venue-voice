@@ -129,7 +129,7 @@ const Navbar = () => {
                   {/* Optional: Add a CTA or additional content */}
                   <div className="mt-6 border-t border-gray-200 pt-6">
                     <Link
-                      to="/all-features"
+                      to="/features"
                       className="block text-center text-blue-600 hover:text-blue-700 font-semibold"
                     >
                       Explore All Features →
