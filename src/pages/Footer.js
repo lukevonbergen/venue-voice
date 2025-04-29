@@ -18,8 +18,8 @@ const Footer = () => {
               </Link>
             </div>
             <p className="text-sm text-gray-500">
-              Turn customer feedback into actionable insights. Automate collection, analyse sentiment, and make data-driven decisions in real-time.
-            </p>
+  Stop bad reviews before they happen. Chatters lets you capture real-time feedback at the table, so you can protect your reputation and grow 5-star ratings.
+</p>
           </div>
 
           {/* Product Links */}
@@ -38,8 +38,6 @@ const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900">Company</h3>
             <ul className="space-y-2">
               <li><Link to="/about" className="text-sm text-gray-500 hover:text-gray-900">About Us</Link></li>
-              <li><Link to="/careers" className="text-sm text-gray-300 hover:text-gray-300 cursor-not-allowed">Careers</Link></li>
-              <li><Link to="/blog" className="text-sm text-gray-300 hover:text-gray-300 cursor-not-allowed">Blog</Link></li>
               <li><Link to="/contact" className="text-sm text-gray-500 hover:text-gray-900">Contact</Link></li>
             </ul>
           </div>
