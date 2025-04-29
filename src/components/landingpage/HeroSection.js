@@ -2,7 +2,7 @@ import React from 'react';
 
 const HeroSection = () => {
   return (
-<header>
+    <header>
       {/* Hero Container */}
       <div className="mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-20">
         {/* Component */}
@@ -11,10 +11,10 @@ const HeroSection = () => {
           <div className="flex flex-col">
             {/* Hero Title */}
             <h1 className="mb-4 text-4xl font-bold md:text-6xl">
-              Eliminate negative reviews before they're made
+              Stop Bad Reviews Before They Happen
             </h1>
             <p className="mb-6 max-w-lg text-sm text-gray-500 sm:text-xl md:mb-10 lg:mb-12">
-            Get instant notifications when guests need attention. Resolve concerns before they escalate into complaints.
+              Guests scan a QR code at their table. If they’re unhappy, your team gets an instant alert — so you can fix the issue before they blast you online.
             </p>
             {/* Hero Button */}
             <div className="flex items-center">
