@@ -7,17 +7,18 @@ import Footer from './Footer';
 const PricingPage = () => {
   const pricingPlans = [
     {
-      title: 'Growth',
+      title: 'Reputation Rescue Plan',
       price: '£29',
-      description: 'For growing businesses with more feedback needs',
+      description: 'Protect your venue from negative reviews with real-time feedback alerts',
       features: [
-        'Unlimited feedback submissions',
-        'Advanced analytics',
-        'AI-powered insights (Coming soon)',
-        'Customisable forms',
-        'Support',
+        'Unlimited table feedback',
+        'Live alerts to catch unhappy guests',
+        'Google/TripAdvisor review booster',
+        'QR code system (instant setup)',
+        'Custom questions & branding',
+        'Manager dashboard + support',
       ],
-      cta: 'Start now',
+      cta: 'Protect My Reputation',
       ctaLink: '/signup',
       popular: true,
       annualPrice: '£23/month (billed annually)',
@@ -36,9 +37,8 @@ const PricingPage = () => {
           {/* Heading Container */}
           <div className="mx-auto mb-8 text-center md:mb-12 lg:mb-16">
             {/* Heading */}
-            <h2 className="text-3xl md:text-5xl font-bold">Simple &amp; Affordable Pricing</h2>
-            {/* Subheading */}
-            <p className="mt-5 text-gray-500">30 days money-back guarantee</p>
+            <h2 className="text-3xl md:text-5xl font-bold">Protect Your Reputation for Just £29/month</h2>
+            <p className="mt-5 text-gray-500">Simple pricing. No hardware. Cancel anytime.</p>
           </div>
 
           {/* Content */}
