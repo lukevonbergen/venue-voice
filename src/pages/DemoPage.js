@@ -31,42 +31,38 @@ const DemoPage = () => {
       <Navbar />
 
       <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 tracking-tight">
-                Stop Bad Reviews Before They Happen
-              </h1>
-              <p className="text-xl text-gray-600 mt-4">
-                Guests scan a QR code at their table. If something’s wrong, your team gets an instant alert — so you can fix it before they leave a 1-star review.
-              </p>
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Live in venues right now</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>30-second setup — no hardware</span>
-                </div>
-              </div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 tracking-tight mb-6">
+            Stop Bad Reviews Before They Happen
+          </h1>
+          <p className="text-xl text-gray-600 mb-4">
+            Guests scan a QR code at their table. If something’s wrong, your team gets an instant alert — so you can fix it before they leave a 1-star review.
+          </p>
+          <div className="flex justify-center space-x-6 text-sm text-gray-500 mb-10">
+            <div className="flex items-center space-x-2">
+              <Check className="h-4 w-4 text-green-500" />
+              <span>Live in venues right now</span>
             </div>
+            <div className="flex items-center space-x-2">
+              <Check className="h-4 w-4 text-green-500" />
+              <span>30-second setup — no hardware</span>
+            </div>
+          </div>
 
-            <div className="bg-white rounded-3xl shadow-xl p-6">
-              {isHubSpotLoaded ? (
-                <div
-                  className="meetings-iframe-container"
-                  data-src="https://meetings.hubspot.com/luke-von-bergen/chatters-demo?embed=true"
-                ></div>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  Booking tool loading… or just{' '}
-                  <a href="mailto:luke@getchatters.com" className="underline">
-                    email me directly
-                  </a>.
-                </p>
-              )}
-            </div>
+          <div className="bg-white rounded-3xl shadow-xl p-6 max-w-xl mx-auto">
+            {isHubSpotLoaded ? (
+              <div
+                className="meetings-iframe-container"
+                data-src="https://meetings.hubspot.com/luke-von-bergen/chatters-demo?embed=true"
+              ></div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                Booking tool loading… or just{' '}
+                <a href="mailto:luke@getchatters.com" className="underline">
+                  email me directly
+                </a>.
+              </p>
+            )}
           </div>
         </div>
       </div>
