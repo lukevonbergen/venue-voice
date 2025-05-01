@@ -57,15 +57,27 @@ const Navbar = () => {
               )}
             </div>
 
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-sm font-semibold hover:text-gray-900 ${isActive(link.path) ? 'text-gray-900' : 'text-gray-600'}`}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.name === 'Docs' ? (
+                <a
+                  key={link.name}
+                  href={link.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`text-sm font-semibold hover:text-gray-900 ${isActive(link.path) ? 'text-gray-900' : 'text-gray-600'}`}
+                >
+                  {link.name}
+                </Link>
+              )
+            )}
           </div>
 
           {/* Desktop Auth Buttons */}
@@ -109,16 +121,28 @@ const Navbar = () => {
                 ))}
               </div>
             </div>
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block text-sm text-gray-700 hover:text-gray-900"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.name === 'Docs' ? (
+                <a
+                  key={link.name}
+                  href={link.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-gray-700 hover:text-gray-900"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-sm text-gray-700 hover:text-gray-900"
+                >
+                  {link.name}
+                </Link>
+              )
+            )}
             <Link to="/signup" className="block text-sm text-gray-700 hover:text-gray-900">
               Sign Up
             </Link>
