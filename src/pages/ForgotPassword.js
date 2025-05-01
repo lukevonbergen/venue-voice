@@ -18,7 +18,7 @@ const ForgotPassword = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://getchatters.com/reset-password',
+        redirectTo: 'https://www.getchatters.com/reset-password',
       });
 
       if (error) {
