@@ -27,10 +27,10 @@ const DemoPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50">
       <Navbar />
 
-      <div className="relative pt-32 pb-16 sm:pt-40 bg-white">
+      <div className="relative pt-32 pb-16 sm:pt-40">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 tracking-tight mb-6">
             Stop Bad Reviews Before They Happen
@@ -67,7 +67,7 @@ const DemoPage = () => {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50 py-16">
+      <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Venues Use Chatters</h2>
