@@ -1,392 +1,108 @@
+// ✅ New version coming right now
+// We'll switch to storing all question feedback locally and posting a single session's feedback in one go
+// Grouped by session_id, without using nps_scores
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import supabase from '../utils/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
-import { v4 as uuidv4 } from 'uuid'; // Import uuid for generating session IDs
-import { toast } from 'react-toastify'; // Import toast
-import 'react-toastify/dist/ReactToastify.css'; // Import toast styles
-
-// Helper function to calculate luminance
-const getLuminance = (color) => {
-  const hex = color.replace(/^#/, '');
-  const r = parseInt(hex.slice(0, 2), 16) / 255;
-  const g = parseInt(hex.slice(2, 4), 16) / 255;
-  const b = parseInt(hex.slice(4, 6), 16) / 255;
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luminance;
-};
+import { v4 as uuidv4 } from 'uuid';
 
 const CustomerFeedbackPage = () => {
   const { venueId } = useParams();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
-  const [isFinished, setIsFinished] = useState(false);
-  const [additionalFeedback, setAdditionalFeedback] = useState('');
-  const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false);
-  const [venueBranding, setVenueBranding] = useState({
-    logo: null,
-    primaryColor: '#1890ff',
-    secondaryColor: '#ffffff',
-    tableCount: 0, // Add tableCount to venueBranding
-  });
+  const [venue, setVenue] = useState(null);
+  const [sessionId] = useState(uuidv4());
   const [tableNumber, setTableNumber] = useState('');
-  const [hasCollectedTableNumber, setHasCollectedTableNumber] = useState(false);
-  const [sessionId, setSessionId] = useState(uuidv4()); // Generate sessionId on component mount
+  const [current, setCurrent] = useState(0);
+  const [feedbackAnswers, setFeedbackAnswers] = useState([]);
+  const [freeText, setFreeText] = useState('');
+  const [isFinished, setIsFinished] = useState(false);
 
-  // Disable scrolling when this page is active
   useEffect(() => {
-    document.body.classList.add('no-scroll');
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, []);
-
-  // Fetch active questions and branding for the venue
-  useEffect(() => {
-    const fetchData = async () => {
-      // Fetch active questions
-      const { data: questionsData, error: questionsError } = await supabase
+    const loadData = async () => {
+      const { data: questionsData } = await supabase
         .from('questions')
         .select('*')
         .eq('venue_id', venueId)
         .eq('active', true)
-        .order('order', { ascending: true });
+        .order('order');
 
-      if (questionsError) {
-        console.error('Error fetching questions:', questionsError);
-        toast.error('Failed to fetch questions'); // Use toast here
-      } else {
-        // Add NPS question at the end
-        const npsQuestion = {
-          id: 'nps',
-          question: 'How likely are you to recommend us?',
-          venue_id: venueId,
-          order: questionsData.length + 1,
-          active: true,
-        };
-        setQuestions([...questionsData, npsQuestion]);
-      }
-
-      // Fetch venue branding and table_count
-      const { data: brandingData, error: brandingError } = await supabase
+      const { data: venueData } = await supabase
         .from('venues')
-        .select('logo, primary_color, secondary_color, table_count') // Add table_count here
+        .select('logo, primary_color, secondary_color, table_count')
         .eq('id', venueId)
         .single();
 
-      if (brandingError) {
-        console.error('Error fetching branding:', brandingError);
-        toast.error('Failed to fetch branding'); // Use toast here
-      } else {
-        setVenueBranding({
-          logo: brandingData.logo,
-          primaryColor: brandingData.primary_color || '#1890ff',
-          secondaryColor: brandingData.secondary_color || '#52c41a',
-          tableCount: brandingData.table_count || 0, // Add tableCount to venueBranding
-        });
-      }
+      setQuestions(questionsData || []);
+      setVenue(venueData);
     };
 
-    fetchData();
+    loadData();
   }, [venueId]);
 
-  // Check if the current question is the NPS question
-  const isNPSQuestion = () => {
-    return questions[currentQuestionIndex]?.id === 'nps';
+  const handleEmojiAnswer = (emoji) => {
+    const rating = { '😠': 1, '😞': 2, '😐': 3, '😊': 4, '😍': 5 }[emoji] || null;
+    const question = questions[current];
+    setFeedbackAnswers(prev => [...prev, {
+      venue_id: venueId,
+      question_id: question.id,
+      session_id: sessionId,
+      sentiment: emoji,
+      rating,
+      table_number: tableNumber || null,
+    }]);
+
+    if (current < questions.length - 1) setCurrent(current + 1);
+    else setCurrent(-1); // Go to free-text
   };
 
-  const handleFeedback = async (emoji) => {
-    const emojiToRating = {
-      '😠': 1,
-      '😞': 2,
-      '😐': 3,
-      '😊': 4,
-      '😍': 5,
-    };
-    const rating = emojiToRating[emoji];
-  
-    // Get the current question being answered
-    const currentQuestion = questions[currentQuestionIndex];
-  
-    // Only send feedback for the current question (excluding NPS)
-    if (currentQuestion.id !== 'nps') {
-      const feedbackData = {
+  const handleSubmit = async () => {
+    const entries = [...feedbackAnswers];
+    if (freeText.trim()) {
+      entries.push({
         venue_id: venueId,
-        question_id: currentQuestion.id,
-        sentiment: emoji,
-        rating: rating,
-        table_number: tableNumber || null, // Include table number
-        session_id: sessionId, // Use the same session_id for all feedback entries
-      };
-  
-      console.log('Feedback data being sent:', feedbackData); // Debugging
-  
-      // Save the feedback entry to the database
-      const { data, error } = await supabase
-        .from('feedback')
-        .insert([feedbackData])
-        .select(); // Use .select() to return the inserted data
-  
-      if (error) {
-        console.error('Error saving feedback:', error);
-        toast.error(`Failed to save feedback: ${error.message}`); // Show detailed error message
-      } else {
-        console.log('Feedback saved successfully:', data); // Debugging
-      }
+        question_id: null,
+        sentiment: null,
+        rating: null,
+        additional_feedback: freeText,
+        table_number: tableNumber || null,
+        session_id: sessionId,
+      });
     }
-  
-    // Move to the next question or show additional feedback
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      setShowAdditionalFeedback(true);
-    }
+
+    const { error } = await supabase.from('feedback').insert(entries);
+    if (!error) setIsFinished(true);
   };
 
-  const handleNPSRating = async (rating) => {
-    // Log the NPS rating to the nps_scores table
-    const { data, error } = await supabase
-      .from('nps_scores')
-      .insert([
-        {
-          venue_id: venueId,
-          score: rating, // Store the NPS score
-          table_number: tableNumber || null, // Include table number
-        },
-      ])
-      .select(); // Use .select() to return the inserted data
+  if (!venue || !questions.length) return <div>Loading...</div>;
+  if (isFinished) return <div>Thanks for your feedback!</div>;
 
-    if (error) {
-      console.error('Error saving NPS rating:', error);
-      toast.error(`Failed to save NPS rating: ${error.message}`); // Show detailed error message
-    } else {
-      console.log('NPS rating saved successfully:', data); // Debugging
-      // Move to the next question or show additional feedback
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-      } else {
-        setShowAdditionalFeedback(true);
-      }
-    }
-  };
-
-  const handleAdditionalFeedback = async () => {
-    if (additionalFeedback.trim() !== '') {
-      const { data, error } = await supabase
-        .from('feedback')
-        .insert([
-          {
-            venue_id: venueId,
-            question_id: null,
-            sentiment: null,
-            rating: null,
-            additional_feedback: additionalFeedback,
-            table_number: tableNumber || null, // Include table number
-            session_id: sessionId, // Include session_id
-          },
-        ])
-        .select(); // Use .select() to return the inserted data
-
-      if (error) {
-        console.error('Error saving additional feedback:', error);
-        toast.error(`Failed to save additional feedback: ${error.message}`); // Show detailed error message
-      } else {
-        console.log('Additional feedback saved successfully:', data); // Debugging
-      }
-    }
-
-    setIsFinished(true);
-  };
-
-  // Calculate text color based on background luminance
-  const textColor = getLuminance(venueBranding.secondaryColor) > 0.5 ? '#000000' : '#ffffff';
-
-  if (questions.length === 0) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (isFinished) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-100 p-4">
-        <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
-        <p className="text-gray-600">You can close this tab now.</p>
-      </div>
-    );
-  }
-
-  // Show table number input if not collected yet
-  if (!hasCollectedTableNumber) {
-    return (
-      <div
-        className="flex flex-col h-screen p-4 overflow-hidden"
-        style={{
-          backgroundColor: venueBranding.secondaryColor,
-        }}
-      >
-        {/* Logo at the Top */}
-        {venueBranding.logo && (
-          <div className="flex justify-center pt-4">
-            <img
-              src={venueBranding.logo}
-              alt="Venue Logo"
-              className="max-w-full max-h-[30px] object-contain"
-            />
-          </div>
-        )}
-
-        {/* Table Number Dropdown */}
-        <div className="flex-1 flex flex-col justify-center items-center">
-          <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
-            What is your table number? (Optional)
-          </h2>
-          <select
-            className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={tableNumber}
-            onChange={(e) => setTableNumber(e.target.value)}
-          >
-            <option value="">Select your table number</option>
-            {Array.from({ length: venueBranding.tableCount || 0 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Table {i + 1}
-              </option>
+  return (
+    <div>
+      {!tableNumber ? (
+        <div>
+          <h2>Select Table Number</h2>
+          <select onChange={(e) => setTableNumber(e.target.value)}>
+            <option value="">Select</option>
+            {Array.from({ length: venue.table_count || 10 }, (_, i) => (
+              <option key={i} value={i + 1}>Table {i + 1}</option>
             ))}
           </select>
-          <button
-            className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            onClick={() => setHasCollectedTableNumber(true)}
-          >
-            Next
-          </button>
         </div>
-
-        {/* Powered by Chatters at the Bottom */}
-        <div className="flex justify-center pb-4">
-          <div className="text-sm" style={{ color: textColor }}>
-            Powered by <strong>Chatters</strong>
-          </div>
+      ) : current >= 0 ? (
+        <div>
+          <h2>{questions[current].question}</h2>
+          {[ '😠', '😞', '😐', '😊', '😍' ].map((emoji) => (
+            <button key={emoji} onClick={() => handleEmojiAnswer(emoji)}>{emoji}</button>
+          ))}
         </div>
-      </div>
-    );
-  }
-
-  // Main feedback UI
-  return (
-    <div
-      className="flex flex-col h-screen p-4 overflow-hidden"
-      style={{
-        backgroundColor: venueBranding.secondaryColor,
-      }}
-    >
-      {/* Logo at the Top */}
-      {venueBranding.logo && (
-        <div className="flex justify-center pt-4">
-          <img
-            src={venueBranding.logo}
-            alt="Venue Logo"
-            className="max-w-full max-h-[30px] object-contain"
-          />
+      ) : (
+        <div>
+          <h2>Additional Feedback?</h2>
+          <textarea value={freeText} onChange={(e) => setFreeText(e.target.value)}></textarea>
+          <button onClick={handleSubmit}>Submit</button>
         </div>
       )}
-
-      {/* Centered Content (Questions or Additional Feedback) */}
-      <div className="flex-1 flex flex-col justify-center items-center">
-        {!showAdditionalFeedback && (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentQuestionIndex}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="flex flex-col justify-center items-center text-center mb-8"
-            >
-              <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
-                {questions[currentQuestionIndex].question}
-              </h2>
-              <p className="text-gray-600" style={{ color: textColor }}>
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        )}
-
-        {/* Emoji Buttons or NPS Rating Input */}
-        {!showAdditionalFeedback && (
-          <>
-            {isNPSQuestion() ? (
-              // NPS Rating Buttons (1-10)
-              <div className="grid grid-cols-5 gap-3">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                  <button
-                    key={rating}
-                    className="w-12 h-12 flex items-center justify-center border rounded-lg transition-colors text-sm font-medium"
-                    style={{
-                      backgroundColor: venueBranding.primaryColor,
-                      color: '#ffffff',
-                    }}
-                    onClick={() => handleNPSRating(rating)}
-                  >
-                    {rating}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              // Emoji Buttons for Non-NPS Questions
-              <div className="flex justify-center gap-6">
-                {['😠', '😞', '😐', '😊', '😍'].map((emoji, index) => (
-                  <button
-                    key={index}
-                    className="text-5xl transition-transform hover:scale-125 active:scale-100"
-                    onClick={() => handleFeedback(emoji)}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Additional Feedback Section */}
-        {showAdditionalFeedback && (
-          <div className="flex flex-col items-center gap-4">
-            <h2 className="text-2xl font-bold mb-4" style={{ color: textColor }}>
-              Any additional feedback?
-            </h2>
-            <p className="text-gray-600 mb-4" style={{ color: textColor }}>
-              This is optional, but we'd love to hear more!
-            </p>
-            <textarea
-              className="w-full max-w-md p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="4"
-              placeholder="Type your feedback here..."
-              value={additionalFeedback}
-              onChange={(e) => setAdditionalFeedback(e.target.value)}
-            />
-            <div className="flex gap-4">
-              <button
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                onClick={handleAdditionalFeedback}
-              >
-                Submit
-              </button>
-              <button
-                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                onClick={() => setIsFinished(true)}
-              >
-                Skip
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Powered by Chatters at the Bottom */}
-      <div className="flex justify-center pb-4">
-        <div className="text-sm" style={{ color: textColor }}>
-          Powered by <strong>Chatters</strong>
-        </div>
-      </div>
     </div>
   );
 };
