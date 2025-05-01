@@ -1,4 +1,4 @@
-// Updated Dashboard.js with cleaner UI: Alerts, All Feedback, Actioned Feedback tabs, and action toggle
+// Updated Dashboard.js with cleaner UI: better legibility and spacing for questions/answers
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
@@ -127,6 +127,17 @@ const DashboardPage = () => {
     }
   };
 
+  const renderFeedbackItems = (items) => (
+    <div className="space-y-3">
+      {items.map((f, j) => (
+        <div key={j} className="p-3 bg-gray-50 rounded border border-gray-200">
+          <p className="font-medium text-sm text-gray-800">{f.question_id ? questionsMap[f.question_id] : 'Additional Feedback'}</p>
+          <p className="text-sm text-gray-600 mt-1">{f.rating ?? f.additional_feedback}</p>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <DashboardFrame>
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -141,10 +152,10 @@ const DashboardPage = () => {
         {activeTab === 'alerts' && alerts.length === 0 && <p className="text-gray-500">No live alerts currently 🎉</p>}
 
         {activeTab === 'alerts' && alerts.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {alerts.map((alert, i) => (
               <div key={i} className="border-l-4 border-red-500 bg-white p-4 rounded-md shadow-sm">
-                <div className="flex justify-between items-center mb-1">
+                <div className="flex justify-between items-center mb-3">
                   <div className="text-sm font-medium text-gray-700">
                     Table {alert.items[0].table_number} – {formatTime(alert.items[0].created_at)}
                   </div>
@@ -155,11 +166,7 @@ const DashboardPage = () => {
                     Mark as Actioned
                   </button>
                 </div>
-                <ul className="text-sm text-gray-600 list-disc ml-5">
-                  {alert.items.map((f, j) => (
-                    <li key={j}>{f.question_id ? questionsMap[f.question_id] : 'Free text'}: {f.rating ?? f.additional_feedback}</li>
-                  ))}
-                </ul>
+                {renderFeedbackItems(alert.items)}
               </div>
             ))}
           </div>
@@ -169,14 +176,10 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {sessionFeedback.map((session, i) => (
               <div key={i} className="bg-white p-4 rounded-lg shadow-sm border">
-                <h3 className="font-semibold text-gray-800 mb-2 text-sm">
+                <h3 className="font-semibold text-gray-800 mb-3 text-sm">
                   Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
                 </h3>
-                <ul className="space-y-1 text-sm text-gray-700">
-                  {session.items.map((f, j) => (
-                    <li key={j}>{f.question_id ? questionsMap[f.question_id] : 'Extra'}: {f.rating ?? f.additional_feedback}</li>
-                  ))}
-                </ul>
+                {renderFeedbackItems(session.items)}
               </div>
             ))}
           </div>
@@ -186,14 +189,10 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {actionedFeedback.map((session, i) => (
               <div key={i} className="bg-gray-50 p-4 rounded-lg shadow-sm border">
-                <h3 className="font-semibold text-gray-800 mb-2 text-sm">
+                <h3 className="font-semibold text-gray-800 mb-3 text-sm">
                   ✅ Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
                 </h3>
-                <ul className="space-y-1 text-sm text-gray-700">
-                  {session.items.map((f, j) => (
-                    <li key={j}>{f.question_id ? questionsMap[f.question_id] : 'Extra'}: {f.rating ?? f.additional_feedback}</li>
-                  ))}
-                </ul>
+                {renderFeedbackItems(session.items)}
               </div>
             ))}
           </div>
