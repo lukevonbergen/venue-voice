@@ -66,8 +66,8 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/">
           <img
-            src="/img/getchatters_logo.svg"
-            alt="Chatter Logo"
+            src="/img/Logo.svg"
+            alt="Chatters Logo"
             className="h-8"
           />
         </Link>
