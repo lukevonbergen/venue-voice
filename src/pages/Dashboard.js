@@ -1,13 +1,16 @@
+// Updated Dashboard.js and CustomerFeedback.js to show "Table x - 3:45pm" and clean question names
+
+// Dashboard.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import FeedbackFeed from '../components/dashboard/FeedbackFeed';
 
 const DashboardPage = () => {
   const [venueId, setVenueId] = useState(null);
   const [sessionFeedback, setSessionFeedback] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [questionsMap, setQuestionsMap] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,12 +33,26 @@ const DashboardPage = () => {
       }
 
       setVenueId(venue.id);
-      loadFeedback(venue.id);
+      await loadQuestionsMap(venue.id);
+      await loadFeedback(venue.id);
       setupRealtime(venue.id);
     };
 
     init();
   }, [navigate]);
+
+  const loadQuestionsMap = async (venueId) => {
+    const { data: questions, error } = await supabase
+      .from('questions')
+      .select('id, question')
+      .eq('venue_id', venueId);
+
+    if (!error) {
+      const map = {};
+      questions.forEach(q => { map[q.id] = q.question });
+      setQuestionsMap(map);
+    }
+  };
 
   const loadFeedback = async (venue_id) => {
     const { data, error } = await supabase
@@ -79,10 +96,15 @@ const DashboardPage = () => {
         schema: 'public',
         table: 'feedback',
         filter: `venue_id=eq.${venueId}`
-      }, (payload) => {
+      }, () => {
         loadFeedback(venueId);
       })
       .subscribe();
+  };
+
+  const formatTime = (isoDate) => {
+    const date = new Date(isoDate);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -95,10 +117,10 @@ const DashboardPage = () => {
             <h2 className="font-bold mb-2">⚠️ Live Alerts</h2>
             {alerts.map((alert, i) => (
               <div key={i} className="mb-2">
-                <p className="text-sm font-medium">Session: {alert.session_id}</p>
+                <p className="text-sm font-medium">Table {alert.items[0].table_number} - {formatTime(alert.items[0].created_at)}</p>
                 <ul className="ml-4 list-disc text-sm text-red-700">
                   {alert.items.map((f, j) => (
-                    <li key={j}>{f.question_id ? `Q${f.question_id}` : 'Free text'}: {f.rating ?? f.additional_feedback}</li>
+                    <li key={j}>{f.question_id ? questionsMap[f.question_id] : 'Free text'}: {f.rating ?? f.additional_feedback}</li>
                   ))}
                 </ul>
               </div>
@@ -109,11 +131,13 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sessionFeedback.map((session, i) => (
             <div key={i} className="bg-white p-4 rounded-xl shadow-sm border">
-              <h3 className="font-semibold text-gray-800 mb-2 text-sm">Session ID: {session.session_id}</h3>
+              <h3 className="font-semibold text-gray-800 mb-2 text-sm">
+                Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
+              </h3>
               <ul className="space-y-1 text-sm text-gray-700">
                 {session.items.map((f, j) => (
                   <li key={j}>
-                    {f.question_id ? `Q${f.question_id}` : 'Extra'}: {f.rating ?? f.additional_feedback}
+                    {f.question_id ? questionsMap[f.question_id] : 'Extra'}: {f.rating ?? f.additional_feedback}
                   </li>
                 ))}
               </ul>
