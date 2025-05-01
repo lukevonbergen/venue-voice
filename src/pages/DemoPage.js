@@ -27,7 +27,7 @@ const DemoPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-green-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
 
       <div className="relative pt-32 pb-16 sm:pt-40">
