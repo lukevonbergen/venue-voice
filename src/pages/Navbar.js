@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { name: 'Features', path: '/features' },
     { name: 'Pricing', path: '/pricing' },
     { name: 'Docs', path: 'https://chatters.canny.io/changelog' },
+  ];
+
+  const featureLinks = [
+    { name: 'Real-time Stats', path: '/features/real-time-stats' },
+    { name: 'Dashboards', path: '/features/dashboards' },
+    { name: 'Custom Branding', path: '/features/custom-branding' },
+    { name: 'QR Codes', path: '/features/qr-codes' },
   ];
 
   return (
@@ -24,12 +31,37 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-6">
+          <div className="hidden lg:flex lg:items-center lg:space-x-6 relative">
+            {/* Features Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="text-sm font-semibold text-gray-700 hover:text-gray-900 flex items-center"
+              >
+                Features <ChevronDown className="ml-1 h-4 w-4" />
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute top-full mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="py-1">
+                    {featureLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        to={link.path}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`text-sm font-medium hover:text-gray-900 ${isActive(link.path) ? 'text-gray-900 font-semibold' : 'text-gray-600'}`}
+                className={`text-sm font-semibold hover:text-gray-900 ${isActive(link.path) ? 'text-gray-900' : 'text-gray-600'}`}
               >
                 {link.name}
               </Link>
@@ -62,6 +94,21 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-white shadow-md">
           <div className="px-4 pt-4 pb-6 space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Features</p>
+              <div className="mt-2 space-y-2">
+                {featureLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block text-sm text-gray-700 hover:text-gray-900"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
             {navLinks.map((link) => (
               <Link
                 key={link.name}
