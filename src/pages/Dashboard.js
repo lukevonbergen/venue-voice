@@ -2,190 +2,123 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
-import FeedbackTrendsChart from '../components/dashboard/FeedbackTrendsChart';
-import FeedbackDistributionChart from '../components/dashboard/FeedbackDistributionChart';
-import SatisfactionCard from '../components/dashboard/SatisfactionCard';
-import ActionCard from '../components/dashboard/ActionCard';
 import FeedbackFeed from '../components/dashboard/FeedbackFeed';
-import LiveUpdatesToggle from '../components/dashboard/LiveUpdatesToggle';
-import MetricsSection from '../components/dashboard/MetricsSection'; // Import MetricsSection
 
 const DashboardPage = () => {
-  const [questions, setQuestions] = useState([]);
   const [venueId, setVenueId] = useState(null);
-  const [feedback, setFeedback] = useState([]);
-  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true);
+  const [sessionFeedback, setSessionFeedback] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         navigate('/signin');
-      } else {
-        fetchVenueId(user.email);
-      }
-    };
-
-    fetchSession();
-  }, [navigate]);
-
-  const fetchVenueId = async (email) => {
-    const { data: venueData, error: venueError } = await supabase
-      .from('venues')
-      .select('id, is_paid')
-      .eq('email', email)
-      .single();
-
-    if (venueError) {
-      console.error('Error fetching venue ID:', venueError);
-    } else {
-      if (!venueData.is_paid) {
-        navigate('/pricing');
         return;
       }
 
-      setVenueId(venueData.id);
-      fetchQuestions(venueData.id);
-      fetchFeedback(venueData.id);
-      if (liveUpdatesEnabled) {
-        setupRealtimeUpdates(venueData.id);
+      const { data: venue, error } = await supabase
+        .from('venues')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+
+      if (error || !venue) {
+        console.error('Failed to fetch venue:', error);
+        return;
       }
-    }
-  };
 
-  const fetchQuestions = async (venueId) => {
-    const { data, error } = await supabase
-      .from('questions')
-      .select('*')
-      .eq('venue_id', venueId)
-      .eq('active', true);
+      setVenueId(venue.id);
+      loadFeedback(venue.id);
+      setupRealtime(venue.id);
+    };
 
-    if (error) {
-      console.error('Error fetching questions:', error);
-    } else {
-      setQuestions(data);
-    }
-  };
+    init();
+  }, [navigate]);
 
-  const fetchFeedback = async (venueId) => {
+  const loadFeedback = async (venue_id) => {
     const { data, error } = await supabase
       .from('feedback')
       .select('*')
-      .eq('venue_id', venueId);
+      .eq('venue_id', venue_id)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching feedback:', error);
-    } else {
-      setFeedback(data);
+      return;
     }
+
+    groupFeedbackBySession(data);
   };
 
-  const setupRealtimeUpdates = (venueId) => {
-    const feedbackSubscription = supabase
-      .channel('feedback')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'feedback', filter: `venue_id=eq.${venueId}` },
-        async (payload) => {
-          setFeedback((prevFeedback) => [...prevFeedback, payload.new]);
-        }
-      )
-      .subscribe();
+  const groupFeedbackBySession = (feedbackRows) => {
+    const grouped = {};
+    const flagged = [];
 
-    return () => {
-      supabase.removeChannel(feedbackSubscription);
-    };
-  };
-
-  const toggleLiveUpdates = () => {
-    setLiveUpdatesEnabled((prev) => !prev);
-    if (venueId) {
-      if (liveUpdatesEnabled) {
-        supabase.removeAllChannels();
-      } else {
-        setupRealtimeUpdates(venueId);
-      }
+    for (const entry of feedbackRows) {
+      if (!grouped[entry.session_id]) grouped[entry.session_id] = [];
+      grouped[entry.session_id].push(entry);
     }
-  };
 
-  const calculateAverageRating = (questionId) => {
-    const relevantFeedback = feedback.filter((f) => f.question_id === questionId);
-    if (relevantFeedback.length === 0) return 0;
-
-    const totalRating = relevantFeedback.reduce((sum, f) => sum + f.rating, 0);
-    return (totalRating / relevantFeedback.length).toFixed(1);
-  };
-
-  const calculateOverallAverageRating = () => {
-    if (feedback.length === 0) return 0;
-
-    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
-    return (totalRating / feedback.length).toFixed(1);
-  };
-
-  const generateSuggestedActions = () => {
-    const suggestedActions = [];
-    const ratingThreshold = 3.5;
-
-    questions.forEach((q) => {
-      const averageRating = calculateAverageRating(q.id);
-      if (averageRating < ratingThreshold) {
-        suggestedActions.push({
-          question: q.question,
-          rating: averageRating,
-          suggestion: `Consider improving ${q.question.toLowerCase()}.`,
-        });
-      }
+    const sessions = Object.entries(grouped).map(([session_id, items]) => {
+      const lowScore = items.some((i) => i.rating !== null && i.rating <= 2);
+      if (lowScore) flagged.push({ session_id, items });
+      return { session_id, items };
     });
 
-    return suggestedActions;
+    setSessionFeedback(sessions);
+    setAlerts(flagged);
+  };
+
+  const setupRealtime = (venueId) => {
+    supabase
+      .channel('feedback-realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'feedback',
+        filter: `venue_id=eq.${venueId}`
+      }, (payload) => {
+        loadFeedback(venueId);
+      })
+      .subscribe();
   };
 
   return (
     <DashboardFrame>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Venue Dashboard</h1>
-          <LiveUpdatesToggle liveUpdatesEnabled={liveUpdatesEnabled} toggleLiveUpdates={toggleLiveUpdates} />
-        </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-6">Table Feedback Dashboard</h1>
 
-        <div className="grid grid-cols-1 gap-6 mb-8">
-          <SatisfactionCard
-            title="Overall Satisfaction"
-            rating={calculateOverallAverageRating()}
-            trend={calculateOverallAverageRating() > 4.2 ? 'up' : 'down'}
-            difference={Math.abs(calculateOverallAverageRating() - 4.2).toFixed(1)}
-          />
-
-          {/* Use the MetricsSection component */}
-          <MetricsSection venueId={venueId} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <FeedbackTrendsChart feedback={feedback} />
-          <FeedbackDistributionChart feedback={feedback} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-gray-50 rounded-xl p-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 sm:mb-0">Suggested Actions</h2>
-              <span className="text-sm text-gray-500">Based on recent feedback</span>
-            </div>
-            <div className="space-y-4">
-              {generateSuggestedActions().map((action, index) => (
-                <ActionCard
-                  key={index}
-                  question={action.question}
-                  rating={action.rating}
-                  suggestion={action.suggestion}
-                />
-              ))}
-            </div>
+        {alerts.length > 0 && (
+          <div className="bg-red-100 border border-red-300 text-red-800 p-4 rounded-lg mb-6">
+            <h2 className="font-bold mb-2">⚠️ Live Alerts</h2>
+            {alerts.map((alert, i) => (
+              <div key={i} className="mb-2">
+                <p className="text-sm font-medium">Session: {alert.session_id}</p>
+                <ul className="ml-4 list-disc text-sm text-red-700">
+                  {alert.items.map((f, j) => (
+                    <li key={j}>{f.question_id ? `Q${f.question_id}` : 'Free text'}: {f.rating ?? f.additional_feedback}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
+        )}
 
-          <FeedbackFeed feedback={feedback} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sessionFeedback.map((session, i) => (
+            <div key={i} className="bg-white p-4 rounded-xl shadow-sm border">
+              <h3 className="font-semibold text-gray-800 mb-2 text-sm">Session ID: {session.session_id}</h3>
+              <ul className="space-y-1 text-sm text-gray-700">
+                {session.items.map((f, j) => (
+                  <li key={j}>
+                    {f.question_id ? `Q${f.question_id}` : 'Extra'}: {f.rating ?? f.additional_feedback}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </DashboardFrame>
