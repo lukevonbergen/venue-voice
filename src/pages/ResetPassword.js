@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import supabase from '../utils/supabase';
 
@@ -9,20 +9,19 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if the user has a valid session (i.e., clicked the reset link)
-    const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error || !data.session) {
-        navigate('/forgot-password'); // Redirect if no valid session
+    // This ensures the access token is restored from the URL
+    const handleRedirect = async () => {
+      const { error } = await supabase.auth.getSessionFromUrl();
+      if (error) {
+        setError('The reset link is invalid or has expired.');
+        setTimeout(() => navigate('/forgot-password'), 3000);
       }
     };
 
-    checkSession();
+    handleRedirect();
   }, [navigate]);
 
   const handleResetPassword = async (e) => {
@@ -38,18 +37,14 @@ const ResetPassword = () => {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password,
-      });
+      const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
         throw new Error(error.message);
       }
 
       setMessage('Password reset successfully! Redirecting to login...');
-      setTimeout(() => {
-        navigate('/signin'); // Redirect to login after successful reset
-      }, 2000);
+      setTimeout(() => navigate('/signin'), 2000);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -58,7 +53,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Back to Homepage Link */}
         <div className="mb-4">
