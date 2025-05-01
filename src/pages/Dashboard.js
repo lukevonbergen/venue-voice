@@ -1,6 +1,4 @@
-// Updated Dashboard.js and CustomerFeedback.js to show "Table x - 3:45pm" and clean question names
-
-// Dashboard.js
+// Updated Dashboard.js with cleaner UI: Alerts tab + subtle red styling
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
@@ -11,6 +9,7 @@ const DashboardPage = () => {
   const [sessionFeedback, setSessionFeedback] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [questionsMap, setQuestionsMap] = useState({});
+  const [activeTab, setActiveTab] = useState('alerts');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -109,16 +108,36 @@ const DashboardPage = () => {
 
   return (
     <DashboardFrame>
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Table Feedback Dashboard</h1>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <h1 className="text-xl font-semibold mb-4">Feedback Dashboard</h1>
 
-        {alerts.length > 0 && (
-          <div className="bg-red-100 border border-red-300 text-red-800 p-4 rounded-lg mb-6">
-            <h2 className="font-bold mb-2">⚠️ Live Alerts</h2>
+        <div className="flex space-x-4 mb-6 border-b">
+          <button
+            className={`pb-2 border-b-2 transition-colors duration-200 ${activeTab === 'alerts' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500'}`}
+            onClick={() => setActiveTab('alerts')}
+          >
+            Alerts
+          </button>
+          <button
+            className={`pb-2 border-b-2 transition-colors duration-200 ${activeTab === 'all' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
+            onClick={() => setActiveTab('all')}
+          >
+            All Feedback
+          </button>
+        </div>
+
+        {activeTab === 'alerts' && alerts.length === 0 && (
+          <p className="text-gray-500">No live alerts currently 🎉</p>
+        )}
+
+        {activeTab === 'alerts' && alerts.length > 0 && (
+          <div className="space-y-4">
             {alerts.map((alert, i) => (
-              <div key={i} className="mb-2">
-                <p className="text-sm font-medium">Table {alert.items[0].table_number} - {formatTime(alert.items[0].created_at)}</p>
-                <ul className="ml-4 list-disc text-sm text-red-700">
+              <div key={i} className="border-l-4 border-red-500 bg-white p-4 rounded-md shadow-sm">
+                <div className="text-sm font-medium text-gray-700 mb-1">
+                  Table {alert.items[0].table_number} – {formatTime(alert.items[0].created_at)}
+                </div>
+                <ul className="text-sm text-gray-600 list-disc ml-5">
                   {alert.items.map((f, j) => (
                     <li key={j}>{f.question_id ? questionsMap[f.question_id] : 'Free text'}: {f.rating ?? f.additional_feedback}</li>
                   ))}
@@ -128,22 +147,24 @@ const DashboardPage = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {sessionFeedback.map((session, i) => (
-            <div key={i} className="bg-white p-4 rounded-xl shadow-sm border">
-              <h3 className="font-semibold text-gray-800 mb-2 text-sm">
-                Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
-              </h3>
-              <ul className="space-y-1 text-sm text-gray-700">
-                {session.items.map((f, j) => (
-                  <li key={j}>
-                    {f.question_id ? questionsMap[f.question_id] : 'Extra'}: {f.rating ?? f.additional_feedback}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        {activeTab === 'all' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sessionFeedback.map((session, i) => (
+              <div key={i} className="bg-white p-4 rounded-lg shadow-sm border">
+                <h3 className="font-semibold text-gray-800 mb-2 text-sm">
+                  Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
+                </h3>
+                <ul className="space-y-1 text-sm text-gray-700">
+                  {session.items.map((f, j) => (
+                    <li key={j}>
+                      {f.question_id ? questionsMap[f.question_id] : 'Extra'}: {f.rating ?? f.additional_feedback}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </DashboardFrame>
   );
