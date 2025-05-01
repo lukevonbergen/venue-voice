@@ -22,7 +22,7 @@ const HeroSection = () => {
                 href="/demo"
                 className="mr-5 items-center rounded-md bg-black px-6 py-3 font-semibold text-white md:mr-6 lg:mr-8"
               >
-                Demo
+                See how it works
               </a>
               <a href="/pricing" className="flex max-w-full items-center font-bold">
                 <img
