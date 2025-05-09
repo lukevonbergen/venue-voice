@@ -142,6 +142,18 @@ const DashboardPage = () => {
   );
 
   const FeedbackModal = ({ session, onClose }) => {
+    const markSessionAsActioned = async () => {
+      const idsToUpdate = session.items.map(item => item.id);
+      const { error } = await supabase
+        .from('feedback')
+        .update({ is_actioned: true })
+        .in('id', idsToUpdate);
+      if (!error) {
+        await loadFeedback(venueId);
+        onClose();
+      }
+    };
+
     if (!session) return null;
 
     const handleOverlayClick = (e) => {
@@ -159,7 +171,7 @@ const DashboardPage = () => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
           </h2>
-          {renderFeedbackItems(session.items)}
+          $1<button onClick={markSessionAsActioned} className=\"mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded\">Mark as Actioned</button>
         </div>
       </div>
     );
