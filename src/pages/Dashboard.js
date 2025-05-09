@@ -1,4 +1,3 @@
-// Updated Dashboard.js with cleaner UI: better legibility and spacing for questions/answers
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
@@ -11,6 +10,8 @@ const DashboardPage = () => {
   const [actionedFeedback, setActionedFeedback] = useState([]);
   const [questionsMap, setQuestionsMap] = useState({});
   const [activeTab, setActiveTab] = useState('alerts');
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -131,11 +132,52 @@ const DashboardPage = () => {
     <div className="space-y-3">
       {items.map((f, j) => (
         <div key={j} className="p-3 bg-gray-50 rounded border border-gray-200">
-          <p className="font-medium text-sm text-gray-800">{f.question_id ? questionsMap[f.question_id] : 'Additional Feedback'}</p>
-          <p className="text-sm text-gray-600 mt-1">{f.rating ?? f.additional_feedback}</p>
+          <p className="font-medium text-sm text-gray-800">
+            {f.question_id ? questionsMap[f.question_id] : 'Additional Feedback'}
+          </p>
+          {f.rating !== null && (
+            <p className="text-sm text-gray-600 mt-1">Rating: {f.rating}</p>
+          )}
+          {f.additional_feedback && (
+            <p className="text-sm text-gray-600 mt-1 italic">"{f.additional_feedback}"</p>
+          )}
         </div>
       ))}
     </div>
+  );
+
+  const FeedbackModal = ({ session, onClose }) => {
+    if (!session) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="bg-white w-full max-w-md mx-auto rounded-lg shadow-lg p-5 relative">
+          <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+          <h2 className="text-lg font-semibold mb-3 text-gray-800">
+            Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
+          </h2>
+          {renderFeedbackItems(session.items)}
+        </div>
+      </div>
+    );
+  };
+
+  const renderSessionButton = (session, actionButton = null) => (
+    <button
+      key={session.session_id}
+      onClick={() => {
+        setSelectedSession(session);
+        setShowModal(true);
+      }}
+      className="w-full text-left bg-white hover:bg-gray-50 border p-4 rounded shadow-sm transition"
+    >
+      <div className="flex justify-between items-center">
+        <h3 className="font-semibold text-gray-800 text-sm">
+          Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
+        </h3>
+        {actionButton || <span className="text-sm text-blue-500 underline">View</span>}
+      </div>
+    </button>
   );
 
   return (
@@ -152,52 +194,46 @@ const DashboardPage = () => {
         {activeTab === 'alerts' && alerts.length === 0 && <p className="text-gray-500">No live alerts currently 🎉</p>}
 
         {activeTab === 'alerts' && alerts.length > 0 && (
-          <div className="space-y-6">
-            {alerts.map((alert, i) => (
-              <div key={i} className="border-l-4 border-red-500 bg-white p-4 rounded-md shadow-sm">
-                <div className="flex justify-between items-center mb-3">
-                  <div className="text-sm font-medium text-gray-700">
-                    Table {alert.items[0].table_number} – {formatTime(alert.items[0].created_at)}
-                  </div>
-                  <button
-                    onClick={() => markSessionAsActioned(alert.session_id)}
-                    className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-md hover:bg-green-200"
-                  >
-                    Mark as Actioned
-                  </button>
-                </div>
-                {renderFeedbackItems(alert.items)}
-              </div>
+          <div className="space-y-4">
+            {alerts.map((session) => (
+              renderSessionButton(
+                session,
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    markSessionAsActioned(session.session_id);
+                  }}
+                  className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-md hover:bg-green-200"
+                >
+                  Mark as Actioned
+                </button>
+              )
             ))}
           </div>
         )}
 
         {activeTab === 'all' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sessionFeedback.map((session, i) => (
-              <div key={i} className="bg-white p-4 rounded-lg shadow-sm border">
-                <h3 className="font-semibold text-gray-800 mb-3 text-sm">
-                  Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
-                </h3>
-                {renderFeedbackItems(session.items)}
-              </div>
-            ))}
+            {sessionFeedback.map((session) => renderSessionButton(session))}
           </div>
         )}
 
         {activeTab === 'actioned' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {actionedFeedback.map((session, i) => (
-              <div key={i} className="bg-gray-50 p-4 rounded-lg shadow-sm border">
-                <h3 className="font-semibold text-gray-800 mb-3 text-sm">
-                  ✅ Table {session.items[0].table_number} – {formatTime(session.items[0].created_at)}
-                </h3>
-                {renderFeedbackItems(session.items)}
-              </div>
-            ))}
+            {actionedFeedback.map((session) => renderSessionButton(session))}
           </div>
         )}
       </div>
+
+      {showModal && (
+        <FeedbackModal
+          session={selectedSession}
+          onClose={() => {
+            setSelectedSession(null);
+            setShowModal(false);
+          }}
+        />
+      )}
     </DashboardFrame>
   );
 };
