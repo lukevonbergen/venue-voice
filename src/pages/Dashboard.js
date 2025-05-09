@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
+import { Bell } from 'lucide-react';
 
 const DashboardPage = () => {
   const [venueId, setVenueId] = useState(null);
@@ -12,6 +13,7 @@ const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('alerts');
   const [selectedSession, setSelectedSession] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState('desc');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,30 +44,27 @@ const DashboardPage = () => {
     init();
   }, [navigate]);
 
+  useEffect(() => {
+    if (venueId) loadFeedback(venueId);
+  }, [sortOrder]);
+
   const loadQuestionsMap = async (venueId) => {
-    const { data: questions, error } = await supabase
+    const { data: questions } = await supabase
       .from('questions')
       .select('id, question')
       .eq('venue_id', venueId);
 
-    if (!error) {
-      const map = {};
-      questions.forEach(q => { map[q.id] = q.question });
-      setQuestionsMap(map);
-    }
+    const map = {};
+    questions.forEach(q => { map[q.id] = q.question });
+    setQuestionsMap(map);
   };
 
   const loadFeedback = async (venue_id) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('feedback')
       .select('*')
       .eq('venue_id', venue_id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching feedback:', error);
-      return;
-    }
+      .order('created_at', { ascending: sortOrder === 'asc' });
 
     groupFeedbackBySession(data);
   };
@@ -116,35 +115,34 @@ const DashboardPage = () => {
     const updates = alerts.find((s) => s.session_id === sessionId)?.items.map(item => item.id);
     if (!updates) return;
 
-    const { error } = await supabase
+    await supabase
       .from('feedback')
       .update({ is_actioned: true })
       .in('id', updates);
 
-    if (error) {
-      console.error('Failed to mark feedback as actioned:', error);
-    } else {
-      await loadFeedback(venueId);
-    }
+    await loadFeedback(venueId);
   };
 
-  const renderFeedbackItems = (items) => (
-    <div className="space-y-3">
-      {items.map((f, j) => (
-        <div key={j} className="p-3 bg-gray-50 rounded border border-gray-200">
-          <p className="font-medium text-sm text-gray-800">
-            {f.question_id ? questionsMap[f.question_id] : 'Additional Feedback'}
-          </p>
-          {f.rating !== null && (
-            <p className="text-sm text-gray-600 mt-1">Rating: {f.rating}</p>
-          )}
-          {f.additional_feedback && (
-            <p className="text-sm text-gray-600 mt-1 italic">"{f.additional_feedback}"</p>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+  const renderFeedbackItems = (items) => {
+    const questionItems = items.filter(f => f.question_id);
+    const additionalItems = items.filter(f => !f.question_id && f.additional_feedback);
+
+    return (
+      <div className="space-y-3">
+        {questionItems.map((f, j) => (
+          <div key={j} className="p-3 bg-gray-50 rounded border border-gray-200">
+            <p className="font-medium text-sm text-gray-800">{questionsMap[f.question_id]}</p>
+            {f.rating !== null && <p className="text-sm text-gray-600 mt-1">Rating: {f.rating}</p>}
+          </div>
+        ))}
+        {additionalItems.map((f, j) => (
+          <div key={j} className="p-3 bg-yellow-50 rounded border border-yellow-200">
+            <p className="text-sm text-gray-600 italic">"{f.additional_feedback}"</p>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const FeedbackModal = ({ session, onClose }) => {
     if (!session) return null;
@@ -162,14 +160,14 @@ const DashboardPage = () => {
     );
   };
 
-  const renderSessionButton = (session, actionButton = null) => (
+  const renderSessionButton = (session, actionButton = null, showBell = false) => (
     <button
       key={session.session_id}
       onClick={() => {
         setSelectedSession(session);
         setShowModal(true);
       }}
-      className="w-full text-left bg-white hover:bg-gray-50 border p-4 rounded shadow-sm transition"
+      className="w-full text-left bg-white hover:bg-gray-50 border p-4 rounded shadow-sm transition relative"
     >
       <div className="flex justify-between items-center">
         <h3 className="font-semibold text-gray-800 text-sm">
@@ -177,6 +175,7 @@ const DashboardPage = () => {
         </h3>
         {actionButton || <span className="text-sm text-blue-500 underline">View</span>}
       </div>
+      {showBell && <Bell className="absolute top-2 right-2 text-red-500 w-4 h-4" />}
     </button>
   );
 
@@ -187,8 +186,20 @@ const DashboardPage = () => {
 
         <div className="flex space-x-4 mb-6 border-b">
           <button className={`pb-2 border-b-2 ${activeTab === 'alerts' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500'}`} onClick={() => setActiveTab('alerts')}>Alerts</button>
-          <button className={`pb-2 border-b-2 ${activeTab === 'all' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`} onClick={() => setActiveTab('all')}>All Feedback</button>
           <button className={`pb-2 border-b-2 ${activeTab === 'actioned' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500'}`} onClick={() => setActiveTab('actioned')}>Actioned</button>
+          <button className={`pb-2 border-b-2 ${activeTab === 'all' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`} onClick={() => setActiveTab('all')}>All Feedback</button>
+        </div>
+
+        <div className="mb-6">
+          <label className="text-sm text-gray-600 mr-2">Sort:</label>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
         </div>
 
         {activeTab === 'alerts' && alerts.length === 0 && <p className="text-gray-500">No live alerts currently 🎉</p>}
@@ -206,21 +217,22 @@ const DashboardPage = () => {
                   className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-md hover:bg-green-200"
                 >
                   Mark as Actioned
-                </button>
+                </button>,
+                true
               )
             ))}
-          </div>
-        )}
-
-        {activeTab === 'all' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sessionFeedback.map((session) => renderSessionButton(session))}
           </div>
         )}
 
         {activeTab === 'actioned' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {actionedFeedback.map((session) => renderSessionButton(session))}
+          </div>
+        )}
+
+        {activeTab === 'all' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sessionFeedback.map((session) => renderSessionButton(session))}
           </div>
         )}
       </div>
