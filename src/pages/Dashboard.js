@@ -9,6 +9,7 @@
 // - Modal closable by clicking outside
 // - Date and time format in session preview
 // - 'Click to view' label
+// - 'Mark as Actioned' button inside modal
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -171,7 +172,10 @@ const DashboardPage = () => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
           </h2>
-          $1<button onClick={markSessionAsActioned} className=\"mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded\">Mark as Actioned</button>
+          {renderFeedbackItems(session.items)}
+          <button onClick={markSessionAsActioned} className="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+            Mark as Actioned
+          </button>
         </div>
       </div>
     );
