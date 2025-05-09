@@ -5,6 +5,10 @@
 // - Pagination (20 per page)
 // - Tabs: Alerts, Actioned, All Feedback
 // - Single column layout with record count
+// - Clickable session bar opens modal
+// - Modal closable by clicking outside
+// - Date and time format in session preview
+// - 'Click to view' label
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -139,12 +143,21 @@ const DashboardPage = () => {
 
   const FeedbackModal = ({ session, onClose }) => {
     if (!session) return null;
+
+    const handleOverlayClick = (e) => {
+      if (e.target.id === 'modal-overlay') onClose();
+    };
+
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div
+        id="modal-overlay"
+        onClick={handleOverlayClick}
+        className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      >
         <div className="bg-white w-full max-w-md p-6 rounded shadow-lg relative">
           <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleString()}
+            Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
           </h2>
           {renderFeedbackItems(session.items)}
         </div>
@@ -193,13 +206,18 @@ const DashboardPage = () => {
         </div>
 
         {sessionsToShow.map((session) => (
-          <div key={session.session_id} className="border p-4 rounded mb-4 bg-white hover:bg-gray-50">
+          <div
+            key={session.session_id}
+            onClick={() => { setSelectedSession(session); setShowModal(true); }}
+            className="cursor-pointer border p-4 rounded mb-4 bg-white hover:bg-gray-50"
+          >
             <div className="flex justify-between items-center">
-              <button onClick={() => { setSelectedSession(session); setShowModal(true); }} className="text-left">
+              <div>
                 <h3 className="text-sm font-semibold text-gray-800">
-                  Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
-              </button>
+                <p className="text-xs text-blue-600">Click to view</p>
+              </div>
               {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
             </div>
           </div>
