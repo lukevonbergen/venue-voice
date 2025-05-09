@@ -1,5 +1,4 @@
-// Enhanced ReportsPage.js
-// - Adds multiple dashboard tiles: Total Feedback, Actioned Sessions, Alerts, Feedback This Week, Unique Tables
+// Final version: ReportsPage.js with Satisfaction Trend Graph
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +13,7 @@ import {
   CalendarClock,
   LayoutGrid
 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ReportsPage = () => {
   const [venueId, setVenueId] = useState(null);
@@ -56,6 +56,7 @@ const ReportsPage = () => {
       isActioned: items.every(i => i.is_actioned),
       createdAt: items[0].created_at,
       table: items[0].table_number,
+      items,
       lowScore: items.some(i => i.rating !== null && i.rating <= 2)
     }));
 
@@ -79,6 +80,27 @@ const ReportsPage = () => {
   const recentCount = feedbackSessions.filter(s => new Date(s.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
   const uniqueTables = [...new Set(feedbackSessions.map(s => s.table))];
   const completionRate = totalCount > 0 ? ((actionedCount / totalCount) * 100).toFixed(1) : 0;
+
+  const allRatings = feedbackSessions.flatMap(session => session.items?.map(i => i.rating).filter(r => r !== null && r >= 1 && r <= 5) || []);
+  const averageRating = allRatings.length > 0 ? (allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length).toFixed(2) : 'N/A';
+
+  const getDailySatisfactionTrend = (sessions) => {
+    const dayMap = {};
+    sessions.forEach(session => {
+      const date = new Date(session.createdAt);
+      const key = date.toISOString().split('T')[0];
+      const ratings = session.items?.map(i => i.rating).filter(r => r !== null && r >= 1 && r <= 5) || [];
+      if (!dayMap[key]) dayMap[key] = [];
+      dayMap[key].push(...ratings);
+    });
+
+    return Object.entries(dayMap).map(([day, ratings]) => {
+      const avg = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : 0;
+      return { day, average: parseFloat(avg) };
+    });
+  };
+
+  const satisfactionTrend = getDailySatisfactionTrend(feedbackSessions);
 
   const Tile = ({ title, value, icon: Icon, color = 'gray' }) => (
     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 border border-gray-100 flex items-center space-x-4">
@@ -118,6 +140,20 @@ const ReportsPage = () => {
           <Tile title="Feedback This Week" value={recentCount} icon={CalendarClock} color="purple" />
           <Tile title="Tables Participated" value={uniqueTables.length} icon={LayoutGrid} color="yellow" />
         </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border mb-10">
+          <h2 className="text-xl font-semibold mb-4">Customer Satisfaction Trend</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={satisfactionTrend}>
+              <XAxis dataKey="day" stroke="#6B7280" fontSize={12} />
+              <YAxis domain={[1, 5]} stroke="#6B7280" fontSize={12} allowDecimals={false} />
+              <Tooltip />
+              <Line type="monotone" dataKey="average" stroke="#6366F1" strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <Tile title="Avg. Customer Satisfaction (1–5)" value={averageRating} icon={BarChart3} color="indigo" />
       </div>
     </DashboardFrame>
   );
