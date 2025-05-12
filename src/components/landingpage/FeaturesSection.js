@@ -57,8 +57,8 @@ const FeaturesSection = () => {
           <div className="h-full w-full">
             <img
               src="/img/lp_features.png"
-              alt=""
-              className="mx-auto inline-block h-full w-full max-w-2xl object-cover"
+              alt="Feature preview"
+              className="h-full w-full object-contain"
             />
           </div>
         </div>
