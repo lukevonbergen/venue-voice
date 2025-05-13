@@ -1,3 +1,4 @@
+// Enhanced Heatmap.js with merge detection, delete persistence, and visual merge indicators
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -10,6 +11,31 @@ const getColor = (rating, isUnresolved) => {
   if (rating <= 2) return 'red';
   if (rating === 3) return 'orange';
   return 'green';
+};
+
+const areClose = (a, b) => {
+  const distance = Math.sqrt((a.x_percent - b.x_percent) ** 2 + (a.y_percent - b.y_percent) ** 2);
+  return distance < 5; // arbitrary proximity threshold
+};
+
+const groupTables = (positions) => {
+  const groups = [];
+  const used = new Set();
+
+  for (let i = 0; i < positions.length; i++) {
+    if (used.has(i)) continue;
+    const group = [positions[i]];
+    used.add(i);
+
+    for (let j = i + 1; j < positions.length; j++) {
+      if (!used.has(j) && areClose(positions[i], positions[j])) {
+        group.push(positions[j]);
+        used.add(j);
+      }
+    }
+    groups.push(group);
+  }
+  return groups;
 };
 
 const Heatmap = () => {
@@ -26,67 +52,49 @@ const Heatmap = () => {
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData.user) throw new Error('User not logged in');
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
 
-        const { data: venueData, error: venueError } = await supabase
-          .from('venues')
-          .select('id')
-          .eq('email', userData.user.email)
-          .single();
+      const { data: venueData } = await supabase
+        .from('venues')
+        .select('id')
+        .eq('email', userData.user.email)
+        .single();
 
-        if (venueError) throw venueError;
+      if (!venueData) return;
+      const venueId = venueData.id;
+      setVenueId(venueId);
 
-        const venueId = venueData.id;
-        setVenueId(venueId);
-        await fetchTablePositions(venueId);
-        await fetchLatestFeedback(venueId);
-      } catch (error) {
-        console.error('Error loading venue or data:', error);
-      } finally {
-        setLoading(false);
-      }
+      await fetchTablePositions(venueId);
+      await fetchLatestFeedback(venueId);
     };
 
     fetchVenueAndData();
   }, []);
 
   const fetchTablePositions = async (venueId) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('table_positions')
       .select('*')
       .eq('venue_id', venueId);
-
-    if (error) {
-      console.error('Error fetching table positions:', error);
-    } else {
-      setPositions(data);
-    }
+    setPositions(data || []);
   };
 
   const fetchLatestFeedback = async (venueId) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('feedback')
       .select('*')
       .eq('venue_id', venueId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching feedback:', error);
-      return;
-    }
-
     const ratingMap = {};
     const sessionMap = {};
     const unresolvedMap = {};
-
     const latestSessionPerTable = {};
 
     for (const entry of data) {
       const table = entry.table_number;
       if (!table) continue;
-
       if (!latestSessionPerTable[table]) {
         latestSessionPerTable[table] = entry.session_id;
         sessionMap[table] = [entry];
@@ -123,27 +131,27 @@ const Heatmap = () => {
   };
 
   const addTable = () => {
-    const nextNumber = positions.length + 1;
-    setPositions((prev) => [
-      ...prev,
-      {
-        id: `temp-${Date.now()}`,
-        venue_id: venueId,
-        table_number: nextNumber,
-        x_percent: 10,
-        y_percent: 10,
-        isNew: true,
-      },
-    ]);
+    const nextNumber = Math.max(0, ...positions.map(p => parseInt(p.table_number) || 0)) + 1;
+    const id = `temp-${Date.now()}`;
+    setPositions(prev => [...prev, {
+      id,
+      venue_id: venueId,
+      table_number: nextNumber,
+      x_percent: 10,
+      y_percent: 10,
+    }]);
+  };
+
+  const removeTable = (id) => {
+    setPositions((prev) => prev.filter((t) => t.id !== id));
+    supabase.from('table_positions').delete().eq('id', id); // persist delete
   };
 
   const saveTables = async () => {
     setSaving(true);
-    const payload = positions.map(({ id, isNew, ...rest }) => rest);
+    const payload = positions.map(({ id, ...rest }) => rest);
     const { error } = await supabase.from('table_positions').upsert(payload);
-    if (error) {
-      console.error('Error saving table layout:', error);
-    } else {
+    if (!error) {
       await fetchLatestFeedback(venueId);
       setEditMode(false);
     }
@@ -159,45 +167,33 @@ const Heatmap = () => {
   };
 
   const markAsResolved = async () => {
-    const idsToUpdate = selectedTable.entries.map((e) => e.id);
-    const { error } = await supabase
-      .from('feedback')
-      .update({ is_actioned: true })
-      .in('id', idsToUpdate);
-
-    if (!error) {
-      await fetchLatestFeedback(venueId);
-      setModalOpen(false);
-    }
+    const ids = selectedTable.entries.map(e => e.id);
+    if (!ids.length) return;
+    await supabase.from('feedback').update({ is_actioned: true }).in('id', ids);
+    await fetchLatestFeedback(venueId);
+    setModalOpen(false);
   };
 
   if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
+
+  const grouped = groupTables(positions);
 
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Live Feedback Heatmap</h1>
+          <h1 className="text-2xl font-bold">Live Feedback Heatmap</h1>
           <div className="space-x-2">
             <button
-              onClick={() => setEditMode((prev) => !prev)}
-              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+              onClick={() => setEditMode(!editMode)}
+              className="bg-yellow-500 text-white px-4 py-2 rounded"
             >
               {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
             </button>
             {editMode && (
               <>
-                <button
-                  onClick={addTable}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  + Add Table
-                </button>
-                <button
-                  onClick={saveTables}
-                  disabled={saving}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
+                <button onClick={addTable} className="bg-green-600 text-white px-4 py-2 rounded">+ Add Table</button>
+                <button onClick={saveTables} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded">
                   {saving ? 'Saving...' : 'Save Layout'}
                 </button>
               </>
@@ -205,49 +201,36 @@ const Heatmap = () => {
           </div>
         </div>
 
-        <div
-          id="layout-area"
-          className="relative w-full h-[600px] bg-white border rounded-lg shadow-sm"
-        >
-          {positions.map((table) => {
-            const position = {
-              x: (table.x_percent / 100) * 800,
-              y: (table.y_percent / 100) * 600,
-            };
-            const pulse = unresolvedTables[table.table_number];
+        <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
+          {grouped.map((group, i) => {
+            const tableNumbers = group.map(g => g.table_number).join(', ');
+            const avgX = group.reduce((sum, g) => sum + g.x_percent, 0) / group.length;
+            const avgY = group.reduce((sum, g) => sum + g.y_percent, 0) / group.length;
+            const rating = group.map(g => latestRatings[g.table_number]).filter(Boolean);
+            const pulse = group.some(g => unresolvedTables[g.table_number]);
+            const bg = getColor(rating[0], pulse);
+
             const content = (
               <div
-                className={`absolute w-12 h-12 flex items-center justify-center rounded shadow-md text-white font-bold cursor-pointer ${
-                  pulse ? 'animate-pulse' : ''
-                }`}
-                style={{
-                  backgroundColor: getColor(latestRatings[table.table_number], pulse),
-                }}
-                onClick={() => !editMode && handleTableClick(table.table_number)}
-                title={`Table ${table.table_number}`}
+                onClick={() => !editMode && handleTableClick(group[0].table_number)}
+                className={`w-16 h-14 flex items-center justify-center text-white font-bold rounded shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
+                style={{ backgroundColor: bg }}
               >
-                {table.table_number}
+                {tableNumbers}
               </div>
             );
 
             return editMode ? (
-              <Draggable
-                key={table.id}
-                defaultPosition={position}
-                bounds="parent"
-                onStop={(e, data) => handleDragStop(e, data, table)}
-              >
-                {content}
+              <Draggable key={i} defaultPosition={{ x: (avgX / 100) * 800, y: (avgY / 100) * 600 }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, group[0])}>
+                <div className="absolute">
+                  {content}
+                  <button onClick={() => removeTable(group[0].id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
+                </div>
               </Draggable>
             ) : (
               <div
-                key={table.id}
-                style={{
-                  position: 'absolute',
-                  top: `${table.y_percent}%`,
-                  left: `${table.x_percent}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
+                key={i}
+                style={{ position: 'absolute', top: `${avgY}%`, left: `${avgX}%`, transform: 'translate(-50%, -50%)' }}
               >
                 {content}
               </div>
