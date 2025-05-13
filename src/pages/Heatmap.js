@@ -4,6 +4,7 @@ import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import Draggable from 'react-draggable';
 import Modal from 'react-modal';
+import { v4 as uuidv4 } from 'uuid';
 
 const getColor = (rating, isUnresolved) => {
   if (isUnresolved) return 'red';
@@ -144,12 +145,12 @@ const Heatmap = () => {
     setSaving(true);
     const clean = positions.filter(p => p.table_number && venueId);
     const payload = clean.map(t => ({
+      id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
       venue_id: venueId,
       table_number: t.table_number,
       x_percent: t.x_percent,
       y_percent: t.y_percent,
-      shape: t.shape,
-      id: t.id?.startsWith('temp-') ? undefined : t.id
+      shape: t.shape
     }));
 
     const { error } = await supabase.from('table_positions').upsert(payload);
