@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
+import Draggable from 'react-draggable';
 
 const getColor = (rating) => {
   if (rating === null || rating === undefined) return 'gray';
@@ -14,6 +15,7 @@ const Heatmap = () => {
   const [positions, setPositions] = useState([]);
   const [latestRatings, setLatestRatings] = useState({});
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
@@ -87,33 +89,92 @@ const Heatmap = () => {
     setLatestRatings(ratingMap);
   };
 
+  const handleDragStop = (e, data, table) => {
+    const container = document.getElementById('layout-area');
+    const { width, height } = container.getBoundingClientRect();
+    const xPercent = (data.x / width) * 100;
+    const yPercent = (data.y / height) * 100;
+
+    setPositions((prev) =>
+      prev.map((t) =>
+        t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t
+      )
+    );
+  };
+
+  const addTable = () => {
+    const nextNumber = positions.length + 1;
+    setPositions((prev) => [
+      ...prev,
+      {
+        id: `temp-${Date.now()}`,
+        venue_id: venueId,
+        table_number: nextNumber,
+        x_percent: 10,
+        y_percent: 10,
+        isNew: true,
+      },
+    ]);
+  };
+
+  const saveTables = async () => {
+    setSaving(true);
+    const payload = positions.map(({ id, isNew, ...rest }) => rest);
+    const { error } = await supabase.from('table_positions').upsert(payload);
+    if (error) {
+      console.error('Error saving table layout:', error);
+    } else {
+      alert('Layout saved');
+    }
+    setSaving(false);
+  };
+
   if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
 
   return (
     <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">Live Feedback Heatmap</h1>
-
-        <div className="relative w-full h-[500px] bg-white border rounded-lg shadow-sm">
-          {positions.map((table) => (
-            <div
-              key={table.id}
-              className="absolute flex items-center justify-center text-white font-bold text-sm"
-              style={{
-                top: `${table.y_percent}%`,
-                left: `${table.x_percent}%`,
-                transform: 'translate(-50%, -50%)',
-                width: 40,
-                height: 40,
-                borderRadius: '9999px',
-                backgroundColor: getColor(latestRatings[table.table_number]),
-                boxShadow: '0 0 6px rgba(0,0,0,0.2)',
-                cursor: 'pointer',
-              }}
-              title={`Table ${table.table_number} — Rating: ${latestRatings[table.table_number] ?? 'N/A'}`}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Live Feedback Heatmap</h1>
+          <div className="space-x-2">
+            <button
+              onClick={addTable}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
             >
-              {table.table_number}
-            </div>
+              + Add Table
+            </button>
+            <button
+              onClick={saveTables}
+              disabled={saving}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              {saving ? 'Saving...' : 'Save Layout'}
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="layout-area"
+          className="relative w-full h-[600px] bg-white border rounded-lg shadow-sm"
+        >
+          {positions.map((table) => (
+            <Draggable
+              key={table.id}
+              defaultPosition={{
+                x: `${(table.x_percent / 100) * 800}`,
+                y: `${(table.y_percent / 100) * 600}`,
+              }}
+              bounds="parent"
+              onStop={(e, data) => handleDragStop(e, data, table)}
+            >
+              <div
+                className="absolute w-12 h-12 flex items-center justify-center rounded-full shadow-md cursor-pointer text-white font-bold"
+                style={{ backgroundColor: getColor(latestRatings[table.table_number]) }}
+                title={`Table ${table.table_number} — Rating: ${latestRatings[table.table_number] ?? 'N/A'}`}
+              >
+                {table.table_number}
+              </div>
+            </Draggable>
           ))}
         </div>
       </div>
