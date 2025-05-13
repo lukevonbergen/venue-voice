@@ -1,4 +1,4 @@
-// Fully fixed Heatmap.js with clear-all support and persistence fixes
+// Fully working Heatmap.js with complete UI and feedback fetch fix
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -52,7 +52,22 @@ const Heatmap = () => {
   };
 
   const fetchLatestFeedback = async (venueId) => {
-    const { data } = await supabase.from('feedback').select('*').eq('venue_id', venueId).order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('id, venue_id, question_id, sentiment, rating, additional_feedback, table_number, is_actioned, session_id, created_at')
+      .eq('venue_id', venueId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error fetching feedback:', error);
+      return;
+    }
+
+    if (!data || !Array.isArray(data)) {
+      console.error('❌ Feedback returned no iterable data:', data);
+      return;
+    }
+
     const ratingMap = {}, sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
     for (const entry of data) {
       const table = entry.table_number;
@@ -64,6 +79,7 @@ const Heatmap = () => {
         sessionMap[table].push(entry);
       }
     }
+
     for (const table in sessionMap) {
       const entries = sessionMap[table];
       const unresolved = entries.some(e => !e.is_actioned && e.rating <= 2);
@@ -72,6 +88,7 @@ const Heatmap = () => {
       ratingMap[table] = avg ? parseFloat(avg.toFixed(1)) : null;
       unresolvedMap[table] = unresolved;
     }
+
     setLatestRatings(ratingMap);
     setUnresolvedTables(unresolvedMap);
     setLatestSessions(sessionMap);
@@ -134,8 +151,6 @@ const Heatmap = () => {
       shape: t.shape,
       id: t.id?.startsWith('temp-') ? undefined : t.id
     }));
-
-    console.log('Saving layout to Supabase →', payload);
 
     const { error } = await supabase.from('table_positions').upsert(payload);
     if (!error) {
