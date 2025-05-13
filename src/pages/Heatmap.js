@@ -1,4 +1,4 @@
-// Fully fixed Heatmap.js: prevents duplicates, shows clean grouping, and deletes correctly
+// Fully fixed Heatmap.js with clear-all support and persistence fixes
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -26,6 +26,7 @@ const Heatmap = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [newShape, setNewShape] = useState('square');
   const [newTableNumber, setNewTableNumber] = useState('');
+  const [confirmClear, setConfirmClear] = useState(false);
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
@@ -111,6 +112,17 @@ const Heatmap = () => {
     }
   };
 
+  const clearAllTables = async () => {
+    if (!venueId) return;
+    const { data } = await supabase.from('table_positions').select('id').eq('venue_id', venueId);
+    if (data?.length) {
+      const ids = data.map(d => d.id);
+      await supabase.from('table_positions').delete().in('id', ids);
+    }
+    setPositions([]);
+    setConfirmClear(false);
+  };
+
   const saveTables = async () => {
     setSaving(true);
     const clean = positions.filter(p => p.table_number && p.venue_id);
@@ -160,6 +172,7 @@ const Heatmap = () => {
                 <button onClick={saveTables} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded">
                   {saving ? 'Saving...' : 'Save Layout'}
                 </button>
+                <button onClick={() => setConfirmClear(true)} className="bg-red-600 text-white px-4 py-2 rounded">Clear All</button>
               </>
             )}
           </div>
@@ -219,6 +232,21 @@ const Heatmap = () => {
           <button onClick={markAsResolved} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Mark as Resolved
           </button>
+        </Modal>
+
+        <Modal
+          isOpen={confirmClear}
+          onRequestClose={() => setConfirmClear(false)}
+          ariaHideApp={false}
+          className="bg-white p-6 rounded-lg max-w-sm mx-auto shadow-xl border"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        >
+          <h2 className="text-lg font-bold mb-4">Clear All Tables?</h2>
+          <p className="mb-4 text-gray-600">This will permanently remove all tables from your layout.</p>
+          <div className="flex justify-end gap-4">
+            <button onClick={() => setConfirmClear(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded">Cancel</button>
+            <button onClick={clearAllTables} className="bg-red-600 text-white px-4 py-2 rounded">Confirm</button>
+          </div>
         </Modal>
       </div>
     </DashboardFrame>
