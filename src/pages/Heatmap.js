@@ -1,4 +1,4 @@
-// Enhanced Heatmap.js with shape selection, unique table numbers, and merge detection
+// Fully fixed Heatmap.js: prevents duplicates, shows clean grouping, and deletes correctly
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -11,29 +11,6 @@ const getColor = (rating, isUnresolved) => {
   if (rating <= 2) return 'red';
   if (rating === 3) return 'orange';
   return 'green';
-};
-
-const areClose = (a, b) => {
-  const distance = Math.sqrt((a.x_percent - b.x_percent) ** 2 + (a.y_percent - b.y_percent) ** 2);
-  return distance < 5;
-};
-
-const groupTables = (positions) => {
-  const groups = [];
-  const used = new Set();
-  for (let i = 0; i < positions.length; i++) {
-    if (used.has(i)) continue;
-    const group = [positions[i]];
-    used.add(i);
-    for (let j = i + 1; j < positions.length; j++) {
-      if (!used.has(j) && areClose(positions[i], positions[j])) {
-        group.push(positions[j]);
-        used.add(j);
-      }
-    }
-    groups.push(group);
-  }
-  return groups;
 };
 
 const Heatmap = () => {
@@ -50,40 +27,23 @@ const Heatmap = () => {
   const [newShape, setNewShape] = useState('square');
   const [newTableNumber, setNewTableNumber] = useState('');
 
-useEffect(() => {
-  const fetchVenueAndData = async () => {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    console.log('👤 Supabase User:', userData, userError);
-
-    if (!userData?.user) {
-      console.warn('⚠️ No user found');
-      return;
-    }
-
-    const { data: venueData, error: venueError } = await supabase
-      .from('venues')
-      .select('id')
-      .eq('email', userData.user.email)
-      .single();
-
-    console.log('🏢 Venue lookup:', venueData, venueError);
-
-    if (!venueData) {
-      console.warn('⚠️ No venue found for user email:', userData.user.email);
-      return;
-    }
-
-    const venueId = venueData.id;
-    setVenueId(venueId);
-
-    await fetchTablePositions(venueId);
-    await fetchLatestFeedback(venueId);
-    setLoading(false); // Ensure this is set here
-  };
-
-  fetchVenueAndData();
-}, []);
-
+  useEffect(() => {
+    const fetchVenueAndData = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) return;
+      const { data: venueData } = await supabase
+        .from('venues')
+        .select('id')
+        .eq('email', userData.user.email)
+        .single();
+      if (!venueData) return;
+      setVenueId(venueData.id);
+      await fetchTablePositions(venueData.id);
+      await fetchLatestFeedback(venueData.id);
+      setLoading(false);
+    };
+    fetchVenueAndData();
+  }, []);
 
   const fetchTablePositions = async (venueId) => {
     const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
@@ -121,19 +81,20 @@ useEffect(() => {
     const { width, height } = container.getBoundingClientRect();
     const xPercent = (data.x / width) * 100;
     const yPercent = (data.y / height) * 100;
-    setPositions((prev) => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
+    setPositions(prev => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
   };
 
   const addTable = () => {
-    if (!newTableNumber || positions.some(p => p.table_number === newTableNumber)) {
-      alert('Please enter a unique table number.');
+    const trimmed = newTableNumber.trim();
+    if (!trimmed || positions.some(p => p.table_number === trimmed)) {
+      alert('Table number must be unique.');
       return;
     }
     const id = `temp-${Date.now()}`;
     setPositions(prev => [...prev, {
       id,
       venue_id: venueId,
-      table_number: newTableNumber,
+      table_number: trimmed,
       x_percent: 10,
       y_percent: 10,
       shape: newShape
@@ -142,16 +103,22 @@ useEffect(() => {
   };
 
   const removeTable = (id) => {
+    const toDelete = positions.find(p => p.id === id);
+    if (!toDelete) return;
     setPositions(prev => prev.filter(t => t.id !== id));
-    supabase.from('table_positions').delete().eq('id', id);
+    if (!id.startsWith('temp-')) {
+      supabase.from('table_positions').delete().eq('id', id);
+    }
   };
 
   const saveTables = async () => {
     setSaving(true);
-    const payload = positions.map(({ id, ...rest }) => rest);
+    const clean = positions.filter(p => p.table_number && p.venue_id);
+    const payload = clean.map(({ id, ...rest }) => rest);
     const { error } = await supabase.from('table_positions').upsert(payload);
     if (!error) {
       await fetchLatestFeedback(venueId);
+      await fetchTablePositions(venueId);
       setEditMode(false);
     }
     setSaving(false);
@@ -171,8 +138,6 @@ useEffect(() => {
   };
 
   if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
-
-  const grouped = groupTables(positions);
 
   return (
     <DashboardFrame>
@@ -201,37 +166,33 @@ useEffect(() => {
         </div>
 
         <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
-          {grouped.map((group, i) => {
-            const tableNumbers = group.map(g => g.table_number).join(', ');
-            const avgX = group.reduce((sum, g) => sum + g.x_percent, 0) / group.length;
-            const avgY = group.reduce((sum, g) => sum + g.y_percent, 0) / group.length;
-            const rating = group.map(g => latestRatings[g.table_number]).filter(Boolean);
-            const pulse = group.some(g => unresolvedTables[g.table_number]);
-            const bg = getColor(rating[0], pulse);
-            const shape = group[0].shape || 'square';
+          {positions.map((table, i) => {
+            const { x_percent, y_percent, table_number, id, shape } = table;
+            const bg = getColor(latestRatings[table_number], unresolvedTables[table_number]);
+            const pulse = unresolvedTables[table_number];
             const shapeClass = shape === 'circle' ? 'rounded-full w-14 h-14' : shape === 'long' ? 'w-24 h-10' : 'w-14 h-14';
 
             const content = (
               <div
-                onClick={() => !editMode && handleTableClick(group[0].table_number)}
+                onClick={() => !editMode && handleTableClick(table_number)}
                 className={`${shapeClass} flex items-center justify-center text-white font-bold shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
                 style={{ backgroundColor: bg }}
               >
-                {tableNumbers}
+                {table_number}
               </div>
             );
 
             return editMode ? (
-              <Draggable key={i} defaultPosition={{ x: (avgX / 100) * 800, y: (avgY / 100) * 600 }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, group[0])}>
+              <Draggable key={id} defaultPosition={{ x: (x_percent / 100) * 800, y: (y_percent / 100) * 600 }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, table)}>
                 <div className="absolute">
                   {content}
-                  <button onClick={() => removeTable(group[0].id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
+                  <button onClick={() => removeTable(id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
                 </div>
               </Draggable>
             ) : (
               <div
-                key={i}
-                style={{ position: 'absolute', top: `${avgY}%`, left: `${avgX}%`, transform: 'translate(-50%, -50%)' }}
+                key={id}
+                style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%`, transform: 'translate(-50%, -50%)' }}
               >
                 {content}
               </div>
