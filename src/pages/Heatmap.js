@@ -1,4 +1,3 @@
-// Fully working Heatmap.js with complete UI and feedback fetch fix
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -98,8 +97,8 @@ const Heatmap = () => {
   const handleDragStop = (e, data, table) => {
     const container = document.getElementById('layout-area');
     const { width, height } = container.getBoundingClientRect();
-    const xPercent = (data.x / width) * 100;
-    const yPercent = (data.y / height) * 100;
+    const xPercent = Math.round((data.x / width) * 10000) / 100;
+    const yPercent = Math.round((data.y / height) * 10000) / 100;
     setPositions(prev => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
   };
 
@@ -121,12 +120,12 @@ const Heatmap = () => {
     setNewTableNumber('');
   };
 
-  const removeTable = (id) => {
+  const removeTable = async (id) => {
     const toDelete = positions.find(p => p.id === id);
     if (!toDelete) return;
     setPositions(prev => prev.filter(t => t.id !== id));
     if (!id.startsWith('temp-')) {
-      supabase.from('table_positions').delete().eq('id', id);
+      await supabase.from('table_positions').delete().eq('id', id);
     }
   };
 
@@ -207,7 +206,7 @@ const Heatmap = () => {
         </div>
 
         <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
-          {positions.map((table, i) => {
+          {positions.map((table) => {
             const { x_percent, y_percent, table_number, id, shape } = table;
             const bg = getColor(latestRatings[table_number], unresolvedTables[table_number]);
             const pulse = unresolvedTables[table_number];
@@ -215,7 +214,11 @@ const Heatmap = () => {
 
             const content = (
               <div
-                onClick={() => !editMode && handleTableClick(table_number)}
+                onClick={() => {
+                  if (!editMode && latestSessions[table_number]?.length) {
+                    handleTableClick(table_number);
+                  }
+                }}
                 className={`${shapeClass} flex items-center justify-center text-white font-bold shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
                 style={{ backgroundColor: bg }}
               >
