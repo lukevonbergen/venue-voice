@@ -11,7 +11,7 @@ import ManageQuestions from './pages/ManageQuestions';
 import TablesDashboard from './pages/Dashboard_Tables';
 import SettingsPage from './pages/SettingsPage';
 import TemplatesPage from './pages/QRTemplates';
-import NPSScores from './pages/NPSScores';
+import ReportsPage from './pages/ReportsPage';
 import QRCodePage_Feature from './pages/Features_QRCode';
 import NPS_Feature from './pages/Features_NPSScore';
 import RealTimeStats_Feature from './pages/Features_RealTimeStats';
@@ -77,7 +77,7 @@ function App() {
       <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
       <Route path="/dashboard/questions" element={<ManageQuestions />} />
       <Route path="/dashboard/tablefeedback" element={<TablesDashboard />} />
-      <Route path="/dashboard/nps" element={<NPSScores />} />
+      <Route path="/dashboard/reports" element={<ReportsPage />} />
       <Route path="/dashboard/settings" element={<SettingsPage />} />
       <Route path="/dashboard/templates" element={<TemplatesPage />} />
       <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
