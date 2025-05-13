@@ -102,6 +102,15 @@ const Heatmap = () => {
     setPositions(prev => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
   };
 
+  const convertPercentToPx = (xPercent, yPercent) => {
+    const container = document.getElementById('layout-area');
+    const { width, height } = container.getBoundingClientRect();
+    return {
+      x: (xPercent / 100) * width,
+      y: (yPercent / 100) * height
+    };
+  };
+
   const addTable = () => {
     const trimmed = newTableNumber.trim();
     if (!trimmed || positions.some(p => p.table_number === trimmed)) {
@@ -226,21 +235,26 @@ const Heatmap = () => {
               </div>
             );
 
-            return editMode ? (
-              <Draggable key={id} defaultPosition={{ x: (x_percent / 100) * 800, y: (y_percent / 100) * 600 }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, table)}>
-                <div className="absolute">
+            if (editMode) {
+              const { x, y } = convertPercentToPx(x_percent, y_percent);
+              return (
+                <Draggable key={id} position={{ x, y }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, table)}>
+                  <div className="absolute">
+                    {content}
+                    <button onClick={() => removeTable(id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
+                  </div>
+                </Draggable>
+              );
+            } else {
+              return (
+                <div
+                  key={id}
+                  style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%`, transform: 'translate(-50%, -50%)' }}
+                >
                   {content}
-                  <button onClick={() => removeTable(id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
                 </div>
-              </Draggable>
-            ) : (
-              <div
-                key={id}
-                style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%`, transform: 'translate(-50%, -50%)' }}
-              >
-                {content}
-              </div>
-            );
+              );
+            }
           })}
         </div>
 
