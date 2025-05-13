@@ -36,8 +36,8 @@ const Navbar = () => {
               <div className="text-sm font-semibold text-gray-700 hover:text-gray-900 flex items-center cursor-pointer">
                 Features <ChevronDown className="ml-1 h-4 w-4" />
               </div>
-              <div className="absolute top-full mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
-                <div className="py-1">
+              <div className="absolute top-full w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+                <div className="py-1 pt-2">
                   {featureLinks.map((link) => (
                     <Link
                       key={link.name}
