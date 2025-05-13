@@ -8,6 +8,7 @@ import DashboardPage from './pages/Dashboard';
 import CustomerFeedbackPage from './pages/CustomerFeedback';
 import SignUpPage from './pages/SignUp';
 import ManageQuestions from './pages/ManageQuestions';
+import Heatmap from './pages/Heatmap';
 import TablesDashboard from './pages/Dashboard_Tables';
 import SettingsPage from './pages/SettingsPage';
 import TemplatesPage from './pages/QRTemplates';
@@ -81,6 +82,7 @@ function App() {
       <Route path="/dashboard/settings" element={<SettingsPage />} />
       <Route path="/dashboard/templates" element={<TemplatesPage />} />
       <Route path="/dashboard/feedbackfeed" element={<FeedbackFeed />} />
+      <Route path="/dashboard/heatmap" element={<Heatmap />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/pricing" element={<PricingPage />} />
