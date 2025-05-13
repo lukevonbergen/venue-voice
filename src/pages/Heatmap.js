@@ -126,7 +126,7 @@ const Heatmap = () => {
   const saveTables = async () => {
     setSaving(true);
     const clean = positions.filter(p => p.table_number && p.venue_id);
-    const payload = clean.map(({ id, ...rest }) => rest);
+    const payload = clean.map(t => ({ ...t }));
     const { error } = await supabase.from('table_positions').upsert(payload);
     if (!error) {
       await fetchLatestFeedback(venueId);
