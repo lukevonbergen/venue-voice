@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
 import Draggable from 'react-draggable';
+import Modal from 'react-modal';
 
-const getColor = (rating) => {
+const getColor = (rating, isUnresolved) => {
+  if (isUnresolved) return 'red';
   if (rating === null || rating === undefined) return 'gray';
   if (rating <= 2) return 'red';
   if (rating === 3) return 'orange';
@@ -14,9 +16,13 @@ const Heatmap = () => {
   const [venueId, setVenueId] = useState(null);
   const [positions, setPositions] = useState([]);
   const [latestRatings, setLatestRatings] = useState({});
+  const [latestSessions, setLatestSessions] = useState({});
+  const [unresolvedTables, setUnresolvedTables] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
@@ -35,7 +41,7 @@ const Heatmap = () => {
         const venueId = venueData.id;
         setVenueId(venueId);
         await fetchTablePositions(venueId);
-        await fetchLatestRatings(venueId);
+        await fetchLatestFeedback(venueId);
       } catch (error) {
         console.error('Error loading venue or data:', error);
       } finally {
@@ -59,10 +65,10 @@ const Heatmap = () => {
     }
   };
 
-  const fetchLatestRatings = async (venueId) => {
+  const fetchLatestFeedback = async (venueId) => {
     const { data, error } = await supabase
       .from('feedback')
-      .select('table_number, rating, session_id, created_at')
+      .select('*')
       .eq('venue_id', venueId)
       .order('created_at', { ascending: false });
 
@@ -71,23 +77,36 @@ const Heatmap = () => {
       return;
     }
 
-    const sessionMap = new Map();
+    const ratingMap = {};
+    const sessionMap = {};
+    const unresolvedMap = {};
+
+    const latestSessionPerTable = {};
+
     for (const entry of data) {
-      if (!entry.table_number) continue;
-      if (!sessionMap.has(entry.table_number)) {
-        sessionMap.set(entry.table_number, []);
+      const table = entry.table_number;
+      if (!table) continue;
+
+      if (!latestSessionPerTable[table]) {
+        latestSessionPerTable[table] = entry.session_id;
+        sessionMap[table] = [entry];
+      } else if (entry.session_id === latestSessionPerTable[table]) {
+        sessionMap[table].push(entry);
       }
-      sessionMap.get(entry.table_number).push(entry);
     }
 
-    const ratingMap = {};
-    sessionMap.forEach((entries, table) => {
+    for (const table in sessionMap) {
+      const entries = sessionMap[table];
+      const unresolved = entries.some((e) => !e.is_actioned && e.rating <= 2);
       const ratings = entries.map(e => e.rating).filter(Boolean);
       const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
       ratingMap[table] = avg ? parseFloat(avg.toFixed(1)) : null;
-    });
+      unresolvedMap[table] = unresolved;
+    }
 
     setLatestRatings(ratingMap);
+    setUnresolvedTables(unresolvedMap);
+    setLatestSessions(sessionMap);
   };
 
   const handleDragStop = (e, data, table) => {
@@ -125,9 +144,31 @@ const Heatmap = () => {
     if (error) {
       console.error('Error saving table layout:', error);
     } else {
-      alert('Layout saved');
+      await fetchLatestFeedback(venueId);
+      setEditMode(false);
     }
     setSaving(false);
+  };
+
+  const handleTableClick = (tableNumber) => {
+    setSelectedTable({
+      number: tableNumber,
+      entries: latestSessions[tableNumber] || [],
+    });
+    setModalOpen(true);
+  };
+
+  const markAsResolved = async () => {
+    const idsToUpdate = selectedTable.entries.map((e) => e.id);
+    const { error } = await supabase
+      .from('feedback')
+      .update({ is_actioned: true })
+      .in('id', idsToUpdate);
+
+    if (!error) {
+      await fetchLatestFeedback(venueId);
+      setModalOpen(false);
+    }
   };
 
   if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
@@ -173,6 +214,22 @@ const Heatmap = () => {
               x: (table.x_percent / 100) * 800,
               y: (table.y_percent / 100) * 600,
             };
+            const pulse = unresolvedTables[table.table_number];
+            const content = (
+              <div
+                className={`absolute w-12 h-12 flex items-center justify-center rounded shadow-md text-white font-bold cursor-pointer ${
+                  pulse ? 'animate-pulse' : ''
+                }`}
+                style={{
+                  backgroundColor: getColor(latestRatings[table.table_number], pulse),
+                }}
+                onClick={() => !editMode && handleTableClick(table.table_number)}
+                title={`Table ${table.table_number}`}
+              >
+                {table.table_number}
+              </div>
+            );
+
             return editMode ? (
               <Draggable
                 key={table.id}
@@ -180,30 +237,49 @@ const Heatmap = () => {
                 bounds="parent"
                 onStop={(e, data) => handleDragStop(e, data, table)}
               >
-                <div
-                  className="absolute w-12 h-12 flex items-center justify-center rounded-full shadow-md cursor-pointer text-white font-bold bg-blue-500"
-                  title={`Table ${table.table_number}`}
-                >
-                  {table.table_number}
-                </div>
+                {content}
               </Draggable>
             ) : (
               <div
                 key={table.id}
-                className="absolute w-12 h-12 flex items-center justify-center rounded-full shadow-md text-white font-bold"
                 style={{
+                  position: 'absolute',
                   top: `${table.y_percent}%`,
                   left: `${table.x_percent}%`,
                   transform: 'translate(-50%, -50%)',
-                  backgroundColor: getColor(latestRatings[table.table_number]),
                 }}
-                title={`Table ${table.table_number} — Rating: ${latestRatings[table.table_number] ?? 'N/A'}`}
               >
-                {table.table_number}
+                {content}
               </div>
             );
           })}
         </div>
+
+        <Modal
+          isOpen={modalOpen}
+          onRequestClose={() => setModalOpen(false)}
+          ariaHideApp={false}
+          className="bg-white p-6 rounded-lg max-w-md mx-auto mt-20 shadow-xl border"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        >
+          <h2 className="text-xl font-bold mb-4">Table {selectedTable?.number} Feedback</h2>
+          <div className="space-y-3 mb-4">
+            {selectedTable?.entries.map((entry, i) => (
+              <div key={i} className="text-sm border-b pb-2">
+                <div><strong>Sentiment:</strong> {entry.sentiment || 'N/A'} (Rating: {entry.rating ?? 'N/A'})</div>
+                {entry.additional_feedback && (
+                  <div><strong>Note:</strong> {entry.additional_feedback}</div>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={markAsResolved}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Mark as Resolved
+          </button>
+        </Modal>
       </div>
     </DashboardFrame>
   );
