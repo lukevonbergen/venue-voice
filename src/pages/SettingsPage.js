@@ -18,6 +18,8 @@ const SettingsPage = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tableCount, setTableCount] = useState('');
+  const [tripadvisorLink, setTripadvisorLink] = useState('');
+  const [googleReviewLink, setGoogleReviewLink] = useState('');
   const [address, setAddress] = useState({
     line1: '',
     line2: '',
@@ -27,15 +29,11 @@ const SettingsPage = () => {
     country: '',
   });
 
-  // Single state for success/error message
   const [message, setMessage] = useState('');
-
-  // State to control the lock status of each section
   const [isAccountLocked, setIsAccountLocked] = useState(true);
   const [isVenueLocked, setIsVenueLocked] = useState(true);
   const [isBrandingLocked, setIsBrandingLocked] = useState(true);
 
-  // Fetch venue ID and settings on component mount
   useEffect(() => {
     const fetchSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -47,11 +45,10 @@ const SettingsPage = () => {
     fetchSession();
   }, []);
 
-  // Fetch venue ID and all fields
   const fetchVenueId = async (email) => {
     const { data: venueData, error: venueError } = await supabase
       .from('venues')
-      .select('id, name, email, first_name, last_name, logo, primary_color, secondary_color, is_paid, table_count, address')
+      .select('id, name, email, first_name, last_name, logo, primary_color, secondary_color, is_paid, table_count, address, tripadvisor_link, google_review_link')
       .eq('email', email)
       .single();
 
@@ -68,11 +65,13 @@ const SettingsPage = () => {
       setSecondaryColor(venueData.secondary_color || '#52c41a');
       setIsPaid(venueData.is_paid || false);
       setTableCount(venueData.table_count || '');
+      setTripadvisorLink(venueData.tripadvisor_link || '');
+      setGoogleReviewLink(venueData.google_review_link || '');
       setAddress(venueData.address || {
         line1: '',
         line2: '',
         city: '',
-        state: '',
+        county: '',
         postalCode: '',
         country: '',
       });
@@ -85,12 +84,10 @@ const SettingsPage = () => {
 
     setLoading(true);
 
-    // Step 1: Generate a unique file name
     const fileExt = file.name.split('.').pop();
-    const fileName = `${venueId}-logo.${fileExt}`; // Unique file name
+    const fileName = `${venueId}-logo.${fileExt}`;
     const filePath = `${fileName}`;
 
-    // Step 2: Delete the existing file (if it exists)
     const { error: deleteError } = await supabase.storage
       .from('venue-logos')
       .remove([filePath]);
@@ -101,7 +98,6 @@ const SettingsPage = () => {
       return;
     }
 
-    // Step 3: Upload the new file
     const { error: uploadError } = await supabase.storage
       .from('venue-logos')
       .upload(filePath, file);
@@ -112,12 +108,10 @@ const SettingsPage = () => {
       return;
     }
 
-    // Step 4: Get the public URL of the uploaded logo
     const { data: { publicUrl } } = supabase.storage
       .from('venue-logos')
       .getPublicUrl(filePath);
 
-    // Step 5: Update the `logo` column in the `venues` table
     const { error: updateError } = await supabase
       .from('venues')
       .update({ logo: publicUrl })
@@ -126,7 +120,7 @@ const SettingsPage = () => {
     if (updateError) {
       console.error('Error updating logo:', updateError);
     } else {
-      setLogo(publicUrl); // Update the logo in the state
+      setLogo(publicUrl);
     }
 
     setLoading(false);
@@ -142,41 +136,22 @@ const SettingsPage = () => {
     setMessage('');
 
     try {
-      // Update profile
-      const profileUpdates = {
+      const updates = {
         name,
         email,
         first_name: firstName,
         last_name: lastName,
-      };
-      await supabase
-        .from('venues')
-        .update(profileUpdates)
-        .eq('id', venueId);
-
-      // Update colors
-      const colorUpdates = {
         primary_color: primaryColor,
         secondary_color: secondaryColor,
-      };
-      await supabase
-        .from('venues')
-        .update(colorUpdates)
-        .eq('id', venueId);
-
-      // Update venue settings
-      const venueUpdates = {
         table_count: tableCount,
         address,
+        tripadvisor_link: tripadvisorLink,
+        google_review_link: googleReviewLink,
       };
-      await supabase
-        .from('venues')
-        .update(venueUpdates)
-        .eq('id', venueId);
+
+      await supabase.from('venues').update(updates).eq('id', venueId);
 
       setMessage('Settings updated successfully!');
-
-      // Lock all sections after saving
       setIsAccountLocked(true);
       setIsVenueLocked(true);
       setIsBrandingLocked(true);
@@ -193,7 +168,6 @@ const SettingsPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
-        {/* Account Settings */}
         <AccountSettings
           name={name}
           email={email}
@@ -207,13 +181,11 @@ const SettingsPage = () => {
           onLockToggle={() => setIsAccountLocked(!isAccountLocked)}
         />
 
-        {/* Subscription Status */}
         <SubscriptionStatus
           isPaid={isPaid}
           onUpgrade={() => alert('Redirect to subscription upgrade page.')}
         />
 
-        {/* Venue Settings */}
         <VenueSettings
           name={name}
           tableCount={tableCount}
@@ -226,7 +198,32 @@ const SettingsPage = () => {
           onLockToggle={() => setIsVenueLocked(!isVenueLocked)}
         />
 
-        {/* Branding Settings */}
+        <div className="bg-white shadow-sm rounded-lg p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Review Links</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tripadvisor Link</label>
+              <input
+                type="url"
+                value={tripadvisorLink}
+                onChange={(e) => setTripadvisorLink(e.target.value)}
+                placeholder="https://www.tripadvisor.com/yourpage"
+                className="w-full border border-gray-300 rounded-md px-4 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Google Review Link</label>
+              <input
+                type="url"
+                value={googleReviewLink}
+                onChange={(e) => setGoogleReviewLink(e.target.value)}
+                placeholder="https://g.page/yourbusiness"
+                className="w-full border border-gray-300 rounded-md px-4 py-2"
+              />
+            </div>
+          </div>
+        </div>
+
         <BrandingSettings
           logo={logo}
           onLogoUpload={handleLogoUpload}
@@ -238,7 +235,6 @@ const SettingsPage = () => {
           onLockToggle={() => setIsBrandingLocked(!isBrandingLocked)}
         />
 
-        {/* Save Button */}
         <div className="mt-8">
           <button
             onClick={saveAllSettings}
