@@ -107,6 +107,11 @@ const DashboardFrame = ({ children }) => {
               </NavLink>
             </li>
             <li>
+              <NavLink to="/dashboard/heatmap" icon={BarChart}>
+                Heatmap
+              </NavLink>
+            </li>
+            <li>
               <NavLink to="/dashboard/templates" icon={BarChart}>
                 QR Templates
               </NavLink>
