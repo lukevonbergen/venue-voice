@@ -4,7 +4,6 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -32,29 +31,24 @@ const Navbar = () => {
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex lg:items-center lg:space-x-6 relative">
-            {/* Features Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="text-sm font-semibold text-gray-700 hover:text-gray-900 flex items-center"
-              >
+            {/* Features Dropdown on Hover */}
+            <div className="relative group">
+              <div className="text-sm font-semibold text-gray-700 hover:text-gray-900 flex items-center cursor-pointer">
                 Features <ChevronDown className="ml-1 h-4 w-4" />
-              </button>
-              {isDropdownOpen && (
-                <div className="absolute top-full mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                  <div className="py-1">
-                    {featureLinks.map((link) => (
-                      <Link
-                        key={link.name}
-                        to={link.path}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </div>
+              </div>
+              <div className="absolute top-full mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200">
+                <div className="py-1">
+                  {featureLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      to={link.path}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
 
             {navLinks.map((link) =>
