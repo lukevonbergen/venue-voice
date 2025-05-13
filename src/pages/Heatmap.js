@@ -46,6 +46,30 @@ const Heatmap = () => {
     fetchVenueAndData();
   }, []);
 
+  useEffect(() => {
+    if (!venueId) return;
+
+    const feedbackSub = supabase
+      .channel('feedback-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'feedback',
+          filter: `venue_id=eq.${venueId}`
+        },
+        () => {
+          fetchLatestFeedback(venueId);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(feedbackSub);
+    };
+  }, [venueId]);
+
   const fetchTablePositions = async (venueId) => {
     const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
     setPositions(data || []);
@@ -58,15 +82,7 @@ const Heatmap = () => {
       .eq('venue_id', venueId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('❌ Error fetching feedback:', error);
-      return;
-    }
-
-    if (!data || !Array.isArray(data)) {
-      console.error('❌ Feedback returned no iterable data:', data);
-      return;
-    }
+    if (error) return console.error('❌ Error fetching feedback:', error);
 
     const ratingMap = {}, sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
     for (const entry of data) {
