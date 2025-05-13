@@ -50,19 +50,40 @@ const Heatmap = () => {
   const [newShape, setNewShape] = useState('square');
   const [newTableNumber, setNewTableNumber] = useState('');
 
-  useEffect(() => {
-    const fetchVenueAndData = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-      const { data: venueData } = await supabase.from('venues').select('id').eq('email', userData.user.email).single();
-      if (!venueData) return;
-      const venueId = venueData.id;
-      setVenueId(venueId);
-      await fetchTablePositions(venueId);
-      await fetchLatestFeedback(venueId);
-    };
-    fetchVenueAndData();
-  }, []);
+useEffect(() => {
+  const fetchVenueAndData = async () => {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    console.log('👤 Supabase User:', userData, userError);
+
+    if (!userData?.user) {
+      console.warn('⚠️ No user found');
+      return;
+    }
+
+    const { data: venueData, error: venueError } = await supabase
+      .from('venues')
+      .select('id')
+      .eq('email', userData.user.email)
+      .single();
+
+    console.log('🏢 Venue lookup:', venueData, venueError);
+
+    if (!venueData) {
+      console.warn('⚠️ No venue found for user email:', userData.user.email);
+      return;
+    }
+
+    const venueId = venueData.id;
+    setVenueId(venueId);
+
+    await fetchTablePositions(venueId);
+    await fetchLatestFeedback(venueId);
+    setLoading(false); // Ensure this is set here
+  };
+
+  fetchVenueAndData();
+}, []);
+
 
   const fetchTablePositions = async (venueId) => {
     const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
