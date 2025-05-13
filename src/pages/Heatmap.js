@@ -16,6 +16,7 @@ const Heatmap = () => {
   const [latestRatings, setLatestRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
@@ -138,18 +139,28 @@ const Heatmap = () => {
           <h1 className="text-2xl font-bold text-gray-900">Live Feedback Heatmap</h1>
           <div className="space-x-2">
             <button
-              onClick={addTable}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              onClick={() => setEditMode((prev) => !prev)}
+              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
             >
-              + Add Table
+              {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
             </button>
-            <button
-              onClick={saveTables}
-              disabled={saving}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              {saving ? 'Saving...' : 'Save Layout'}
-            </button>
+            {editMode && (
+              <>
+                <button
+                  onClick={addTable}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  + Add Table
+                </button>
+                <button
+                  onClick={saveTables}
+                  disabled={saving}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  {saving ? 'Saving...' : 'Save Layout'}
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -157,25 +168,41 @@ const Heatmap = () => {
           id="layout-area"
           className="relative w-full h-[600px] bg-white border rounded-lg shadow-sm"
         >
-          {positions.map((table) => (
-            <Draggable
-              key={table.id}
-              defaultPosition={{
-                x: `${(table.x_percent / 100) * 800}`,
-                y: `${(table.y_percent / 100) * 600}`,
-              }}
-              bounds="parent"
-              onStop={(e, data) => handleDragStop(e, data, table)}
-            >
+          {positions.map((table) => {
+            const position = {
+              x: (table.x_percent / 100) * 800,
+              y: (table.y_percent / 100) * 600,
+            };
+            return editMode ? (
+              <Draggable
+                key={table.id}
+                defaultPosition={position}
+                bounds="parent"
+                onStop={(e, data) => handleDragStop(e, data, table)}
+              >
+                <div
+                  className="absolute w-12 h-12 flex items-center justify-center rounded-full shadow-md cursor-pointer text-white font-bold bg-blue-500"
+                  title={`Table ${table.table_number}`}
+                >
+                  {table.table_number}
+                </div>
+              </Draggable>
+            ) : (
               <div
-                className="absolute w-12 h-12 flex items-center justify-center rounded-full shadow-md cursor-pointer text-white font-bold"
-                style={{ backgroundColor: getColor(latestRatings[table.table_number]) }}
+                key={table.id}
+                className="absolute w-12 h-12 flex items-center justify-center rounded-full shadow-md text-white font-bold"
+                style={{
+                  top: `${table.y_percent}%`,
+                  left: `${table.x_percent}%`,
+                  transform: 'translate(-50%, -50%)',
+                  backgroundColor: getColor(latestRatings[table.table_number]),
+                }}
                 title={`Table ${table.table_number} — Rating: ${latestRatings[table.table_number] ?? 'N/A'}`}
               >
                 {table.table_number}
               </div>
-            </Draggable>
-          ))}
+            );
+          })}
         </div>
       </div>
     </DashboardFrame>
