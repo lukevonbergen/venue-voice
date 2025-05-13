@@ -220,7 +220,7 @@ const Heatmap = () => {
             const bg = getColor(latestRatings[table_number], unresolvedTables[table_number]);
             const pulse = unresolvedTables[table_number];
             const shapeClass = shape === 'circle' ? 'rounded-full w-14 h-14' : shape === 'long' ? 'w-24 h-10' : 'w-14 h-14';
-
+        
             const content = (
               <div
                 onClick={() => {
@@ -234,7 +234,7 @@ const Heatmap = () => {
                 {table_number}
               </div>
             );
-
+        
             if (editMode) {
               const { x, y } = convertPercentToPx(x_percent, y_percent);
               return (
@@ -249,7 +249,7 @@ const Heatmap = () => {
               return (
                 <div
                   key={id}
-                  style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%`, transform: 'translate(-50%, -50%)' }}
+                  style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%` }} // Removed transform
                 >
                   {content}
                 </div>
