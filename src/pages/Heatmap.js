@@ -1,4 +1,4 @@
-// Enhanced Heatmap.js with merge detection, delete persistence, and visual merge indicators
+// Enhanced Heatmap.js with shape selection, unique table numbers, and merge detection
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -15,18 +15,16 @@ const getColor = (rating, isUnresolved) => {
 
 const areClose = (a, b) => {
   const distance = Math.sqrt((a.x_percent - b.x_percent) ** 2 + (a.y_percent - b.y_percent) ** 2);
-  return distance < 5; // arbitrary proximity threshold
+  return distance < 5;
 };
 
 const groupTables = (positions) => {
   const groups = [];
   const used = new Set();
-
   for (let i = 0; i < positions.length; i++) {
     if (used.has(i)) continue;
     const group = [positions[i]];
     used.add(i);
-
     for (let j = i + 1; j < positions.length; j++) {
       if (!used.has(j) && areClose(positions[i], positions[j])) {
         group.push(positions[j]);
@@ -49,49 +47,31 @@ const Heatmap = () => {
   const [editMode, setEditMode] = useState(false);
   const [selectedTable, setSelectedTable] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [newShape, setNewShape] = useState('square');
+  const [newTableNumber, setNewTableNumber] = useState('');
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
-
-      const { data: venueData } = await supabase
-        .from('venues')
-        .select('id')
-        .eq('email', userData.user.email)
-        .single();
-
+      const { data: venueData } = await supabase.from('venues').select('id').eq('email', userData.user.email).single();
       if (!venueData) return;
       const venueId = venueData.id;
       setVenueId(venueId);
-
       await fetchTablePositions(venueId);
       await fetchLatestFeedback(venueId);
     };
-
     fetchVenueAndData();
   }, []);
 
   const fetchTablePositions = async (venueId) => {
-    const { data } = await supabase
-      .from('table_positions')
-      .select('*')
-      .eq('venue_id', venueId);
+    const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
     setPositions(data || []);
   };
 
   const fetchLatestFeedback = async (venueId) => {
-    const { data } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId)
-      .order('created_at', { ascending: false });
-
-    const ratingMap = {};
-    const sessionMap = {};
-    const unresolvedMap = {};
-    const latestSessionPerTable = {};
-
+    const { data } = await supabase.from('feedback').select('*').eq('venue_id', venueId).order('created_at', { ascending: false });
+    const ratingMap = {}, sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
     for (const entry of data) {
       const table = entry.table_number;
       if (!table) continue;
@@ -102,16 +82,14 @@ const Heatmap = () => {
         sessionMap[table].push(entry);
       }
     }
-
     for (const table in sessionMap) {
       const entries = sessionMap[table];
-      const unresolved = entries.some((e) => !e.is_actioned && e.rating <= 2);
+      const unresolved = entries.some(e => !e.is_actioned && e.rating <= 2);
       const ratings = entries.map(e => e.rating).filter(Boolean);
       const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
       ratingMap[table] = avg ? parseFloat(avg.toFixed(1)) : null;
       unresolvedMap[table] = unresolved;
     }
-
     setLatestRatings(ratingMap);
     setUnresolvedTables(unresolvedMap);
     setLatestSessions(sessionMap);
@@ -122,29 +100,29 @@ const Heatmap = () => {
     const { width, height } = container.getBoundingClientRect();
     const xPercent = (data.x / width) * 100;
     const yPercent = (data.y / height) * 100;
-
-    setPositions((prev) =>
-      prev.map((t) =>
-        t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t
-      )
-    );
+    setPositions((prev) => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
   };
 
   const addTable = () => {
-    const nextNumber = Math.max(0, ...positions.map(p => parseInt(p.table_number) || 0)) + 1;
+    if (!newTableNumber || positions.some(p => p.table_number === newTableNumber)) {
+      alert('Please enter a unique table number.');
+      return;
+    }
     const id = `temp-${Date.now()}`;
     setPositions(prev => [...prev, {
       id,
       venue_id: venueId,
-      table_number: nextNumber,
+      table_number: newTableNumber,
       x_percent: 10,
       y_percent: 10,
+      shape: newShape
     }]);
+    setNewTableNumber('');
   };
 
   const removeTable = (id) => {
-    setPositions((prev) => prev.filter((t) => t.id !== id));
-    supabase.from('table_positions').delete().eq('id', id); // persist delete
+    setPositions(prev => prev.filter(t => t.id !== id));
+    supabase.from('table_positions').delete().eq('id', id);
   };
 
   const saveTables = async () => {
@@ -159,10 +137,7 @@ const Heatmap = () => {
   };
 
   const handleTableClick = (tableNumber) => {
-    setSelectedTable({
-      number: tableNumber,
-      entries: latestSessions[tableNumber] || [],
-    });
+    setSelectedTable({ number: tableNumber, entries: latestSessions[tableNumber] || [] });
     setModalOpen(true);
   };
 
@@ -184,14 +159,17 @@ const Heatmap = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Live Feedback Heatmap</h1>
           <div className="space-x-2">
-            <button
-              onClick={() => setEditMode(!editMode)}
-              className="bg-yellow-500 text-white px-4 py-2 rounded"
-            >
+            <button onClick={() => setEditMode(!editMode)} className="bg-yellow-500 text-white px-4 py-2 rounded">
               {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
             </button>
             {editMode && (
               <>
+                <input type="text" placeholder="Table #" value={newTableNumber} onChange={(e) => setNewTableNumber(e.target.value)} className="px-2 py-1 border rounded" />
+                <select value={newShape} onChange={(e) => setNewShape(e.target.value)} className="px-2 py-1 border rounded">
+                  <option value="square">Square</option>
+                  <option value="circle">Circle</option>
+                  <option value="long">Long</option>
+                </select>
                 <button onClick={addTable} className="bg-green-600 text-white px-4 py-2 rounded">+ Add Table</button>
                 <button onClick={saveTables} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded">
                   {saving ? 'Saving...' : 'Save Layout'}
@@ -209,11 +187,13 @@ const Heatmap = () => {
             const rating = group.map(g => latestRatings[g.table_number]).filter(Boolean);
             const pulse = group.some(g => unresolvedTables[g.table_number]);
             const bg = getColor(rating[0], pulse);
+            const shape = group[0].shape || 'square';
+            const shapeClass = shape === 'circle' ? 'rounded-full w-14 h-14' : shape === 'long' ? 'w-24 h-10' : 'w-14 h-14';
 
             const content = (
               <div
                 onClick={() => !editMode && handleTableClick(group[0].table_number)}
-                className={`w-16 h-14 flex items-center justify-center text-white font-bold rounded shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
+                className={`${shapeClass} flex items-center justify-center text-white font-bold shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
                 style={{ backgroundColor: bg }}
               >
                 {tableNumbers}
@@ -250,16 +230,11 @@ const Heatmap = () => {
             {selectedTable?.entries.map((entry, i) => (
               <div key={i} className="text-sm border-b pb-2">
                 <div><strong>Sentiment:</strong> {entry.sentiment || 'N/A'} (Rating: {entry.rating ?? 'N/A'})</div>
-                {entry.additional_feedback && (
-                  <div><strong>Note:</strong> {entry.additional_feedback}</div>
-                )}
+                {entry.additional_feedback && (<div><strong>Note:</strong> {entry.additional_feedback}</div>)}
               </div>
             ))}
           </div>
-          <button
-            onClick={markAsResolved}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
+          <button onClick={markAsResolved} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Mark as Resolved
           </button>
         </Modal>
