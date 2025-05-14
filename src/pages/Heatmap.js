@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
-import Draggable from 'react-draggable';
-import Modal from 'react-modal';
 import PageContainer from '../components/PageContainer';
-import { v4 as uuidv4 } from 'uuid';
 
-const getColor = (isUnresolved) => {
-  return isUnresolved ? 'red' : 'gray';
-};
+import TableNode from '../components/heatmap/TableNode';
+import TableModal from '../components/heatmap/TableModal';
+import TableEditorPanel from '../components/heatmap/TableEditorPanel';
+
+import { v4 as uuidv4 } from 'uuid';
 
 const Heatmap = () => {
   const [venueId, setVenueId] = useState(null);
@@ -23,18 +22,24 @@ const Heatmap = () => {
   const [newShape, setNewShape] = useState('square');
   const [newTableNumber, setNewTableNumber] = useState('');
   const [confirmClear, setConfirmClear] = useState(false);
+  const [tableLimit, setTableLimit] = useState(null);
 
   useEffect(() => {
     const fetchVenueAndData = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) return;
+
       const { data: venueData } = await supabase
         .from('venues')
-        .select('id')
+        .select('id, table_count')
         .eq('email', userData.user.email)
         .single();
+
       if (!venueData) return;
+
       setVenueId(venueData.id);
+      setTableLimit(venueData.table_count);
+
       await loadQuestionsMap(venueData.id);
       await fetchTablePositions(venueData.id);
       await fetchLatestFeedback(venueData.id);
@@ -55,8 +60,17 @@ const Heatmap = () => {
   };
 
   const fetchTablePositions = async (venueId) => {
-    const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
-    setPositions(data || []);
+    const { data } = await supabase
+      .from('table_positions')
+      .select('*')
+      .eq('venue_id', venueId);
+
+    const enriched = (data || []).map(t => ({
+      ...t,
+      x_px: (t.x_percent / 100) * 800,
+      y_px: (t.y_percent / 100) * 600
+    }));
+    setPositions(enriched);
   };
 
   const fetchLatestFeedback = async (venueId) => {
@@ -94,11 +108,17 @@ const Heatmap = () => {
   };
 
   const handleDragStop = (e, data, table) => {
-    const container = document.getElementById('layout-area');
-    const { width, height } = container.getBoundingClientRect();
-    const xPercent = (data.x / width) * 100;
-    const yPercent = (data.y / height) * 100;
-    setPositions(prev => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
+    setPositions(prev =>
+      prev.map(t =>
+        t.id === table.id
+          ? {
+              ...t,
+              x_px: data.x,
+              y_px: data.y
+            }
+          : t
+      )
+    );
   };
 
   const addTable = () => {
@@ -107,15 +127,24 @@ const Heatmap = () => {
       alert('Table number must be unique.');
       return;
     }
+    if (positions.length >= tableLimit) {
+      alert('You’ve reached the maximum number of tables allowed.');
+      return;
+    }
     const id = `temp-${Date.now()}`;
-    setPositions(prev => [...prev, {
-      id,
-      venue_id: venueId,
-      table_number: trimmed,
-      x_percent: 10,
-      y_percent: 10,
-      shape: newShape
-    }]);
+    setPositions(prev => [
+      ...prev,
+      {
+        id,
+        venue_id: venueId,
+        table_number: trimmed,
+        x_px: 50,
+        y_px: 50,
+        x_percent: 10,
+        y_percent: 10,
+        shape: newShape
+      }
+    ]);
     setNewTableNumber('');
   };
 
@@ -141,15 +170,18 @@ const Heatmap = () => {
 
   const saveTables = async () => {
     setSaving(true);
-    const clean = positions.filter(p => p.table_number && venueId);
-    const payload = clean.map(t => ({
-      id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
-      venue_id: venueId,
-      table_number: t.table_number,
-      x_percent: t.x_percent,
-      y_percent: t.y_percent,
-      shape: t.shape
-    }));
+    const payload = positions.map(t => {
+      const x_percent = (t.x_px / 800) * 100;
+      const y_percent = (t.y_px / 600) * 100;
+      return {
+        id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
+        venue_id: venueId,
+        table_number: t.table_number,
+        x_percent,
+        y_percent,
+        shape: t.shape
+      };
+    });
 
     const { error } = await supabase.from('table_positions').upsert(payload);
     if (!error) {
@@ -163,7 +195,10 @@ const Heatmap = () => {
   };
 
   const handleTableClick = (tableNumber) => {
-    setSelectedTable({ number: tableNumber, entries: latestSessions[tableNumber] || [] });
+    setSelectedTable({
+      number: tableNumber,
+      entries: latestSessions[tableNumber] || []
+    });
     setModalOpen(true);
   };
 
@@ -179,101 +214,56 @@ const Heatmap = () => {
 
   return (
     <PageContainer>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Live Feedback Heatmap</h1>
-          <div className="space-x-2">
-            <button onClick={() => setEditMode(!editMode)} className="bg-yellow-500 text-white px-4 py-2 rounded">
-              {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
-            </button>
-            {editMode && (
-              <>
-                <input type="text" placeholder="Table #" value={newTableNumber} onChange={(e) => setNewTableNumber(e.target.value)} className="px-2 py-1 border rounded" />
-                <select value={newShape} onChange={(e) => setNewShape(e.target.value)} className="px-2 py-1 border rounded">
-                  <option value="square">Square</option>
-                  <option value="circle">Circle</option>
-                  <option value="long">Long</option>
-                </select>
-                <button onClick={addTable} className="bg-green-600 text-white px-4 py-2 rounded">+ Add Table</button>
-                <button onClick={saveTables} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded">
-                  {saving ? 'Saving...' : 'Save Layout'}
-                </button>
-                <button onClick={() => setConfirmClear(true)} className="bg-red-600 text-white px-4 py-2 rounded">Clear All</button>
-              </>
-            )}
-          </div>
+      <TableEditorPanel
+        editMode={editMode}
+        newTableNumber={newTableNumber}
+        setNewTableNumber={setNewTableNumber}
+        newShape={newShape}
+        setNewShape={setNewShape}
+        onAddTable={addTable}
+        onSave={saveTables}
+        saving={saving}
+        onClear={() => setConfirmClear(true)}
+        onToggleEdit={() => setEditMode(!editMode)}
+      />
+
+      <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
+        {positions.map((table) => (
+          <TableNode
+            key={table.id}
+            table={table}
+            editMode={editMode}
+            unresolved={unresolvedTables[table.table_number]}
+            onDragStop={handleDragStop}
+            onRemove={removeTable}
+            onClick={handleTableClick}
+          />
+        ))}
+      </div>
+
+      <TableModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        selectedTable={selectedTable}
+        questionsMap={questionsMap}
+        onResolve={markAsResolved}
+      />
+
+      {/* Clear confirmation */}
+      <Modal
+        isOpen={confirmClear}
+        onRequestClose={() => setConfirmClear(false)}
+        ariaHideApp={false}
+        className="bg-white p-6 rounded-lg max-w-sm mx-auto shadow-xl border"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      >
+        <h2 className="text-lg font-bold mb-4">Clear All Tables?</h2>
+        <p className="mb-4 text-gray-600">This will permanently remove all tables from your layout.</p>
+        <div className="flex justify-end gap-4">
+          <button onClick={() => setConfirmClear(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded">Cancel</button>
+          <button onClick={clearAllTables} className="bg-red-600 text-white px-4 py-2 rounded">Confirm</button>
         </div>
-
-        <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
-          {positions.map((table) => {
-            const { x_percent, y_percent, table_number, id, shape } = table;
-            const bg = getColor(unresolvedTables[table_number]);
-            const pulse = unresolvedTables[table_number];
-            const shapeClass = shape === 'circle' ? 'rounded-full w-14 h-14' : shape === 'long' ? 'w-24 h-10' : 'w-14 h-14';
-
-            const content = (
-              <div
-                onClick={() => !editMode && handleTableClick(table_number)}
-                className={`${shapeClass} flex items-center justify-center text-white font-bold shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
-                style={{ backgroundColor: bg }}
-              >
-                {table_number}
-              </div>
-            );
-
-            return editMode ? (
-              <Draggable key={id} defaultPosition={{ x: (x_percent / 100) * 800, y: (y_percent / 100) * 600 }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, table)}>
-                <div className="absolute">
-                  {content}
-                  <button onClick={() => removeTable(id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
-                </div>
-              </Draggable>
-            ) : (
-              <div
-                key={id}
-                style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%`, transform: 'translate(-50%, -50%)' }}
-              >
-                {content}
-              </div>
-            );
-          })}
-        </div>
-
-        <Modal
-          isOpen={modalOpen}
-          onRequestClose={() => setModalOpen(false)}
-          ariaHideApp={false}
-          className="bg-white p-6 rounded-lg max-w-md mx-auto mt-20 shadow-xl border"
-          overlayClassName="fixed inset-0 bg-transparent flex items-center justify-center"
-        >
-          <h2 className="text-xl font-bold mb-4">Table {selectedTable?.number} Feedback</h2>
-          <div className="space-y-3 mb-4">
-            {selectedTable?.entries.map((entry, i) => (
-              <div key={i} className="text-sm border-b pb-2">
-                <div><strong>Question:</strong> {questionsMap[entry.question_id] || 'N/A'}</div>
-                <div><strong>Sentiment:</strong> {entry.sentiment || 'N/A'} (Rating: {entry.rating ?? 'N/A'})</div>
-                {entry.additional_feedback && (<div><strong>Note:</strong> {entry.additional_feedback}</div>)}
-              </div>
-            ))}
-          </div>
-          <button onClick={markAsResolved} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Mark as Resolved
-          </button>
-        </Modal>
-
-        <Modal
-          isOpen={confirmClear}
-          onRequestClose={() => setConfirmClear(false)}
-          ariaHideApp={false}
-          className="bg-white p-6 rounded-lg max-w-sm mx-auto shadow-xl border"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-        >
-          <h2 className="text-lg font-bold mb-4">Clear All Tables?</h2>
-          <p className="mb-4 text-gray-600">This will permanently remove all tables from your layout.</p>
-          <div className="flex justify-end gap-4">
-            <button onClick={() => setConfirmClear(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded">Cancel</button>
-            <button onClick={clearAllTables} className="bg-red-600 text-white px-4 py-2 rounded">Confirm</button>
-          </div>
-        </Modal>
+      </Modal>
     </PageContainer>
   );
 };
