@@ -35,7 +35,7 @@ const DashboardFrame = ({ children }) => {
     <div className="min-h-screen bg-gray-100">
       {/* Top Bar */}
       <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
             <img
               src="https://www.getchatters.com/img/Logo.svg"
