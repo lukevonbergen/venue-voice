@@ -34,7 +34,7 @@ import ResetPassword from './pages/ResetPassword';
 import './index.css';
 
 import { VenueProvider } from './context/VenueContext';
-import DashboardFrame from './components/DashboardFrame';
+import DashboardFrame from './pages/DashboardFrame';
 
 function App() {
   useEffect(() => {
