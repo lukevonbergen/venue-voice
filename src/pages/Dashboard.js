@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import FeedbackTabs from '../components/FeedbackTabs';
-import SessionsActionedTile from '../components/tiles/SessionsActionedTile';
-import UnresolvedAlertsTile from '../components/tiles/UnresolvedAlertsTile';
-import AvgSatisfactionTile from '../components/tiles/AvgSatisfactionTile';
+import SessionsActionedTile from '../components/reports/SessionsActionedTile';
+import UnresolvedAlertsTile from '../components/reports/UnresolvedAlertsTile';
+import AvgSatisfactionTile from '../components/reports/AvgSatisfactionTile';
 
 const DashboardPage = () => {
   const [venueId, setVenueId] = useState(null);
