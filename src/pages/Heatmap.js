@@ -1,3 +1,4 @@
+// Fully working Heatmap.js with complete UI and feedback fetch fix
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -5,18 +6,13 @@ import Draggable from 'react-draggable';
 import Modal from 'react-modal';
 import { v4 as uuidv4 } from 'uuid';
 
-const getColor = (rating, isUnresolved) => {
-  if (isUnresolved) return 'red';
-  if (rating === null || rating === undefined) return 'gray';
-  if (rating <= 2) return 'red';
-  if (rating === 3) return 'orange';
-  return 'green';
+const getColor = (isUnresolved) => {
+  return isUnresolved ? 'red' : 'gray';
 };
 
 const Heatmap = () => {
   const [venueId, setVenueId] = useState(null);
   const [positions, setPositions] = useState([]);
-  const [latestRatings, setLatestRatings] = useState({});
   const [latestSessions, setLatestSessions] = useState({});
   const [unresolvedTables, setUnresolvedTables] = useState({});
   const [loading, setLoading] = useState(true);
@@ -78,11 +74,19 @@ const Heatmap = () => {
   const fetchLatestFeedback = async (venueId) => {
     const { data, error } = await supabase
       .from('feedback')
-      .select('id, venue_id, question_id, sentiment, rating, additional_feedback, table_number, is_actioned, session_id, created_at')
+      .select('id, venue_id, question_id, questions(text), sentiment, rating, additional_feedback, table_number, is_actioned, session_id, created_at')
       .eq('venue_id', venueId)
       .order('created_at', { ascending: false });
 
-    if (error) return console.error('❌ Error fetching feedback:', error);
+    if (error) {
+      console.error('❌ Error fetching feedback:', error);
+      return;
+    }
+
+    if (!data || !Array.isArray(data)) {
+      console.error('❌ Feedback returned no iterable data:', data);
+      return;
+    }
 
     const ratingMap = {}, sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
     for (const entry of data) {
@@ -99,13 +103,9 @@ const Heatmap = () => {
     for (const table in sessionMap) {
       const entries = sessionMap[table];
       const unresolved = entries.some(e => !e.is_actioned && e.rating <= 2);
-      const ratings = entries.map(e => e.rating).filter(Boolean);
-      const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
-      ratingMap[table] = avg ? parseFloat(avg.toFixed(1)) : null;
       unresolvedMap[table] = unresolved;
     }
 
-    setLatestRatings(ratingMap);
     setUnresolvedTables(unresolvedMap);
     setLatestSessions(sessionMap);
   };
@@ -233,7 +233,7 @@ const Heatmap = () => {
         <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
           {positions.map((table) => {
             const { x_percent, y_percent, table_number, id, shape } = table;
-            const bg = getColor(latestRatings[table_number], unresolvedTables[table_number]);
+            const bg = getColor(unresolvedTables[table_number]);
             const pulse = unresolvedTables[table_number];
             const shapeClass = shape === 'circle' ? 'rounded-full w-14 h-14' : shape === 'long' ? 'w-24 h-10' : 'w-14 h-14';
         
@@ -279,12 +279,13 @@ const Heatmap = () => {
           onRequestClose={() => setModalOpen(false)}
           ariaHideApp={false}
           className="bg-white p-6 rounded-lg max-w-md mx-auto mt-20 shadow-xl border"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+          overlayClassName="fixed inset-0 bg-transparent flex items-center justify-center"
         >
           <h2 className="text-xl font-bold mb-4">Table {selectedTable?.number} Feedback</h2>
           <div className="space-y-3 mb-4">
             {selectedTable?.entries.map((entry, i) => (
               <div key={i} className="text-sm border-b pb-2">
+                <div><strong>Question:</strong> {entry.questions?.text || 'N/A'}</div>
                 <div><strong>Sentiment:</strong> {entry.sentiment || 'N/A'} (Rating: {entry.rating ?? 'N/A'})</div>
                 {entry.additional_feedback && (<div><strong>Note:</strong> {entry.additional_feedback}</div>)}
               </div>
