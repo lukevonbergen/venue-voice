@@ -4,6 +4,8 @@ import PageContainer from '../components/PageContainer';
 import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
 
+const GRID_SIZE = 20; // 👈 adjust here for tighter/looser snapping
+
 const Heatmap = () => {
   const layoutRef = useRef(null);
 
@@ -16,7 +18,6 @@ const Heatmap = () => {
   const [editMode, setEditMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Load venue + tables
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -55,6 +56,8 @@ const Heatmap = () => {
     load();
   }, []);
 
+  const snapToGrid = (value) => Math.round(value / GRID_SIZE) * GRID_SIZE;
+
   const addTable = () => {
     const number = newTableNumber.trim();
     if (!number) return;
@@ -73,8 +76,8 @@ const Heatmap = () => {
     const newTable = {
       id: `temp-${Date.now()}`,
       table_number: number,
-      x_px: width / 2 - 35,
-      y_px: height / 2 - 35,
+      x_px: snapToGrid(width / 2 - 35),
+      y_px: snapToGrid(height / 2 - 35),
       shape: 'square',
       venue_id: venueId
     };
@@ -92,10 +95,13 @@ const Heatmap = () => {
   };
 
   const handleDragStop = (e, data, tableId) => {
+    const snappedX = snapToGrid(data.x);
+    const snappedY = snapToGrid(data.y);
+
     setTables(prev =>
       prev.map(t =>
         t.id === tableId
-          ? { ...t, x_px: data.x, y_px: data.y }
+          ? { ...t, x_px: snappedX, y_px: snappedY }
           : t
       )
     );
