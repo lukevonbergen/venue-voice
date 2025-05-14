@@ -1,3 +1,4 @@
+// Fully working Heatmap.js using questionsMap like DashboardPage
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -14,6 +15,7 @@ const Heatmap = () => {
   const [positions, setPositions] = useState([]);
   const [latestSessions, setLatestSessions] = useState({});
   const [unresolvedTables, setUnresolvedTables] = useState({});
+  const [questionsMap, setQuestionsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -34,12 +36,24 @@ const Heatmap = () => {
         .single();
       if (!venueData) return;
       setVenueId(venueData.id);
+      await loadQuestionsMap(venueData.id);
       await fetchTablePositions(venueData.id);
       await fetchLatestFeedback(venueData.id);
       setLoading(false);
     };
     fetchVenueAndData();
   }, []);
+
+  const loadQuestionsMap = async (venueId) => {
+    const { data: questions } = await supabase
+      .from('questions')
+      .select('id, question')
+      .eq('venue_id', venueId);
+
+    const map = {};
+    questions?.forEach(q => { map[q.id] = q.question });
+    setQuestionsMap(map);
+  };
 
   const fetchTablePositions = async (venueId) => {
     const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
@@ -49,7 +63,7 @@ const Heatmap = () => {
   const fetchLatestFeedback = async (venueId) => {
     const { data, error } = await supabase
       .from('feedback')
-      .select('id, venue_id, question_id, sentiment, rating, additional_feedback, table_number, is_actioned, session_id, created_at, questions:question_id(text)')
+      .select('*')
       .eq('venue_id', venueId)
       .order('created_at', { ascending: false });
 
@@ -237,7 +251,7 @@ const Heatmap = () => {
           <div className="space-y-3 mb-4">
             {selectedTable?.entries.map((entry, i) => (
               <div key={i} className="text-sm border-b pb-2">
-                <div><strong>Question:</strong> {entry.questions?.text || 'N/A'}</div>
+                <div><strong>Question:</strong> {questionsMap[entry.question_id] || 'N/A'}</div>
                 <div><strong>Sentiment:</strong> {entry.sentiment || 'N/A'} (Rating: {entry.rating ?? 'N/A'})</div>
                 {entry.additional_feedback && (<div><strong>Note:</strong> {entry.additional_feedback}</div>)}
               </div>
