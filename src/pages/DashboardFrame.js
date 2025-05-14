@@ -1,35 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, MessageSquare, LogOut, BarChart, Settings, ChevronDown } from 'lucide-react';
 import supabase from '../utils/supabase';
+import { useVenue } from '../context/VenueContext';
 
 const DashboardFrame = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [venueName, setVenueName] = useState('');
-  const [venueId, setVenueId] = useState('');
+  const { venueName, venueId, loading } = useVenue();
+
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isFeedbackDropdownOpen, setIsFeedbackDropdownOpen] = useState(false);
-
-  const fetchVenue = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data, error } = await supabase
-        .from('venues')
-        .select('id, name')
-        .eq('email', user.email)
-        .single();
-
-      if (!error && data) {
-        setVenueName(data.name);
-        setVenueId(data.id);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchVenue();
-  }, [fetchVenue]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -114,6 +95,7 @@ const DashboardFrame = ({ children }) => {
         {children}
       </main>
 
+      {/* Logout Modal */}
       {isLogoutModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
