@@ -13,6 +13,7 @@ const Heatmap = () => {
   const [saving, setSaving] = useState(false);
   const [tableLimit, setTableLimit] = useState(null);
   const [deletedIds, setDeletedIds] = useState([]);
+  const [editMode, setEditMode] = useState(false);
 
   // Load venue + tables
   useEffect(() => {
@@ -121,6 +122,7 @@ const Heatmap = () => {
       console.error('Save error:', error);
     } else {
       setDeletedIds([]);
+      setEditMode(false); // Exit edit mode after save
     }
 
     setSaving(false);
@@ -128,9 +130,27 @@ const Heatmap = () => {
 
   return (
     <PageContainer>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Heatmap Editor</h1>
-        <div className="space-x-2">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Table Heatmap</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className={`px-4 py-2 rounded ${
+              editMode ? 'bg-yellow-600' : 'bg-gray-800'
+            } text-white`}
+          >
+            {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
+          </button>
+          {!editMode && (
+            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              Live Mode
+            </span>
+          )}
+        </div>
+      </div>
+
+      {editMode && (
+        <div className="flex items-center gap-2 mb-4">
           <input
             type="text"
             placeholder="Table #"
@@ -138,40 +158,67 @@ const Heatmap = () => {
             onChange={(e) => setNewTableNumber(e.target.value)}
             className="px-2 py-1 border rounded"
           />
-          <button onClick={addTable} className="bg-green-600 text-white px-4 py-2 rounded">+ Add Table</button>
-          <button onClick={saveLayout} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded">
+          <button
+            onClick={addTable}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            + Add Table
+          </button>
+          <button
+            onClick={saveLayout}
+            disabled={saving}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
             {saving ? 'Saving...' : 'Save Layout'}
           </button>
         </div>
-      </div>
+      )}
 
       <div
         ref={layoutRef}
         id="layout-area"
-        className="relative w-full h-[600px] bg-gray-100 border rounded"
+        className={`relative w-full h-[600px] border rounded transition-colors ${
+          editMode ? 'bg-gray-100' : 'bg-white'
+        }`}
       >
-        {tables.map((t) => (
-          <Draggable
-            key={t.id}
-            position={{ x: t.x_px, y: t.y_px }}
-            bounds="parent"
-            onStop={(e, data) => handleDragStop(e, data, t.id)}
-          >
+        {tables.map((t) => {
+          const node = (
             <div className="absolute">
               <div
                 className="w-14 h-14 bg-gray-700 text-white rounded flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer"
               >
                 {t.table_number}
               </div>
-              <button
-                onClick={() => removeTable(t.id)}
-                className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
-              >
-                ×
-              </button>
+              {editMode && (
+                <button
+                  onClick={() => removeTable(t.id)}
+                  className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
+                >
+                  ×
+                </button>
+              )}
             </div>
-          </Draggable>
-        ))}
+          );
+
+          return editMode ? (
+            <Draggable
+              key={t.id}
+              position={{ x: t.x_px, y: t.y_px }}
+              bounds="parent"
+              onStop={(e, data) => handleDragStop(e, data, t.id)}
+            >
+              {node}
+            </Draggable>
+          ) : (
+            <div
+              key={t.id}
+              className="absolute"
+              style={{ left: t.x_px, top: t.y_px }}
+            >
+              {node}
+            </div>
+          );
+        })}
       </div>
     </PageContainer>
   );
