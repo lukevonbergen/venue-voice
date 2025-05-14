@@ -1,299 +1,178 @@
 import React, { useEffect, useRef, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
-import Modal from 'react-modal';
-
-import TableNode from '../components/heatmap/TableNode';
-import TableModal from '../components/heatmap/TableModal';
-import TableEditorPanel from '../components/heatmap/TableEditorPanel';
-
+import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
 
 const Heatmap = () => {
   const layoutRef = useRef(null);
 
   const [venueId, setVenueId] = useState(null);
-  const [positions, setPositions] = useState([]);
-  const [deletedIds, setDeletedIds] = useState([]);
-  const [latestSessions, setLatestSessions] = useState({});
-  const [unresolvedTables, setUnresolvedTables] = useState({});
-  const [questionsMap, setQuestionsMap] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [selectedTable, setSelectedTable] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [newShape, setNewShape] = useState('square');
+  const [tables, setTables] = useState([]);
   const [newTableNumber, setNewTableNumber] = useState('');
-  const [confirmClear, setConfirmClear] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [tableLimit, setTableLimit] = useState(null);
+  const [deletedIds, setDeletedIds] = useState([]);
 
+  // Load venue + tables
   useEffect(() => {
-    const fetchVenueAndData = async () => {
+    const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData?.user) return;
+      const email = userData?.user?.email;
+      if (!email) return;
 
-      const { data: venueData } = await supabase
+      const { data: venue } = await supabase
         .from('venues')
         .select('id, table_count')
-        .eq('email', userData.user.email)
+        .eq('email', email)
         .single();
 
-      if (!venueData) return;
+      if (!venue) return;
+      setVenueId(venue.id);
+      setTableLimit(venue.table_count);
 
-      setVenueId(venueData.id);
-      setTableLimit(venueData.table_count);
+      const container = layoutRef.current;
+      if (!container) return;
 
-      await loadQuestionsMap(venueData.id);
-      await fetchTablePositions(venueData.id);
-      await fetchLatestFeedback(venueData.id);
-      setLoading(false);
+      const { width, height } = container.getBoundingClientRect();
+
+      const { data: tableData } = await supabase
+        .from('table_positions')
+        .select('*')
+        .eq('venue_id', venue.id);
+
+      const loaded = tableData.map(t => ({
+        ...t,
+        x_px: (t.x_percent / 100) * width,
+        y_px: (t.y_percent / 100) * height
+      }));
+
+      setTables(loaded);
     };
-    fetchVenueAndData();
+
+    load();
   }, []);
 
-  const loadQuestionsMap = async (venueId) => {
-    const { data: questions } = await supabase
-      .from('questions')
-      .select('id, question')
-      .eq('venue_id', venueId);
-
-    const map = {};
-    questions?.forEach(q => { map[q.id] = q.question });
-    setQuestionsMap(map);
-  };
-
-  const fetchTablePositions = async (venueId) => {
-    const { data } = await supabase
-      .from('table_positions')
-      .select('*')
-      .eq('venue_id', venueId);
-
-    const container = layoutRef.current;
-    if (!container) return;
-    const { width, height } = container.getBoundingClientRect();
-    if (width === 0 || height === 0) return;
-
-    const enriched = (data || []).map(t => ({
-      ...t,
-      x_px: (t.x_percent / 100) * width,
-      y_px: (t.y_percent / 100) * height
-    }));
-
-    setPositions(enriched);
-  };
-
-  const fetchLatestFeedback = async (venueId) => {
-    const { data, error } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('❌ Error fetching feedback:', error);
+  const addTable = () => {
+    const number = newTableNumber.trim();
+    if (!number) return;
+    if (tables.find(t => t.table_number === number)) {
+      alert('Table number must be unique.');
+      return;
+    }
+    if (tables.length >= tableLimit) {
+      alert('Max table limit reached.');
       return;
     }
 
-    const sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
-    for (const entry of data) {
-      const table = entry.table_number;
-      if (!table) continue;
-      if (!latestSessionPerTable[table]) {
-        latestSessionPerTable[table] = entry.session_id;
-        sessionMap[table] = [entry];
-      } else if (entry.session_id === latestSessionPerTable[table]) {
-        sessionMap[table].push(entry);
-      }
-    }
+    const container = layoutRef.current;
+    const { width, height } = container.getBoundingClientRect();
 
-    for (const table in sessionMap) {
-      const entries = sessionMap[table];
-      const unresolved = entries.some(e => !e.is_actioned && e.rating <= 2);
-      unresolvedMap[table] = unresolved;
-    }
+    const newTable = {
+      id: `temp-${Date.now()}`,
+      table_number: number,
+      x_px: width / 2 - 35,
+      y_px: height / 2 - 35,
+      shape: 'square',
+      venue_id: venueId
+    };
 
-    setUnresolvedTables(unresolvedMap);
-    setLatestSessions(sessionMap);
+    setTables(prev => [...prev, newTable]);
+    setNewTableNumber('');
   };
 
-  const handleDragStop = (e, data, table) => {
-    setPositions(prev =>
+  const removeTable = (id) => {
+    const isTemp = id.startsWith('temp-');
+    if (!isTemp) setDeletedIds(prev => [...prev, id]);
+    setTables(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleDragStop = (e, data, tableId) => {
+    setTables(prev =>
       prev.map(t =>
-        t.id === table.id
-          ? {
-              ...t,
-              x_px: data.x,
-              y_px: data.y
-            }
+        t.id === tableId
+          ? { ...t, x_px: data.x, y_px: data.y }
           : t
       )
     );
   };
 
-  const addTable = () => {
-    const trimmed = newTableNumber.trim();
-    if (!trimmed || positions.some(p => p.table_number === trimmed)) {
-      alert('Table number must be unique.');
-      return;
-    }
-    if (positions.length >= tableLimit) {
-      alert('You’ve reached the maximum number of tables allowed.');
-      return;
-    }
-
-    const container = layoutRef.current;
-    const { width, height } = container.getBoundingClientRect();
-
-    const id = `temp-${Date.now()}`;
-    setPositions(prev => [
-      ...prev,
-      {
-        id,
-        venue_id: venueId,
-        table_number: trimmed,
-        x_px: width / 2 - 35,
-        y_px: height / 2 - 35,
-        shape: newShape
-      }
-    ]);
-    setNewTableNumber('');
-  };
-
-  const removeTable = (id) => {
-    const toDelete = positions.find(p => p.id === id);
-    if (!toDelete) return;
-
-    if (!id.startsWith('temp-')) {
-      setDeletedIds(prev => [...prev, id]);
-    }
-
-    setPositions(prev => prev.filter(t => t.id !== id));
-  };
-
-  const clearAllTables = async () => {
-    if (!venueId) return;
-    const { data } = await supabase.from('table_positions').select('id').eq('venue_id', venueId);
-    if (data?.length) {
-      const ids = data.map(d => d.id);
-      await supabase.from('table_positions').delete().in('id', ids);
-    }
-    setPositions([]);
-    setDeletedIds([]);
-    setConfirmClear(false);
-  };
-
-  const saveTables = async () => {
+  const saveLayout = async () => {
+    if (!venueId || !layoutRef.current) return;
     setSaving(true);
 
-    const container = layoutRef.current;
-    if (!container) return;
-    const { width, height } = container.getBoundingClientRect();
+    const { width, height } = layoutRef.current.getBoundingClientRect();
 
-    const payload = positions
-      .filter(t => !deletedIds.includes(t.id))
-      .map(t => {
-        const x_percent = (t.x_px / width) * 100;
-        const y_percent = (t.y_px / height) * 100;
-        return {
-          id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
-          venue_id: venueId,
-          table_number: t.table_number,
-          x_percent,
-          y_percent,
-          shape: t.shape
-        };
-      });
+    const payload = tables.map(t => ({
+      id: t.id.startsWith('temp-') ? uuidv4() : t.id,
+      venue_id: t.venue_id,
+      table_number: t.table_number,
+      x_percent: (t.x_px / width) * 100,
+      y_percent: (t.y_px / height) * 100,
+      shape: t.shape
+    }));
 
     if (deletedIds.length) {
       await supabase.from('table_positions').delete().in('id', deletedIds);
     }
 
     const { error } = await supabase.from('table_positions').upsert(payload);
-    if (!error) {
-      await fetchLatestFeedback(venueId);
-      await fetchTablePositions(venueId);
-      setEditMode(false);
-      setDeletedIds([]);
+    if (error) {
+      console.error('Save error:', error);
     } else {
-      console.error('❌ Supabase save error:', error);
+      setDeletedIds([]);
     }
+
     setSaving(false);
   };
 
-  const handleTableClick = (tableNumber) => {
-    setSelectedTable({
-      number: tableNumber,
-      entries: latestSessions[tableNumber] || []
-    });
-    setModalOpen(true);
-  };
-
-  const markAsResolved = async () => {
-    const ids = selectedTable.entries.map(e => e.id);
-    if (!ids.length) return;
-    await supabase.from('feedback').update({ is_actioned: true }).in('id', ids);
-    await fetchLatestFeedback(venueId);
-    setModalOpen(false);
-  };
-
-  if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
-
   return (
     <PageContainer>
-      <TableEditorPanel
-        editMode={editMode}
-        newTableNumber={newTableNumber}
-        setNewTableNumber={setNewTableNumber}
-        newShape={newShape}
-        setNewShape={setNewShape}
-        onAddTable={addTable}
-        onSave={saveTables}
-        saving={saving}
-        onClear={() => setConfirmClear(true)}
-        onToggleEdit={() => setEditMode(!editMode)}
-      />
-
-      <div
-        id="layout-area"
-        ref={layoutRef}
-        className="relative w-full h-[600px] bg-white border rounded"
-      >
-        {positions.map((table) => (
-          <TableNode
-            key={table.id}
-            table={table}
-            editMode={editMode}
-            unresolved={unresolvedTables[table.table_number]}
-            onDragStop={handleDragStop}
-            onRemove={removeTable}
-            onClick={handleTableClick}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Heatmap Editor</h1>
+        <div className="space-x-2">
+          <input
+            type="text"
+            placeholder="Table #"
+            value={newTableNumber}
+            onChange={(e) => setNewTableNumber(e.target.value)}
+            className="px-2 py-1 border rounded"
           />
-        ))}
+          <button onClick={addTable} className="bg-green-600 text-white px-4 py-2 rounded">+ Add Table</button>
+          <button onClick={saveLayout} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded">
+            {saving ? 'Saving...' : 'Save Layout'}
+          </button>
+        </div>
       </div>
 
-      <TableModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        selectedTable={selectedTable}
-        questionsMap={questionsMap}
-        onResolve={markAsResolved}
-      />
-
-      <Modal
-        isOpen={confirmClear}
-        onRequestClose={() => setConfirmClear(false)}
-        ariaHideApp={false}
-        className="bg-white p-6 rounded-lg max-w-sm mx-auto shadow-xl border"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      <div
+        ref={layoutRef}
+        id="layout-area"
+        className="relative w-full h-[600px] bg-gray-100 border rounded"
       >
-        <h2 className="text-lg font-bold mb-4">Clear All Tables?</h2>
-        <p className="mb-4 text-gray-600">This will permanently remove all tables from your layout.</p>
-        <div className="flex justify-end gap-4">
-          <button onClick={() => setConfirmClear(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded">Cancel</button>
-          <button onClick={clearAllTables} className="bg-red-600 text-white px-4 py-2 rounded">Confirm</button>
-        </div>
-      </Modal>
+        {tables.map((t) => (
+          <Draggable
+            key={t.id}
+            position={{ x: t.x_px, y: t.y_px }}
+            bounds="parent"
+            onStop={(e, data) => handleDragStop(e, data, t.id)}
+          >
+            <div className="absolute">
+              <div
+                className="w-14 h-14 bg-gray-700 text-white rounded flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer"
+              >
+                {t.table_number}
+              </div>
+              <button
+                onClick={() => removeTable(t.id)}
+                className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
+              >
+                ×
+              </button>
+            </div>
+          </Draggable>
+        ))}
+      </div>
     </PageContainer>
   );
 };
