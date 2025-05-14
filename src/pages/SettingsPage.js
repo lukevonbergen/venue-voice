@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
 import AccountSettings from '../components/settings/AccountSettings';
 import VenueSettings from '../components/settings/VenueSettings';
 import BrandingSettings from '../components/settings/BrandingSettings';
@@ -164,7 +163,6 @@ const SettingsPage = () => {
   };
 
   return (
-    <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
@@ -246,7 +244,6 @@ const SettingsPage = () => {
           {message && <p className="text-sm text-red-500 mt-2">{message}</p>}
         </div>
       </div>
-    </DashboardFrame>
   );
 };
 

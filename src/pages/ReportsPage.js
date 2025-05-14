@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import {
@@ -113,7 +112,6 @@ const ReportsPage = () => {
   );
 
   return (
-    <DashboardFrame>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Reports Overview</h1>
 
@@ -155,7 +153,6 @@ const ReportsPage = () => {
 
         <Tile title="Avg. Customer Satisfaction (1–5)" value={averageRating} icon={BarChart3} color="indigo" />
       </div>
-    </DashboardFrame>
   );
 };
 

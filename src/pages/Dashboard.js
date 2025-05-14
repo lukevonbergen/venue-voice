@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
 import { Bell } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
@@ -67,8 +66,6 @@ const DashboardPage = () => {
 
   const groupFeedbackBySession = (rows) => {
     const grouped = {};
-    const flagged = [];
-    const actioned = [];
 
     for (const row of rows) {
       if (!grouped[row.session_id]) grouped[row.session_id] = [];
@@ -176,7 +173,7 @@ const DashboardPage = () => {
   const totalSessions = filteredSortedSessions(displayTab).length;
 
   return (
-    <DashboardFrame>
+    <>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h1 className="text-xl font-bold">Feedback Dashboard</h1>
@@ -247,9 +244,15 @@ const DashboardPage = () => {
       </div>
 
       {showModal && (
-        <FeedbackModal session={selectedSession} onClose={() => { setShowModal(false); setSelectedSession(null); }} />
+        <FeedbackModal
+          session={selectedSession}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedSession(null);
+          }}
+        />
       )}
-    </DashboardFrame>
+    </>
   );
 };
 

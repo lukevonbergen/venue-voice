@@ -1,7 +1,5 @@
-// Fully working Heatmap.js using questionsMap like DashboardPage
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
-import DashboardFrame from './DashboardFrame';
 import Draggable from 'react-draggable';
 import Modal from 'react-modal';
 import { v4 as uuidv4 } from 'uuid';
@@ -179,7 +177,6 @@ const Heatmap = () => {
   if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
 
   return (
-    <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Live Feedback Heatmap</h1>
@@ -277,7 +274,6 @@ const Heatmap = () => {
           </div>
         </Modal>
       </div>
-    </DashboardFrame>
   );
 };
 

@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardFrame from './DashboardFrame';
-import { Star, Trash2, CheckCircle, XCircle } from 'lucide-react'; // Import icons from lucide-react
+import { Star, Trash2, CheckCircle, XCircle } from 'lucide-react';
 
 const TablesPage = () => {
   const [feedback, setFeedback] = useState([]);

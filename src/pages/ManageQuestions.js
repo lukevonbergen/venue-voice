@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import supabase from '../utils/supabase';
-import DashboardFrame from './/DashboardFrame';
 import { DragDropContext } from 'react-beautiful-dnd';
 import SuggestedQuestions from '../components/SuggestedQuestions';
 import CurrentQuestions from '../components/CurrentQuestions';
@@ -306,7 +305,6 @@ const ManageQuestions = () => {
   const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
 
   return (
-    <DashboardFrame>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Manage Questions</h1>
@@ -363,7 +361,6 @@ const ManageQuestions = () => {
           onReplaceQuestion={handleReplaceQuestion}
         />
       </div>
-    </DashboardFrame>
   );
 };
 
