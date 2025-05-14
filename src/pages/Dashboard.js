@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import { Bell } from 'lucide-react';
+import PageContainer from '../components/PageContainer';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -174,9 +175,9 @@ const DashboardPage = () => {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <PageContainer>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h1 className="text-xl font-bold">Feedback Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
           <div className="flex gap-4 items-center">
             <select
               value={sortOrder}
@@ -241,7 +242,7 @@ const DashboardPage = () => {
             >Next</button>
           </div>
         )}
-      </div>
+      </PageContainer>
 
       {showModal && (
         <FeedbackModal
