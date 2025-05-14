@@ -17,7 +17,7 @@ const Heatmap = () => {
   const [deletedIds, setDeletedIds] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [unresolvedTables, setUnresolvedTables] = useState({});
+  const [feedbackMap, setFeedbackMap] = useState({});
 
   useEffect(() => {
     const load = async () => {
@@ -53,13 +53,13 @@ const Heatmap = () => {
 
       setTables(loaded);
 
-      await fetchUnresolvedFeedback(venue.id);
+      await fetchFeedback(venue.id);
     };
 
     load();
   }, []);
 
-  const fetchUnresolvedFeedback = async (venueId) => {
+  const fetchFeedback = async (venueId) => {
     const { data, error } = await supabase
       .from('feedback')
       .select('*')
@@ -73,13 +73,12 @@ const Heatmap = () => {
 
     const sessionMap = {};
     const latestSessionPerTable = {};
-    const unresolvedMap = {};
+    const averageRatings = {};
 
     for (const entry of data) {
       const table = entry.table_number;
       if (!table) continue;
 
-      // Group feedback by latest session per table
       if (!latestSessionPerTable[table]) {
         latestSessionPerTable[table] = entry.session_id;
         sessionMap[table] = [entry];
@@ -90,11 +89,19 @@ const Heatmap = () => {
 
     for (const table in sessionMap) {
       const entries = sessionMap[table];
-      const unresolved = entries.some(e => !e.is_actioned && e.rating <= 2);
-      unresolvedMap[table] = unresolved;
+      const validRatings = entries
+        .filter(e => e.rating !== null && e.is_actioned === false)
+        .map(e => e.rating);
+
+      const avg =
+        validRatings.length > 0
+          ? validRatings.reduce((a, b) => a + b, 0) / validRatings.length
+          : null;
+
+      averageRatings[table] = avg;
     }
 
-    setUnresolvedTables(unresolvedMap);
+    setFeedbackMap(averageRatings);
   };
 
   const snapToGrid = (value) => Math.round(value / GRID_SIZE) * GRID_SIZE;
@@ -188,6 +195,13 @@ const Heatmap = () => {
     setEditMode(!editMode);
   };
 
+  const getFeedbackColor = (avg) => {
+    if (avg === null || avg === undefined) return 'bg-blue-500';     // No feedback
+    if (avg > 4) return 'bg-green-500';                              // Positive
+    if (avg >= 2.5) return 'bg-amber-400';                           // Neutral
+    return 'bg-red-600';                                            // Negative
+  };
+
   return (
     <PageContainer>
       <div className="flex items-center justify-between mb-4">
@@ -235,7 +249,8 @@ const Heatmap = () => {
         className="relative w-full h-[600px] bg-white border rounded"
       >
         {tables.map((t) => {
-          const unresolved = unresolvedTables[t.table_number];
+          const avgRating = feedbackMap[t.table_number];
+          const feedbackColor = getFeedbackColor(avgRating);
 
           const node = (
             <div className="absolute">
@@ -245,8 +260,15 @@ const Heatmap = () => {
                 >
                   {t.table_number}
                 </div>
-                {!editMode && unresolved && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full animate-pulse border-2 border-white" />
+                {!editMode && (
+                  <div
+                    className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-pulse ${feedbackColor}`}
+                    title={
+                      avgRating === null
+                        ? 'No feedback yet'
+                        : `Avg rating: ${avgRating.toFixed(1)}`
+                    }
+                  />
                 )}
               </div>
 
