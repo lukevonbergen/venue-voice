@@ -4,6 +4,7 @@ import AccountSettings from '../components/settings/AccountSettings';
 import VenueSettings from '../components/settings/VenueSettings';
 import BrandingSettings from '../components/settings/BrandingSettings';
 import SubscriptionStatus from '../components/settings/SubscriptionStatus';
+import PageContainer from '../components/PageContainer';
 
 const SettingsPage = () => {
   const [venueId, setVenueId] = useState(null);
@@ -163,7 +164,7 @@ const SettingsPage = () => {
   };
 
   return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
+      <PageContainer>
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
 
         <AccountSettings
@@ -243,7 +244,7 @@ const SettingsPage = () => {
           </button>
           {message && <p className="text-sm text-red-500 mt-2">{message}</p>}
         </div>
-      </div>
+      </PageContainer>
   );
 };
 

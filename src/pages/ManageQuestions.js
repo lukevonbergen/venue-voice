@@ -7,6 +7,7 @@ import AddNewQuestion from '../components/AddNewQuestion';
 import QRCodeSection from '../components/QRCodeSection';
 import ReplaceModal from '../components/ReplaceModal';
 import PreviouslyUsedQuestions from '../components/PreviouslyUsedQuestions';
+import PageContainer from '../components/PageContainer';
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -305,7 +306,7 @@ const ManageQuestions = () => {
   const feedbackUrl = `${window.location.origin}/feedback/${venueId}`;
 
   return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
+    <PageContainer>
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Manage Questions</h1>
           <div className="bg-blue-50 px-4 py-2 rounded-lg">
@@ -360,7 +361,7 @@ const ManageQuestions = () => {
           questions={questions}
           onReplaceQuestion={handleReplaceQuestion}
         />
-      </div>
+      </PageContainer>
   );
 };
 

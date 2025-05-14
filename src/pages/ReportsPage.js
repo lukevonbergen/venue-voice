@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import PageContainer from '../components/PageContainer';
 import {
   CheckCircle,
   AlertTriangle,
@@ -112,7 +113,7 @@ const ReportsPage = () => {
   );
 
   return (
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <PageContainer>
         <h1 className="text-2xl font-bold mb-6">Reports Overview</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -152,7 +153,7 @@ const ReportsPage = () => {
         </div>
 
         <Tile title="Avg. Customer Satisfaction (1–5)" value={averageRating} icon={BarChart3} color="indigo" />
-      </div>
+        </PageContainer>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import supabase from '../utils/supabase';
 import Template1 from '../components/QRTemplates/Template1';
 import Template2 from '../components/QRTemplates/Template2';
+import PageContainer from '../components/PageContainer';
 
 const QRTemplates = () => {
   const [logo, setLogo] = useState(null);
@@ -43,7 +44,7 @@ const QRTemplates = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
+      <PageContainer>
         <h1 className="text-2xl font-bold text-gray-900 mb-8">QR Code Templates</h1>
 
         {/* Template 1 */}
@@ -69,7 +70,7 @@ const QRTemplates = () => {
         </div>
 
         {/* Add more templates as needed */}
-      </div>
+      </PageContainer>
   );
 };
 

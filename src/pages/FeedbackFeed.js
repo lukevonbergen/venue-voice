@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
+import PageContainer from '../components/PageContainer';
 
 const FeedbackFeedPage = () => {
   const [feedback, setFeedback] = useState([]);
@@ -59,7 +60,7 @@ const FeedbackFeedPage = () => {
   };
 
   return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer>
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Feedback Feed</h1>
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Customer Feedback</h2>
@@ -79,7 +80,7 @@ const FeedbackFeedPage = () => {
             )}
           </div>
         </div>
-      </div>
+      </PageContainer>
   );
 };
 
