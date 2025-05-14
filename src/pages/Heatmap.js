@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import Draggable from 'react-draggable';
 import Modal from 'react-modal';
+import PageContainer from '../components/PageContainer';
 import { v4 as uuidv4 } from 'uuid';
 
 const getColor = (isUnresolved) => {
@@ -177,7 +178,7 @@ const Heatmap = () => {
   if (loading) return <p className="p-8 text-gray-600">Loading heatmap...</p>;
 
   return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
+    <PageContainer>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Live Feedback Heatmap</h1>
           <div className="space-x-2">
@@ -273,7 +274,7 @@ const Heatmap = () => {
             <button onClick={clearAllTables} className="bg-red-600 text-white px-4 py-2 rounded">Confirm</button>
           </div>
         </Modal>
-      </div>
+    </PageContainer>
   );
 };
 
