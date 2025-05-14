@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, LogOut, Menu, X, BarChart, Settings, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, LogOut, BarChart, Settings, ChevronDown } from 'lucide-react';
 import supabase from '../utils/supabase';
 
 const DashboardFrame = ({ children }) => {
@@ -8,7 +8,6 @@ const DashboardFrame = ({ children }) => {
   const navigate = useNavigate();
   const [venueName, setVenueName] = useState('');
   const [venueId, setVenueId] = useState('');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isFeedbackDropdownOpen, setIsFeedbackDropdownOpen] = useState(false);
 
@@ -42,129 +41,78 @@ const DashboardFrame = ({ children }) => {
     return (
       <Link
         to={to}
-        className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
-          isActive
-            ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
-            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+        className={`flex items-center gap-2 text-sm px-3 py-2 rounded transition-all duration-200 ${
+          isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'
         }`}
-        onClick={() => setIsSidebarOpen(false)}
       >
-        {Icon && <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-500' : 'text-gray-400'}`} />}
+        {Icon && <Icon className="w-5 h-5" />}
         {children}
       </Link>
     );
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 p-2 bg-white rounded-lg shadow-sm z-50"
-      >
-        {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
-
-      <div
-        className={`w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm fixed h-screen transform transition-transform duration-200 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } z-40`}
-      >
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-          <p className="text-sm text-gray-500 mt-2">Manage your venue feedback</p>
-        </div>
-
-        <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-600">Logged in as:</h3>
-            <div className="venue-info bg-white p-3 rounded-lg shadow-sm">
-              <strong className="text-base font-semibold text-gray-900 block">
-                {venueName || 'Loading...'}
-              </strong>
-              <span className="text-xs text-gray-500 mt-1 block">ID: {venueId || '...'}</span>
+    <div className="min-h-screen bg-gray-100">
+      {/* Top Nav */}
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          {/* Left: Logo + Venue Info + Nav */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
+              <img
+                src="https://www.getchatters.com/img/Logo.svg"
+                alt="Chatters Logo"
+                className="h-8 w-auto"
+              />
+              <span className="text-sm text-gray-500">{venueName || 'Loading venue...'}</span>
             </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">
-            Menu
-          </div>
-          <ul className="space-y-2">
-            <li>
-              <NavLink to="/dashboard" icon={LayoutDashboard}>
-                Overview
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/dashboard/questions" icon={MessageSquare}>
-                Manage Questions
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/dashboard/reports" icon={BarChart}>
-                Reports
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/dashboard/heatmap" icon={BarChart}>
-                Heatmap
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/dashboard/templates" icon={BarChart}>
-                QR Templates
-              </NavLink>
-            </li>
-            <li>
+            <div className="flex flex-wrap gap-4">
+              <NavLink to="/dashboard" icon={LayoutDashboard}>Dashboard</NavLink>
+              <NavLink to="/dashboard/questions" icon={MessageSquare}>Questions</NavLink>
+              <NavLink to="/dashboard/reports" icon={BarChart}>Reports</NavLink>
+              <NavLink to="/dashboard/heatmap" icon={BarChart}>Heatmap</NavLink>
+              <NavLink to="/dashboard/templates" icon={BarChart}>QR Templates</NavLink>
               <div className="relative">
                 <button
                   onClick={() => setIsFeedbackDropdownOpen(!isFeedbackDropdownOpen)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
-                    location.pathname.startsWith('/dashboard/feedback')
-                      ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  className="flex items-center gap-2 text-sm px-3 py-2 rounded text-gray-600 hover:text-blue-600"
                 >
-                  <div className="flex items-center">
-                    <MessageSquare className="w-5 h-5 mr-3 text-gray-400" />
-                    Feedback
-                  </div>
-                  <ChevronDown
-                    className={`w-5 h-5 transition-transform duration-200 ${
-                      isFeedbackDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                  />
+                  <MessageSquare className="w-5 h-5" />
+                  Feedback
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isFeedbackDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isFeedbackDropdownOpen && (
-                  <div className="mt-2 ml-8 space-y-2">
+                  <div className="absolute top-full mt-2 left-0 bg-white border rounded shadow z-50 w-48">
                     <NavLink to="/dashboard/feedbackfeed">Comments</NavLink>
                     <NavLink to="/dashboard/tablefeedback">Tables</NavLink>
                   </div>
                 )}
               </div>
-            </li>
-          </ul>
-        </nav>
+            </div>
+          </div>
 
-        <div className="p-4 border-t border-gray-200 bg-white">
-          <NavLink to="/dashboard/settings" icon={Settings}>
-            Settings
-          </NavLink>
-
-          <button
-            onClick={() => setIsLogoutModalOpen(true)}
-            className="w-full px-4 py-3 text-left text-red-600 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center group mt-2"
-          >
-            <LogOut className="w-5 h-5 mr-3 text-red-400 group-hover:text-red-500" />
-            Sign Out
-          </button>
+          {/* Right: Avatar + Logout */}
+          <div className="flex items-center gap-4">
+            <div className="text-xs text-gray-500">ID: {venueId || '...'}</div>
+            <img
+              src="https://ui-avatars.com/api/?name=Luke"
+              alt="User"
+              className="w-8 h-8 rounded-full border"
+            />
+            <button
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="text-sm text-red-600 hover:underline"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 p-4 lg:p-8 mt-16 lg:mt-0 lg:ml-72 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">{children}</div>
-      </div>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {children}
+      </main>
 
       {isLogoutModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
