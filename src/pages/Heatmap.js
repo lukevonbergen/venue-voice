@@ -4,7 +4,7 @@ import PageContainer from '../components/PageContainer';
 import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
 
-const GRID_SIZE = 20; // 👈 adjust here for tighter/looser snapping
+const GRID_SIZE = 20;
 
 const Heatmap = () => {
   const layoutRef = useRef(null);
@@ -17,6 +17,7 @@ const Heatmap = () => {
   const [deletedIds, setDeletedIds] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [unresolvedTables, setUnresolvedTables] = useState({});
 
   useEffect(() => {
     const load = async () => {
@@ -51,10 +52,50 @@ const Heatmap = () => {
       }));
 
       setTables(loaded);
+
+      await fetchUnresolvedFeedback(venue.id);
     };
 
     load();
   }, []);
+
+  const fetchUnresolvedFeedback = async (venueId) => {
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('venue_id', venueId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch feedback', error);
+      return;
+    }
+
+    const sessionMap = {};
+    const latestSessionPerTable = {};
+    const unresolvedMap = {};
+
+    for (const entry of data) {
+      const table = entry.table_number;
+      if (!table) continue;
+
+      // Group feedback by latest session per table
+      if (!latestSessionPerTable[table]) {
+        latestSessionPerTable[table] = entry.session_id;
+        sessionMap[table] = [entry];
+      } else if (entry.session_id === latestSessionPerTable[table]) {
+        sessionMap[table].push(entry);
+      }
+    }
+
+    for (const table in sessionMap) {
+      const entries = sessionMap[table];
+      const unresolved = entries.some(e => !e.is_actioned && e.rating <= 2);
+      unresolvedMap[table] = unresolved;
+    }
+
+    setUnresolvedTables(unresolvedMap);
+  };
 
   const snapToGrid = (value) => Math.round(value / GRID_SIZE) * GRID_SIZE;
 
@@ -194,13 +235,21 @@ const Heatmap = () => {
         className="relative w-full h-[600px] bg-white border rounded"
       >
         {tables.map((t) => {
+          const unresolved = unresolvedTables[t.table_number];
+
           const node = (
             <div className="absolute">
-              <div
-                className="w-14 h-14 bg-gray-700 text-white rounded flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer"
-              >
-                {t.table_number}
+              <div className="relative">
+                <div
+                  className="w-14 h-14 bg-gray-700 text-white rounded flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer"
+                >
+                  {t.table_number}
+                </div>
+                {!editMode && unresolved && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full animate-pulse border-2 border-white" />
+                )}
               </div>
+
               {editMode && (
                 <button
                   onClick={() => removeTable(t.id)}
