@@ -264,7 +264,7 @@ const Heatmap = () => {
                   <div
                     className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white animate-pulse ${feedbackColor}`}
                     title={
-                      avgRating === null
+                      avgRating === null || avgRating === undefined
                         ? 'No feedback yet'
                         : `Avg rating: ${avgRating.toFixed(1)}`
                     }
