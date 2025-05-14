@@ -14,6 +14,7 @@ const Heatmap = () => {
   const [tableLimit, setTableLimit] = useState(null);
   const [deletedIds, setDeletedIds] = useState([]);
   const [editMode, setEditMode] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Load venue + tables
   useEffect(() => {
@@ -80,12 +81,14 @@ const Heatmap = () => {
 
     setTables(prev => [...prev, newTable]);
     setNewTableNumber('');
+    setHasUnsavedChanges(true);
   };
 
   const removeTable = (id) => {
     const isTemp = id.startsWith('temp-');
     if (!isTemp) setDeletedIds(prev => [...prev, id]);
     setTables(prev => prev.filter(t => t.id !== id));
+    setHasUnsavedChanges(true);
   };
 
   const handleDragStop = (e, data, tableId) => {
@@ -96,6 +99,7 @@ const Heatmap = () => {
           : t
       )
     );
+    setHasUnsavedChanges(true);
   };
 
   const saveLayout = async () => {
@@ -122,64 +126,66 @@ const Heatmap = () => {
       console.error('Save error:', error);
     } else {
       setDeletedIds([]);
-      setEditMode(false); // Exit edit mode after save
+      setEditMode(false);
+      setHasUnsavedChanges(false);
     }
 
     setSaving(false);
   };
 
+  const handleToggleEdit = () => {
+    if (editMode && hasUnsavedChanges) {
+      const confirmExit = window.confirm('You have unsaved changes. Exit anyway?');
+      if (!confirmExit) return;
+    }
+    setEditMode(!editMode);
+  };
+
   return (
     <PageContainer>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Table Heatmap</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Table Heatmap</h1>
+          {editMode && (
+            <>
+              <input
+                type="text"
+                placeholder="Table #"
+                value={newTableNumber}
+                onChange={(e) => setNewTableNumber(e.target.value)}
+                className="px-2 py-1 text-sm border rounded"
+              />
+              <button
+                onClick={addTable}
+                className="text-sm bg-gray-700 text-white px-3 py-1 rounded"
+              >
+                + Add Table
+              </button>
+              <button
+                onClick={saveLayout}
+                disabled={saving}
+                className="text-sm bg-green-600 text-white px-3 py-1 rounded"
+              >
+                {saving ? 'Saving...' : 'Save Layout'}
+              </button>
+            </>
+          )}
+        </div>
+
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setEditMode(!editMode)}
-            className={`px-4 py-2 rounded ${
-              editMode ? 'bg-yellow-600' : 'bg-gray-800'
-            } text-white`}
+            onClick={handleToggleEdit}
+            className="text-blue-600 underline text-sm"
           >
             {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
           </button>
-          {!editMode && (
-            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-              Live Mode
-            </span>
-          )}
         </div>
       </div>
-
-      {editMode && (
-        <div className="flex items-center gap-2 mb-4">
-          <input
-            type="text"
-            placeholder="Table #"
-            value={newTableNumber}
-            onChange={(e) => setNewTableNumber(e.target.value)}
-            className="px-2 py-1 border rounded"
-          />
-          <button
-            onClick={addTable}
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            + Add Table
-          </button>
-          <button
-            onClick={saveLayout}
-            disabled={saving}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            {saving ? 'Saving...' : 'Save Layout'}
-          </button>
-        </div>
-      )}
 
       <div
         ref={layoutRef}
         id="layout-area"
-        className={`relative w-full h-[600px] border rounded transition-colors ${
-          editMode ? 'bg-gray-100' : 'bg-white'
-        }`}
+        className="relative w-full h-[600px] bg-white border rounded"
       >
         {tables.map((t) => {
           const node = (
