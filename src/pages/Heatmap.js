@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import Modal from 'react-modal';
+import React, { useEffect, useRef, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
+import Modal from 'react-modal';
 
 import TableNode from '../components/heatmap/TableNode';
 import TableModal from '../components/heatmap/TableModal';
@@ -10,6 +10,8 @@ import TableEditorPanel from '../components/heatmap/TableEditorPanel';
 import { v4 as uuidv4 } from 'uuid';
 
 const Heatmap = () => {
+  const layoutRef = useRef(null);
+
   const [venueId, setVenueId] = useState(null);
   const [positions, setPositions] = useState([]);
   const [latestSessions, setLatestSessions] = useState({});
@@ -66,11 +68,17 @@ const Heatmap = () => {
       .select('*')
       .eq('venue_id', venueId);
 
+    const container = layoutRef.current;
+    if (!container) return;
+
+    const { width, height } = container.getBoundingClientRect();
+
     const enriched = (data || []).map(t => ({
       ...t,
-      x_px: (t.x_percent / 100) * 800,
-      y_px: (t.y_percent / 100) * 600
+      x_px: (t.x_percent / 100) * width,
+      y_px: (t.y_percent / 100) * height
     }));
+
     setPositions(enriched);
   };
 
@@ -171,9 +179,13 @@ const Heatmap = () => {
 
   const saveTables = async () => {
     setSaving(true);
+    const container = layoutRef.current;
+    if (!container) return;
+    const { width, height } = container.getBoundingClientRect();
+
     const payload = positions.map(t => {
-      const x_percent = (t.x_px / 800) * 100;
-      const y_percent = (t.y_px / 600) * 100;
+      const x_percent = (t.x_px / width) * 100;
+      const y_percent = (t.y_px / height) * 100;
       return {
         id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
         venue_id: venueId,
@@ -228,7 +240,11 @@ const Heatmap = () => {
         onToggleEdit={() => setEditMode(!editMode)}
       />
 
-      <div id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
+      <div
+        id="layout-area"
+        ref={layoutRef}
+        className="relative w-full h-[600px] bg-white border rounded"
+      >
         {positions.map((table) => (
           <TableNode
             key={table.id}
@@ -250,7 +266,6 @@ const Heatmap = () => {
         onResolve={markAsResolved}
       />
 
-      {/* Clear confirmation */}
       <Modal
         isOpen={confirmClear}
         onRequestClose={() => setConfirmClear(false)}
