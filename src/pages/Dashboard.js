@@ -1,16 +1,3 @@
-// Updated DashboardPage.js with:
-// - Sorting (Newest/Oldest)
-// - Table filter
-// - Alerts tab with bell icons
-// - Pagination (20 per page)
-// - Tabs: Alerts, Actioned, All Feedback
-// - Single column layout with record count
-// - Clickable session bar opens modal
-// - Modal closable by clicking outside
-// - Date and time format in session preview
-// - 'Click to view' label
-// - 'Mark as Actioned' button inside modal
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';

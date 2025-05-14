@@ -1,4 +1,3 @@
-// Fully working Heatmap.js with visual fixes and question display
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -50,7 +49,7 @@ const Heatmap = () => {
   const fetchLatestFeedback = async (venueId) => {
     const { data, error } = await supabase
       .from('feedback')
-      .select('id, venue_id, question_id, questions(text), sentiment, rating, additional_feedback, table_number, is_actioned, session_id, created_at')
+      .select('id, venue_id, question_id, sentiment, rating, additional_feedback, table_number, is_actioned, session_id, created_at, questions:question_id(text)')
       .eq('venue_id', venueId)
       .order('created_at', { ascending: false });
 
