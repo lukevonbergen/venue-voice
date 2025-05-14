@@ -14,6 +14,7 @@ const Heatmap = () => {
 
   const [venueId, setVenueId] = useState(null);
   const [positions, setPositions] = useState([]);
+  const [deletedIds, setDeletedIds] = useState([]);
   const [latestSessions, setLatestSessions] = useState({});
   const [unresolvedTables, setUnresolvedTables] = useState({});
   const [questionsMap, setQuestionsMap] = useState({});
@@ -70,8 +71,8 @@ const Heatmap = () => {
 
     const container = layoutRef.current;
     if (!container) return;
-
     const { width, height } = container.getBoundingClientRect();
+    if (width === 0 || height === 0) return;
 
     const enriched = (data || []).map(t => ({
       ...t,
@@ -140,6 +141,10 @@ const Heatmap = () => {
       alert('You’ve reached the maximum number of tables allowed.');
       return;
     }
+
+    const container = layoutRef.current;
+    const { width, height } = container.getBoundingClientRect();
+
     const id = `temp-${Date.now()}`;
     setPositions(prev => [
       ...prev,
@@ -147,10 +152,8 @@ const Heatmap = () => {
         id,
         venue_id: venueId,
         table_number: trimmed,
-        x_px: 50,
-        y_px: 50,
-        x_percent: 10,
-        y_percent: 10,
+        x_px: width / 2 - 35,
+        y_px: height / 2 - 35,
         shape: newShape
       }
     ]);
@@ -160,10 +163,12 @@ const Heatmap = () => {
   const removeTable = (id) => {
     const toDelete = positions.find(p => p.id === id);
     if (!toDelete) return;
-    setPositions(prev => prev.filter(t => t.id !== id));
+
     if (!id.startsWith('temp-')) {
-      supabase.from('table_positions').delete().eq('id', id);
+      setDeletedIds(prev => [...prev, id]);
     }
+
+    setPositions(prev => prev.filter(t => t.id !== id));
   };
 
   const clearAllTables = async () => {
@@ -174,33 +179,42 @@ const Heatmap = () => {
       await supabase.from('table_positions').delete().in('id', ids);
     }
     setPositions([]);
+    setDeletedIds([]);
     setConfirmClear(false);
   };
 
   const saveTables = async () => {
     setSaving(true);
+
     const container = layoutRef.current;
     if (!container) return;
     const { width, height } = container.getBoundingClientRect();
 
-    const payload = positions.map(t => {
-      const x_percent = (t.x_px / width) * 100;
-      const y_percent = (t.y_px / height) * 100;
-      return {
-        id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
-        venue_id: venueId,
-        table_number: t.table_number,
-        x_percent,
-        y_percent,
-        shape: t.shape
-      };
-    });
+    const payload = positions
+      .filter(t => !deletedIds.includes(t.id))
+      .map(t => {
+        const x_percent = (t.x_px / width) * 100;
+        const y_percent = (t.y_px / height) * 100;
+        return {
+          id: t.id?.startsWith('temp-') ? uuidv4() : t.id,
+          venue_id: venueId,
+          table_number: t.table_number,
+          x_percent,
+          y_percent,
+          shape: t.shape
+        };
+      });
+
+    if (deletedIds.length) {
+      await supabase.from('table_positions').delete().in('id', deletedIds);
+    }
 
     const { error } = await supabase.from('table_positions').upsert(payload);
     if (!error) {
       await fetchLatestFeedback(venueId);
       await fetchTablePositions(venueId);
       setEditMode(false);
+      setDeletedIds([]);
     } else {
       console.error('❌ Supabase save error:', error);
     }
