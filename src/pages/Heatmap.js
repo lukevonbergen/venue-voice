@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Modal from 'react-modal';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 
