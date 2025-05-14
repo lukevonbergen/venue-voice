@@ -1,4 +1,4 @@
-// Fully working Heatmap.js with complete UI and feedback fetch fix
+// Fully working Heatmap.js with visual fixes and question display
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import DashboardFrame from './DashboardFrame';
@@ -42,30 +42,6 @@ const Heatmap = () => {
     fetchVenueAndData();
   }, []);
 
-  useEffect(() => {
-    if (!venueId) return;
-
-    const feedbackSub = supabase
-      .channel('feedback-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'feedback',
-          filter: `venue_id=eq.${venueId}`
-        },
-        () => {
-          fetchLatestFeedback(venueId);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(feedbackSub);
-    };
-  }, [venueId]);
-
   const fetchTablePositions = async (venueId) => {
     const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
     setPositions(data || []);
@@ -83,12 +59,7 @@ const Heatmap = () => {
       return;
     }
 
-    if (!data || !Array.isArray(data)) {
-      console.error('❌ Feedback returned no iterable data:', data);
-      return;
-    }
-
-    const ratingMap = {}, sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
+    const sessionMap = {}, unresolvedMap = {}, latestSessionPerTable = {};
     for (const entry of data) {
       const table = entry.table_number;
       if (!table) continue;
@@ -113,18 +84,9 @@ const Heatmap = () => {
   const handleDragStop = (e, data, table) => {
     const container = document.getElementById('layout-area');
     const { width, height } = container.getBoundingClientRect();
-    const xPercent = Math.round((data.x / width) * 10000) / 100;
-    const yPercent = Math.round((data.y / height) * 10000) / 100;
+    const xPercent = (data.x / width) * 100;
+    const yPercent = (data.y / height) * 100;
     setPositions(prev => prev.map(t => t.id === table.id ? { ...t, x_percent: xPercent, y_percent: yPercent } : t));
-  };
-
-  const convertPercentToPx = (xPercent, yPercent) => {
-    const container = document.getElementById('layout-area');
-    const { width, height } = container.getBoundingClientRect();
-    return {
-      x: (xPercent / 100) * width,
-      y: (yPercent / 100) * height
-    };
   };
 
   const addTable = () => {
@@ -145,12 +107,12 @@ const Heatmap = () => {
     setNewTableNumber('');
   };
 
-  const removeTable = async (id) => {
+  const removeTable = (id) => {
     const toDelete = positions.find(p => p.id === id);
     if (!toDelete) return;
     setPositions(prev => prev.filter(t => t.id !== id));
     if (!id.startsWith('temp-')) {
-      await supabase.from('table_positions').delete().eq('id', id);
+      supabase.from('table_positions').delete().eq('id', id);
     }
   };
 
@@ -236,41 +198,32 @@ const Heatmap = () => {
             const bg = getColor(unresolvedTables[table_number]);
             const pulse = unresolvedTables[table_number];
             const shapeClass = shape === 'circle' ? 'rounded-full w-14 h-14' : shape === 'long' ? 'w-24 h-10' : 'w-14 h-14';
-        
+
             const content = (
               <div
-                onClick={() => {
-                  if (!editMode && latestSessions[table_number]?.length) {
-                    handleTableClick(table_number);
-                  }
-                }}
+                onClick={() => !editMode && handleTableClick(table_number)}
                 className={`${shapeClass} flex items-center justify-center text-white font-bold shadow cursor-pointer ${pulse ? 'animate-pulse' : ''} border-2 border-black`}
                 style={{ backgroundColor: bg }}
               >
                 {table_number}
               </div>
             );
-        
-            if (editMode) {
-              const { x, y } = convertPercentToPx(x_percent, y_percent);
-              return (
-                <Draggable key={id} position={{ x, y }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, table)}>
-                  <div className="absolute">
-                    {content}
-                    <button onClick={() => removeTable(id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
-                  </div>
-                </Draggable>
-              );
-            } else {
-              return (
-                <div
-                  key={id}
-                  style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%` }} // Removed transform
-                >
+
+            return editMode ? (
+              <Draggable key={id} defaultPosition={{ x: (x_percent / 100) * 800, y: (y_percent / 100) * 600 }} bounds="parent" onStop={(e, d) => handleDragStop(e, d, table)}>
+                <div className="absolute">
                   {content}
+                  <button onClick={() => removeTable(id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
                 </div>
-              );
-            }
+              </Draggable>
+            ) : (
+              <div
+                key={id}
+                style={{ position: 'absolute', top: `${y_percent}%`, left: `${x_percent}%`, transform: 'translate(-50%, -50%)' }}
+              >
+                {content}
+              </div>
+            );
           })}
         </div>
 
