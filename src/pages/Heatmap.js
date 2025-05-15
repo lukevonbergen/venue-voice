@@ -1,3 +1,4 @@
+// Full Heatmap.js with Zone Tabs Support
 import React, { useEffect, useRef, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
@@ -12,6 +13,8 @@ const Heatmap = () => {
   const layoutRef = useRef(null);
 
   const [venueId, setVenueId] = useState(null);
+  const [zones, setZones] = useState([]);
+  const [selectedZoneId, setSelectedZoneId] = useState(null);
   const [tables, setTables] = useState([]);
   const [newTableNumber, setNewTableNumber] = useState('');
   const [newTableShape, setNewTableShape] = useState('square');
@@ -37,12 +40,31 @@ const Heatmap = () => {
       setVenueId(venue.id);
       setTableLimit(venue.table_count);
 
+      await loadZones(venue.id);
       await loadTables(venue.id);
       await fetchFeedback(venue.id);
     };
 
     load();
   }, []);
+
+  const loadZones = async (venueId) => {
+    const { data: zonesData, error } = await supabase
+      .from('zones')
+      .select('*')
+      .eq('venue_id', venueId)
+      .order('order');
+
+    if (error) {
+      console.error('Error loading zones:', error);
+      return;
+    }
+
+    setZones(zonesData);
+    if (zonesData.length > 0 && !selectedZoneId) {
+      setSelectedZoneId(zonesData[0].id);
+    }
+  };
 
   useEffect(() => {
     if (!venueId) return;
@@ -168,7 +190,8 @@ const Heatmap = () => {
       x_px: snapToGrid(width / 2 - 35),
       y_px: snapToGrid(height / 2 - 35),
       shape: newTableShape,
-      venue_id: venueId
+      venue_id: venueId,
+      zone_id: selectedZoneId // assign to current zone tab
     };
 
     setTables(prev => [...prev, newTable]);
@@ -246,7 +269,8 @@ const Heatmap = () => {
       table_number: t.table_number,
       x_percent: (t.x_px / width) * 100,
       y_percent: (t.y_px / height) * 100,
-      shape: t.shape
+      shape: t.shape,
+      zone_id: t.zone_id ?? null
     }));
 
     const { error } = await supabase.from('table_positions').upsert(payload);
@@ -266,8 +290,6 @@ const Heatmap = () => {
     if (avg >= 2.5) return 'bg-amber-400';
     return 'bg-red-600';
   };
-
-  // Render omitted for brevity — unchanged from your version
 
   return (
     <PageContainer>
@@ -325,12 +347,28 @@ const Heatmap = () => {
         </div>
       </div>
 
+      <div className="flex gap-2 mb-4">
+        {zones.map(zone => (
+          <button
+            key={zone.id}
+            onClick={() => setSelectedZoneId(zone.id)}
+            className={`px-4 py-1 rounded border ${
+              selectedZoneId === zone.id
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {zone.name}
+          </button>
+        ))}
+      </div>
+
       <div
         ref={layoutRef}
         id="layout-area"
         className="relative w-full h-[600px] bg-white border rounded"
       >
-        {tables.map((t) => {
+        {tables.filter(t => t.zone_id === selectedZoneId).map((t) => {
           const avgRating = feedbackMap[t.table_number];
           const feedbackColor = getFeedbackColor(avgRating);
 
