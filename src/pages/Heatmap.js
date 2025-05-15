@@ -1,4 +1,4 @@
-// Full Heatmap.js with Zone Tabs Support
+// Full Heatmap.js with Zone Editor (Create, Rename, Delete with Reassignment Prompt)
 import React, { useEffect, useRef, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
@@ -15,6 +15,7 @@ const Heatmap = () => {
   const [venueId, setVenueId] = useState(null);
   const [zones, setZones] = useState([]);
   const [selectedZoneId, setSelectedZoneId] = useState(null);
+  const [editingZoneId, setEditingZoneId] = useState(null);
   const [tables, setTables] = useState([]);
   const [newTableNumber, setNewTableNumber] = useState('');
   const [newTableShape, setNewTableShape] = useState('square');
@@ -191,7 +192,7 @@ const Heatmap = () => {
       y_px: snapToGrid(height / 2 - 35),
       shape: newTableShape,
       venue_id: venueId,
-      zone_id: selectedZoneId // assign to current zone tab
+      zone_id: selectedZoneId
     };
 
     setTables(prev => [...prev, newTable]);
@@ -199,54 +200,38 @@ const Heatmap = () => {
     setHasUnsavedChanges(true);
   };
 
-  const removeTable = async (id) => {
-    const isTemp = id.startsWith('temp-');
-    setTables(prev => prev.filter(t => t.id !== id));
-
-    if (!isTemp) {
-      const { error } = await supabase
-        .from('table_positions')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting table from Supabase:', error);
-      }
+  const deleteZone = async (zoneId) => {
+    const tablesInZone = tables.filter(t => t.zone_id === zoneId);
+    if (tablesInZone.length > 0) {
+      const confirm = window.confirm(`This zone contains ${tablesInZone.length} table(s). Deleting the zone will unassign those tables. Proceed?`);
+      if (!confirm) return;
+      await supabase.from('table_positions').update({ zone_id: null }).eq('zone_id', zoneId);
     }
-
-    setHasUnsavedChanges(true);
+    await supabase.from('zones').delete().eq('id', zoneId);
+    await loadZones(venueId);
+    await loadTables(venueId);
   };
 
-  const clearAllTables = async () => {
-    if (!venueId) return;
-    const confirmClear = window.confirm('Are you sure you want to delete ALL tables? This cannot be undone.');
-    if (!confirmClear) return;
-
-    const { error } = await supabase
-      .from('table_positions')
-      .delete()
-      .eq('venue_id', venueId);
-
-    if (error) {
-      console.error('Error clearing all tables:', error);
-    } else {
-      setTables([]);
-      setHasUnsavedChanges(false);
+  const createNewZone = async () => {
+    const { data, error } = await supabase.from('zones').insert({
+      name: 'New Zone',
+      venue_id: venueId,
+      order: zones.length + 1
+    }).select('*').single();
+    if (!error && data) {
+      await loadZones(venueId);
+      setSelectedZoneId(data.id);
     }
   };
 
-  const handleDragStop = (e, data, tableId) => {
-    const snappedX = snapToGrid(data.x);
-    const snappedY = snapToGrid(data.y);
+  const handleZoneRename = (id, name) => {
+    setZones(prev => prev.map(z => z.id === id ? { ...z, name } : z));
+  };
 
-    setTables(prev =>
-      prev.map(t =>
-        t.id === tableId
-          ? { ...t, x_px: snappedX, y_px: snappedY }
-          : t
-      )
-    );
-    setHasUnsavedChanges(true);
+  const saveZoneRename = async (id) => {
+    const zone = zones.find(z => z.id === id);
+    await supabase.from('zones').update({ name: zone.name }).eq('id', id);
+    setEditingZoneId(null);
   };
 
   const handleToggleEdit = () => {
@@ -260,9 +245,7 @@ const Heatmap = () => {
   const saveLayout = async () => {
     if (!venueId || !layoutRef.current) return;
     setSaving(true);
-
     const { width, height } = layoutRef.current.getBoundingClientRect();
-
     const payload = tables.map(t => ({
       id: t.id.startsWith('temp-') ? uuidv4() : t.id,
       venue_id: t.venue_id,
@@ -272,15 +255,12 @@ const Heatmap = () => {
       shape: t.shape,
       zone_id: t.zone_id ?? null
     }));
-
     const { error } = await supabase.from('table_positions').upsert(payload);
-    if (error) {
-      console.error('Save error:', error);
-    } else {
+    if (error) console.error('Save error:', error);
+    else {
       setEditMode(false);
       setHasUnsavedChanges(false);
     }
-
     setSaving(false);
   };
 
@@ -298,137 +278,81 @@ const Heatmap = () => {
           <h1 className="text-2xl font-bold">Table Heatmap</h1>
           {editMode && (
             <>
-              <input
-                type="text"
-                placeholder="Table #"
-                value={newTableNumber}
-                onChange={(e) => setNewTableNumber(e.target.value)}
-                className="px-2 py-1 text-sm border rounded"
-              />
-              <select
-                value={newTableShape}
-                onChange={(e) => setNewTableShape(e.target.value)}
-                className="text-sm border rounded px-2 py-1"
-              >
+              <input type="text" placeholder="Table #" value={newTableNumber} onChange={(e) => setNewTableNumber(e.target.value)} className="px-2 py-1 text-sm border rounded" />
+              <select value={newTableShape} onChange={(e) => setNewTableShape(e.target.value)} className="text-sm border rounded px-2 py-1">
                 <option value="square">Square</option>
                 <option value="circle">Circle</option>
                 <option value="long">Long</option>
               </select>
-              <button
-                onClick={addTable}
-                className="text-sm bg-gray-700 text-white px-3 py-1 rounded"
-              >
-                + Add Table
-              </button>
-              <button
-                onClick={saveLayout}
-                disabled={saving}
-                className="text-sm bg-green-600 text-white px-3 py-1 rounded"
-              >
-                {saving ? 'Saving...' : 'Save Layout'}
-              </button>
-              <button
-                onClick={clearAllTables}
-                className="text-sm text-red-600 border border-red-600 px-3 py-1 rounded"
-              >
-                Clear All Tables
-              </button>
+              <button onClick={addTable} className="text-sm bg-gray-700 text-white px-3 py-1 rounded">+ Add Table</button>
+              <button onClick={saveLayout} disabled={saving} className="text-sm bg-green-600 text-white px-3 py-1 rounded">{saving ? 'Saving...' : 'Save Layout'}</button>
+              <button onClick={clearAllTables} className="text-sm text-red-600 border border-red-600 px-3 py-1 rounded">Clear All Tables</button>
             </>
           )}
         </div>
-
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggleEdit}
-            className="text-blue-600 underline text-sm"
-          >
-            {editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
-          </button>
+          <button onClick={handleToggleEdit} className="text-blue-600 underline text-sm">{editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}</button>
         </div>
       </div>
 
-      <div className="flex gap-2 mb-4">
-        {zones.map(zone => (
-          <button
-            key={zone.id}
-            onClick={() => setSelectedZoneId(zone.id)}
-            className={`px-4 py-1 rounded border ${
-              selectedZoneId === zone.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-800'
-            }`}
-          >
-            {zone.name}
-          </button>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {zones.map((zone) => (
+          <div key={zone.id} className="flex items-center gap-1">
+            {editMode && editingZoneId === zone.id ? (
+              <input
+                value={zone.name}
+                onChange={(e) => handleZoneRename(zone.id, e.target.value)}
+                onBlur={() => saveZoneRename(zone.id)}
+                autoFocus
+                className="px-2 py-1 border rounded text-sm"
+              />
+            ) : (
+              <button
+                onClick={() => setSelectedZoneId(zone.id)}
+                onDoubleClick={() => editMode && setEditingZoneId(zone.id)}
+                className={`px-4 py-1 rounded border ${selectedZoneId === zone.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'}`}
+              >
+                {zone.name}
+              </button>
+            )}
+            {editMode && (
+              <button
+                onClick={() => deleteZone(zone.id)}
+                className="text-red-500 text-xs"
+                title="Delete zone"
+              >
+                🗑
+              </button>
+            )}
+          </div>
         ))}
+        {editMode && (
+          <button onClick={createNewZone} className="px-2 py-1 text-sm border border-dashed rounded text-gray-500">+ Add Zone</button>
+        )}
       </div>
 
-      <div
-        ref={layoutRef}
-        id="layout-area"
-        className="relative w-full h-[600px] bg-white border rounded"
-      >
+      <div ref={layoutRef} id="layout-area" className="relative w-full h-[600px] bg-white border rounded">
         {tables.filter(t => t.zone_id === selectedZoneId).map((t) => {
           const avgRating = feedbackMap[t.table_number];
           const feedbackColor = getFeedbackColor(avgRating);
-
-          const tableShapeClasses =
-            t.shape === 'circle'
-              ? 'w-14 h-14 rounded-full bg-gray-700'
-              : t.shape === 'long'
-              ? 'w-28 h-10 rounded bg-gray-700'
-              : 'w-14 h-14 rounded bg-gray-700';
-
+          const tableShapeClasses = t.shape === 'circle' ? 'w-14 h-14 rounded-full bg-gray-700' : t.shape === 'long' ? 'w-28 h-10 rounded bg-gray-700' : 'w-14 h-14 rounded bg-gray-700';
           const node = (
             <div className="absolute">
               <div className="relative">
-                <div
-                  className={`text-white flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer ${tableShapeClasses}`}
-                >
-                  {t.table_number}
-                </div>
+                <div className={`text-white flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer ${tableShapeClasses}`}>{t.table_number}</div>
                 {!editMode && (
-                  <div
-                    className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${feedbackColor} ${
-                      feedbackColor === 'bg-red-600' ? 'animate-pulse' : ''
-                    }`}
-                    title={
-                      avgRating === null || avgRating === undefined
-                        ? 'No feedback yet'
-                        : `Avg rating: ${avgRating.toFixed(1)}`
-                    }
-                  />
+                  <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${feedbackColor} ${feedbackColor === 'bg-red-600' ? 'animate-pulse' : ''}`} title={avgRating === null || avgRating === undefined ? 'No feedback yet' : `Avg rating: ${avgRating.toFixed(1)}`} />
                 )}
               </div>
-
               {editMode && (
-                <button
-                  onClick={() => removeTable(t.id)}
-                  className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
-                >
-                  ×
-                </button>
+                <button onClick={() => removeTable(t.id)} className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs">×</button>
               )}
             </div>
           );
-
           return editMode ? (
-            <Draggable
-              key={t.id}
-              position={{ x: t.x_px, y: t.y_px }}
-              bounds="parent"
-              onStop={(e, data) => handleDragStop(e, data, t.id)}
-            >
-              {node}
-            </Draggable>
+            <Draggable key={t.id} position={{ x: t.x_px, y: t.y_px }} bounds="parent" onStop={(e, data) => handleDragStop(e, data, t.id)}>{node}</Draggable>
           ) : (
-            <div
-              key={t.id}
-              className="absolute"
-              style={{ left: t.x_px, top: t.y_px }}
-            >
-              {node}
-            </div>
+            <div key={t.id} className="absolute" style={{ left: t.x_px, top: t.y_px }}>{node}</div>
           );
         })}
       </div>
