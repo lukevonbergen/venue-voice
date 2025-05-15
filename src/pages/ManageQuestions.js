@@ -8,8 +8,10 @@ import QRCodeSection from '../components/QRCodeSection';
 import ReplaceModal from '../components/ReplaceModal';
 import PreviouslyUsedQuestions from '../components/PreviouslyUsedQuestions';
 import PageContainer from '../components/PageContainer';
+import usePageTitle from '../hooks/usePageTitle';
 
 const ManageQuestions = () => {
+  usePageTitle('Feedback Manager');
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState('');
   const [editingQuestionId, setEditingQuestionId] = useState(null);
