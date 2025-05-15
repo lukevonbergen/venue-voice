@@ -262,7 +262,7 @@ const Heatmap = () => {
                 </div>
                 {!editMode && (
                   <div
-                    className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${feedbackColor} ${
+                    className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${feedbackColor} ${
                       feedbackColor === 'bg-red-600' ? 'animate-pulse' : ''
                     }`}
                     title={
