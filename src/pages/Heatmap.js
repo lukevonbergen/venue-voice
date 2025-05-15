@@ -1,4 +1,3 @@
-// Full Heatmap.js with zone tabs, feedback modal, and full table + zone editing support
 import React, { useEffect, useRef, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
@@ -27,9 +26,11 @@ const Heatmap = () => {
   const [editMode, setEditMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [feedbackMap, setFeedbackMap] = useState({});
+  const [staffList, setStaffList] = useState([]);
 
   const [selectedTable, setSelectedTable] = useState(null);
   const [feedbackModalData, setFeedbackModalData] = useState([]);
+  const [staffSelections, setStaffSelections] = useState({});
 
   useEffect(() => {
     const load = async () => {
@@ -50,81 +51,70 @@ const Heatmap = () => {
       await loadZones(venue.id);
       await loadTables(venue.id);
       await fetchFeedback(venue.id);
+      await loadStaff(venue.id);
     };
     load();
   }, []);
 
-  const loadZones = async (venueId) => {
-    const { data, error } = await supabase
-      .from('zones')
-      .select('*')
-      .eq('venue_id', venueId)
-      .order('order');
-
-    if (!error) {
-      setZones(data);
-      if (data.length > 0 && !selectedZoneId) setSelectedZoneId(data[0].id);
-    }
-  };
-
-  const loadTables = async (venueId) => {
-    const container = layoutRef.current;
-    if (!container) return;
-    const { width, height } = container.getBoundingClientRect();
-    const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
-    const loaded = data.map(t => ({ ...t, x_px: (t.x_percent / 100) * width, y_px: (t.y_percent / 100) * height }));
-    setTables(loaded);
-  };
-
-  const fetchFeedback = async (venueId) => {
-    const { data } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId)
-      .order('created_at', { ascending: false });
-
-    const sessionMap = {}, latestSession = {}, ratings = {};
-    for (const entry of data) {
-      const table = entry.table_number;
-      if (!table) continue;
-      if (!latestSession[table]) {
-        latestSession[table] = entry.session_id;
-        sessionMap[table] = [entry];
-      } else if (entry.session_id === latestSession[table]) {
-        sessionMap[table].push(entry);
-      }
-    }
-
-    for (const table in sessionMap) {
-      const valid = sessionMap[table].filter(e => e.rating !== null && !e.is_actioned).map(e => e.rating);
-      ratings[table] = valid.length > 0 ? valid.reduce((a, b) => a + b) / valid.length : null;
-    }
-    setFeedbackMap(ratings);
-  };
-
-  const openFeedbackModal = async (tableNumber) => {
-    const { data } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId)
-      .eq('table_number', tableNumber)
-      .order('created_at', { ascending: false });
-
-    setFeedbackModalData(data);
-    setSelectedTable(tableNumber);
+  const loadStaff = async (venueId) => {
+    const { data } = await supabase.from('staff').select('id, first_name, last_name').eq('venue_id', venueId);
+    setStaffList(data || []);
   };
 
   const markResolved = async (feedbackId) => {
-    await supabase.from('feedback').update({ is_actioned: true, resolved_at: new Date() }).eq('id', feedbackId);
+    const staffId = staffSelections[feedbackId];
+    if (!staffId) return alert('Please select a staff member');
+    await supabase.from('feedback').update({ is_actioned: true, resolved_at: new Date(), resolved_by: staffId }).eq('id', feedbackId);
     await fetchFeedback(venueId);
-    setFeedbackModalData(prev => prev.map(f => f.id === feedbackId ? { ...f, is_actioned: true } : f));
+    setFeedbackModalData(prev => prev.map(f => f.id === feedbackId ? { ...f, is_actioned: true, resolved_by: staffId } : f));
   };
 
   const undoResolved = async (feedbackId) => {
-    await supabase.from('feedback').update({ is_actioned: false, resolved_at: null }).eq('id', feedbackId);
+    await supabase.from('feedback').update({ is_actioned: false, resolved_at: null, resolved_by: null }).eq('id', feedbackId);
     await fetchFeedback(venueId);
-    setFeedbackModalData(prev => prev.map(f => f.id === feedbackId ? { ...f, is_actioned: false } : f));
+    setFeedbackModalData(prev => prev.map(f => f.id === feedbackId ? { ...f, is_actioned: false, resolved_by: null } : f));
   };
+
+  const FeedbackModal = () => (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
+        <h3 className="text-lg font-semibold mb-4">Feedback for Table {selectedTable}</h3>
+        <button onClick={() => setSelectedTable(null)} className="absolute top-2 right-2 text-gray-400 hover:text-black">✕</button>
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+          {feedbackModalData.map(f => (
+            <div key={f.id} className="border rounded p-3">
+              <div className="flex justify-between text-sm text-gray-500 mb-2">
+                <span>Session: {f.session_id?.slice(0, 8)}</span>
+                <span>{dayjs(f.created_at).fromNow()}</span>
+              </div>
+              <div className="mb-1 text-sm">Rating: {f.rating ?? 'N/A'}</div>
+              {f.additional_feedback && <div className="text-sm italic text-gray-700">"{f.additional_feedback}"</div>}
+              {f.is_actioned ? (
+                <div className="mt-2">
+                  <div className="text-xs text-gray-600">Resolved by: {staffList.find(s => s.id === f.resolved_by)?.first_name || 'Unknown'}</div>
+                  <button onClick={() => undoResolved(f.id)} className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded mt-1">Undo</button>
+                </div>
+              ) : (
+                <div className="mt-2 space-y-2">
+                  <select
+                    className="w-full border border-gray-300 rounded text-sm px-2 py-1"
+                    value={staffSelections[f.id] || ''}
+                    onChange={(e) => setStaffSelections(prev => ({ ...prev, [f.id]: e.target.value }))}
+                  >
+                    <option value="">Select Staff Member</option>
+                    {staffList.map(staff => (
+                      <option key={staff.id} value={staff.id}>{staff.first_name} {staff.last_name}</option>
+                    ))}
+                  </select>
+                  <button onClick={() => markResolved(f.id)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Mark Resolved</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   const addTable = () => {
     const number = newTableNumber.trim();
@@ -209,34 +199,6 @@ const Heatmap = () => {
     if (avg >= 2.5) return 'bg-amber-400';
     return 'bg-red-600';
   };
-
-  const FeedbackModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
-        <h3 className="text-lg font-semibold mb-4">Feedback for Table {selectedTable}</h3>
-        <button onClick={() => setSelectedTable(null)} className="absolute top-2 right-2 text-gray-400 hover:text-black">✕</button>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-          {feedbackModalData.map(f => (
-            <div key={f.id} className="border rounded p-3">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
-                <span>Session: {f.session_id?.slice(0, 8)}</span>
-                <span>{dayjs(f.created_at).fromNow()}</span>
-              </div>
-              <div className="mb-1 text-sm">Rating: {f.rating ?? 'N/A'}</div>
-              {f.additional_feedback && <div className="text-sm italic text-gray-700">"{f.additional_feedback}"</div>}
-              <div className="mt-2">
-                {f.is_actioned ? (
-                  <button onClick={() => undoResolved(f.id)} className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">Undo</button>
-                ) : (
-                  <button onClick={() => markResolved(f.id)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Mark Resolved</button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <PageContainer>
