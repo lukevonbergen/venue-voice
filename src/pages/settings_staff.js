@@ -37,13 +37,17 @@ const StaffPage = () => {
   const handleAddOrUpdateStaff = async (e) => {
     e.preventDefault();
     if (!form.first_name || !form.last_name || !form.email) return;
-
+  
+    const payload = { ...form, venue_id: venueId };
+  
     if (editingId) {
-      await supabase.from('staff').update(form).eq('id', editingId);
+      const { error } = await supabase.from('staff').update(payload).eq('id', editingId);
+      if (error) console.error('Update error:', error);
     } else {
-      await supabase.from('staff').insert([{ ...form, venue_id: venueId }]);
+      const { error } = await supabase.from('staff').insert([payload]);
+      if (error) console.error('Insert error:', error);
     }
-
+  
     setForm({ first_name: '', last_name: '', email: '', role: '' });
     setEditingId(null);
     setModalOpen(false);
