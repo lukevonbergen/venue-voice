@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -18,6 +18,25 @@ const DashboardFrame = ({ children }) => {
   const { venueName, venueId } = useVenue();
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState({ first_name: '', last_name: '', email: '' });
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const email = userData?.user?.email;
+      if (!email) return;
+
+      const { data: venue } = await supabase
+        .from('venues')
+        .select('first_name, last_name, email')
+        .eq('email', email)
+        .single();
+
+      if (venue) setUserInfo(venue);
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -54,18 +73,31 @@ const DashboardFrame = ({ children }) => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-xs text-gray-500">ID: {venueId || '...'}</div>
-            <img
-              src="https://ui-avatars.com/api/?name=Luke"
-              alt="User"
-              className="w-7 h-7 rounded-full border"
-            />
-            <button
-              onClick={() => setIsLogoutModalOpen(true)}
-              className="text-red-600 hover:text-red-700"
-              title="Sign Out"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            <div className="relative group">
+              <img
+                src={`https://ui-avatars.com/api/?name=${userInfo.first_name || 'User'}`}
+                alt="User"
+                className="w-8 h-8 rounded-full border cursor-pointer"
+              />
+              <div className="absolute right-0 top-10 hidden group-hover:flex flex-col bg-white border shadow-lg rounded-md min-w-[180px] z-50">
+                <div className="px-4 py-3 text-sm text-gray-700 border-b">
+                  <div className="font-medium">{userInfo.first_name} {userInfo.last_name}</div>
+                  <div className="text-xs text-gray-500">{userInfo.email}</div>
+                </div>
+                <Link
+                  to="/dashboard/settings"
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Account Settings
+                </Link>
+                <button
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
