@@ -45,7 +45,7 @@ const StaffPage = () => {
         .from('staff')
         .update(payload)
         .eq('id', editingId)
-        .select(); // <-- Force return
+        .select(); // Required to trigger update and confirm it worked
   
       if (!data?.length) {
         alert('Update failed: No record found for this ID.');
@@ -68,7 +68,7 @@ const StaffPage = () => {
     setEditingId(null);
     setModalOpen(false);
     loadStaff();
-  };
+  };  
   
 
   const handleEdit = (staff) => {
