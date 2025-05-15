@@ -49,7 +49,7 @@ const CustomerFeedbackPage = () => {
     }]);
 
     if (current < questions.length - 1) setCurrent(current + 1);
-    else setCurrent(-1); // Go to free-text
+    else setCurrent(-1); // Move to free-text input
   };
 
   const handleSubmit = async () => {
@@ -70,116 +70,95 @@ const CustomerFeedbackPage = () => {
     if (!error) setIsFinished(true);
   };
 
-  if (!venue || !questions.length) return <div style={{ textAlign: 'center', padding: '2rem' }}>Loading...</div>;
-  if (isFinished) return <div style={{ textAlign: 'center', padding: '2rem' }}>Thanks for your feedback!</div>;
+  if (!venue || !questions.length) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-gray-600 text-lg">
+        Loading feedback form...
+      </div>
+    );
+  }
 
-  const primary = venue.primary_color || '#333';
-  const secondary = venue.secondary_color || '#eee';
+  if (isFinished) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-green-600 text-xl font-semibold">
+        Thanks for your feedback!
+      </div>
+    );
+  }
+
+  const primary = venue.primary_color || '#111827';
+  const secondary = venue.secondary_color || '#f3f4f6';
 
   return (
-    <div style={{
-      fontFamily: 'sans-serif',
-      padding: '2rem 1rem',
-      maxWidth: '500px',
-      margin: '0 auto',
-      textAlign: 'center',
-      color: primary
-    }}>
-      {venue.logo && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <img src={venue.logo} alt="Venue Logo" style={{ maxHeight: '60px' }} />
-        </div>
-      )}
-      {!tableNumber ? (
-        <div>
-          <h2>Select Your Table</h2>
-          <select
-            value={tableNumber}
-            onChange={(e) => setTableNumber(e.target.value)}
-            style={{
-              padding: '0.75rem',
-              fontSize: '1.1rem',
-              marginTop: '1rem',
-              borderRadius: '8px',
-              width: '80%',
-              maxWidth: '300px',
-              border: `2px solid ${primary}`,
-              backgroundColor: secondary
-            }}
-          >
-            <option value="">Select</option>
-            {Array.from({ length: venue.table_count || 10 }, (_, i) => (
-              <option key={i} value={i + 1}>Table {i + 1}</option>
-            ))}
-          </select>
-        </div>
-      ) : current >= 0 ? (
-        <div>
-          <h2 style={{ marginBottom: '2rem', fontSize: '1.4rem' }}>{questions[current].question}</h2>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            padding: '1rem 0'
-          }}>
-            {['😠', '😞', '😐', '😊', '😍'].map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => handleEmojiAnswer(emoji)}
-                style={{
-                  fontSize: '2.5rem',
-                  padding: '1rem',
-                  borderRadius: '50%',
-                  border: `2px solid ${primary}`,
-                  backgroundColor: secondary,
-                  width: '60px',
-                  height: '60px',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
-                  cursor: 'pointer'
-                }}
-              >
-                {emoji}
-              </button>
-            ))}
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: secondary }}>
+      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-6 text-center" style={{ color: primary }}>
+        {venue.logo && (
+          <div className="mb-6">
+            <img src={venue.logo} alt="Venue Logo" className="h-14 mx-auto" />
           </div>
-        </div>
-      ) : (
-        <div>
-          <h2 style={{ marginBottom: '1rem' }}>Additional Feedback?</h2>
-          <textarea
-            value={freeText}
-            onChange={(e) => setFreeText(e.target.value)}
-            rows="5"
-            placeholder="Type anything else you'd like to say..."
-            style={{
-              width: '90%',
-              maxWidth: '400px',
-              padding: '1rem',
-              fontSize: '1rem',
-              borderRadius: '8px',
-              border: `1px solid ${primary}`,
-              backgroundColor: secondary,
-              marginBottom: '1.5rem'
-            }}
-          ></textarea>
-          <br />
-          <button
-            onClick={handleSubmit}
-            style={{
-              padding: '0.75rem 2rem',
-              fontSize: '1.1rem',
-              borderRadius: '8px',
-              backgroundColor: primary,
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            Submit
-          </button>
-        </div>
-      )}
+        )}
+
+        {!tableNumber ? (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Select Your Table</h2>
+            <select
+              value={tableNumber}
+              onChange={(e) => setTableNumber(e.target.value)}
+              className="w-full border px-4 py-3 rounded-lg text-base"
+              style={{
+                borderColor: primary,
+                backgroundColor: secondary,
+              }}
+            >
+              <option value="">Choose your table</option>
+              {Array.from({ length: venue.table_count || 10 }, (_, i) => (
+                <option key={i} value={i + 1}>Table {i + 1}</option>
+              ))}
+            </select>
+          </div>
+        ) : current >= 0 ? (
+          <div>
+            <h2 className="text-lg font-semibold mb-6">{questions[current].question}</h2>
+            <div className="flex justify-between gap-3 flex-wrap px-4">
+              {['😠', '😞', '😐', '😊', '😍'].map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => handleEmojiAnswer(emoji)}
+                  className="w-16 h-16 rounded-full text-3xl shadow-sm border hover:scale-110 transition"
+                  style={{
+                    borderColor: primary,
+                    backgroundColor: secondary,
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Anything else you'd like to tell us?</h2>
+            <textarea
+              value={freeText}
+              onChange={(e) => setFreeText(e.target.value)}
+              rows={4}
+              placeholder="Leave any additional comments..."
+              className="w-full p-3 border rounded-lg text-base mb-4"
+              style={{
+                borderColor: primary,
+                backgroundColor: secondary,
+              }}
+            />
+            <button
+              onClick={handleSubmit}
+              className="w-full py-3 rounded-lg font-semibold text-white text-lg"
+              style={{ backgroundColor: primary }}
+            >
+              Submit Feedback
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
