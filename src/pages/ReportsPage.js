@@ -14,8 +14,10 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import usePageTitle from '../hooks/usePageTitle';
 
 const ReportsPage = () => {
+  usePageTitle('Reports');
   const [venueId, setVenueId] = useState(null);
   const [feedbackSessions, setFeedbackSessions] = useState([]);
   const navigate = useNavigate();
