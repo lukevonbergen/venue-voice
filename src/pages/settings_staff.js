@@ -25,18 +25,24 @@ const StaffPage = () => {
   }, [staffList, searchTerm]);
 
   const loadStaff = async () => {
-    const { data } = await supabase.from('staff').select('*').eq('venue_id', venueId);
+    console.log('Loading staff for venue:', venueId);
+    const { data, error } = await supabase.from('staff').select('*').eq('venue_id', venueId);
+    if (error) console.error('Error loading staff:', error);
+    console.log('Staff loaded:', data);
     setStaffList(data || []);
   };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Form change - ${name}:`, value);
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAddOrUpdateStaff = async (e) => {
     e.preventDefault();
     const payload = { ...form, venue_id: venueId };
+    console.log('Submitting form, editingId:', editingId);
+    console.log('Payload:', payload);
 
     if (editingId) {
       const { error: updateError } = await supabase
@@ -45,8 +51,11 @@ const StaffPage = () => {
         .eq('id', editingId);
 
       if (updateError) {
+        console.error('Update error:', updateError);
         alert('Update error: ' + updateError.message);
         return;
+      } else {
+        console.log('Staff updated successfully');
       }
     } else {
       const { error: insertError } = await supabase
@@ -54,8 +63,11 @@ const StaffPage = () => {
         .insert([payload]);
 
       if (insertError) {
+        console.error('Insert error:', insertError);
         alert('Insert error: ' + insertError.message);
         return;
+      } else {
+        console.log('Staff inserted successfully');
       }
     }
 
@@ -66,6 +78,7 @@ const StaffPage = () => {
   };
 
   const handleEdit = (staff) => {
+    console.log('Editing staff:', staff);
     setForm({
       first_name: staff.first_name,
       last_name: staff.last_name,
@@ -79,6 +92,7 @@ const StaffPage = () => {
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    console.log('Uploading CSV file:', file.name);
     setUploading(true);
     Papa.parse(file, {
       header: true,
@@ -93,7 +107,11 @@ const StaffPage = () => {
             venue_id: venueId
           }));
 
-        if (rows.length) await supabase.from('staff').insert(rows);
+        console.log('Parsed CSV rows:', rows);
+        if (rows.length) {
+          const { error } = await supabase.from('staff').insert(rows);
+          if (error) console.error('CSV insert error:', error);
+        }
         loadStaff();
         setUploading(false);
       },
@@ -101,6 +119,7 @@ const StaffPage = () => {
   };
 
   const handleDownloadCSV = () => {
+    console.log('Downloading staff list as CSV');
     const csv = Papa.unparse(staffList);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -114,12 +133,14 @@ const StaffPage = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this staff member?')) return;
+    console.log('Deleting staff with ID:', id);
     await supabase.from('staff').delete().eq('id', id);
     loadStaff();
   };
 
   const handleSearch = (term) => {
     const lowered = term.toLowerCase();
+    console.log('Searching staff with term:', term);
     const filtered = staffList.filter(
       (s) =>
         s.first_name.toLowerCase().includes(lowered) ||
@@ -134,6 +155,8 @@ const StaffPage = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  console.log('Current paginated staff:', paginatedStaff);
 
   return (
     <PageContainer>
