@@ -12,6 +12,7 @@ const Heatmap = () => {
   const [venueId, setVenueId] = useState(null);
   const [tables, setTables] = useState([]);
   const [newTableNumber, setNewTableNumber] = useState('');
+  const [newTableShape, setNewTableShape] = useState('square');
   const [saving, setSaving] = useState(false);
   const [tableLimit, setTableLimit] = useState(null);
   const [deletedIds, setDeletedIds] = useState([]);
@@ -126,7 +127,7 @@ const Heatmap = () => {
       table_number: number,
       x_px: snapToGrid(width / 2 - 35),
       y_px: snapToGrid(height / 2 - 35),
-      shape: 'square',
+      shape: newTableShape,
       venue_id: venueId
     };
 
@@ -216,6 +217,15 @@ const Heatmap = () => {
                 onChange={(e) => setNewTableNumber(e.target.value)}
                 className="px-2 py-1 text-sm border rounded"
               />
+              <select
+                value={newTableShape}
+                onChange={(e) => setNewTableShape(e.target.value)}
+                className="text-sm border rounded px-2 py-1"
+              >
+                <option value="square">Square</option>
+                <option value="circle">Circle</option>
+                <option value="long">Long</option>
+              </select>
               <button
                 onClick={addTable}
                 className="text-sm bg-gray-700 text-white px-3 py-1 rounded"
@@ -252,11 +262,18 @@ const Heatmap = () => {
           const avgRating = feedbackMap[t.table_number];
           const feedbackColor = getFeedbackColor(avgRating);
 
+          const tableShapeClasses =
+            t.shape === 'circle'
+              ? 'w-14 h-14 rounded-full bg-gray-700'
+              : t.shape === 'long'
+              ? 'w-28 h-10 rounded bg-gray-700'
+              : 'w-14 h-14 rounded bg-gray-700';
+
           const node = (
             <div className="absolute">
               <div className="relative">
                 <div
-                  className="w-14 h-14 bg-gray-700 text-white rounded flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer"
+                  className={`text-white flex items-center justify-center font-bold border-2 border-black shadow cursor-pointer ${tableShapeClasses}`}
                 >
                   {t.table_number}
                 </div>
