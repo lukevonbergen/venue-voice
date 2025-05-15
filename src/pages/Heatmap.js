@@ -234,6 +234,32 @@ const Heatmap = () => {
     setEditMode(!editMode);
   };
 
+  const saveLayout = async () => {
+    if (!venueId || !layoutRef.current) return;
+    setSaving(true);
+
+    const { width, height } = layoutRef.current.getBoundingClientRect();
+
+    const payload = tables.map(t => ({
+      id: t.id.startsWith('temp-') ? uuidv4() : t.id,
+      venue_id: t.venue_id,
+      table_number: t.table_number,
+      x_percent: (t.x_px / width) * 100,
+      y_percent: (t.y_px / height) * 100,
+      shape: t.shape
+    }));
+
+    const { error } = await supabase.from('table_positions').upsert(payload);
+    if (error) {
+      console.error('Save error:', error);
+    } else {
+      setEditMode(false);
+      setHasUnsavedChanges(false);
+    }
+
+    setSaving(false);
+  };
+
   const getFeedbackColor = (avg) => {
     if (avg === null || avg === undefined) return 'bg-blue-500';
     if (avg > 4) return 'bg-green-500';
