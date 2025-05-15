@@ -129,7 +129,7 @@ const StaffPage = () => {
                 <tr className="border-b bg-gray-50 text-left">
                   <th className="py-3 px-2">Name</th>
                   <th className="py-3 px-2">Email</th>
-                  <th className="py-3 px-2">Role</th>
+                  <th className="py-3 px-2">Job Title</th>
                   <th className="py-3 px-2 text-right">Actions</th>
                 </tr>
               </thead>
