@@ -151,7 +151,7 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
                 onClick={() => navigate('/dashboard/heatmap')}
                 className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
               >
-                View Heatmap
+                View on Heatmap
               </button>
             </div>
           </div>
