@@ -37,13 +37,13 @@ const StaffPage = () => {
   const handleAddOrUpdateStaff = async (e) => {
     e.preventDefault();
     const payload = { ...form, venue_id: venueId };
-  
+
     if (editingId) {
       const { error: updateError } = await supabase
         .from('staff')
         .update(payload)
         .eq('id', editingId);
-  
+
       if (updateError) {
         alert('Update error: ' + updateError.message);
         return;
@@ -52,23 +52,20 @@ const StaffPage = () => {
       const { error: insertError } = await supabase
         .from('staff')
         .insert([payload]);
-  
+
       if (insertError) {
         alert('Insert error: ' + insertError.message);
         return;
       }
     }
-  
+
     setForm({ first_name: '', last_name: '', email: '', role: '' });
     setEditingId(null);
     setModalOpen(false);
     loadStaff();
   };
-  
 
   const handleEdit = (staff) => {
-    console.log('EDIT:', staff);        // This should show the full object
-    console.log('ID Being Set:', staff.id); // This must be a UUID string
     setForm({
       first_name: staff.first_name,
       last_name: staff.last_name,
@@ -143,7 +140,6 @@ const StaffPage = () => {
       <h1 className="text-3xl font-bold mb-6">Manage Staff</h1>
 
       <div className="space-y-6">
-        {/* Top row: Search + Add Staff */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <input
             type="text"
@@ -160,7 +156,6 @@ const StaffPage = () => {
           </button>
         </div>
 
-        {/* Staff List */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Staff List</h2>
@@ -195,7 +190,6 @@ const StaffPage = () => {
             </table>
           )}
 
-          {/* Pagination */}
           <div className="flex justify-between items-center pt-4">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -218,7 +212,6 @@ const StaffPage = () => {
         </div>
       </div>
 
-      {/* Staff Form Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative space-y-6">
