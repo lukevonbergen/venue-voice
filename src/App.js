@@ -24,6 +24,7 @@ import SignInPage from './pages/SignIn';
 import PricingPage from './pages/Pricing';
 import FeaturesPage from './pages/Features';
 import DemoPage from './pages/DemoPage';
+import Settings_Staff from './pages/settings_staff';
 import ContactPage from './pages/ContactPage';
 import SecurityPage from './pages/SecurityPage';
 import TermsAndConditionsPage from './pages/Terms';
@@ -137,6 +138,16 @@ function App() {
           <VenueProvider>
             <DashboardFrame>
               <SettingsPage />
+            </DashboardFrame>
+          </VenueProvider>
+        }
+      />
+      <Route
+        path="/dashboard/settings/staff"
+        element={
+          <VenueProvider>
+            <DashboardFrame>
+              <Settings_Staff />
             </DashboardFrame>
           </VenueProvider>
         }
