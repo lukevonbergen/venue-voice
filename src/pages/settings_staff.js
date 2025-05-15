@@ -28,9 +28,10 @@ const StaffPage = () => {
     console.log('Loading staff for venue:', venueId);
     const { data, error } = await supabase.from('staff').select('*').eq('venue_id', venueId);
     if (error) console.error('Error loading staff:', error);
-    console.log('Staff loaded:', data);
-    setStaffList(data || []);
-    setFilteredStaff(data || []);
+    const sorted = (data || []).sort((a, b) => a.first_name.localeCompare(b.first_name));
+    console.log('Sorted staff:', sorted);
+    setStaffList(sorted);
+    setFilteredStaff(sorted);
   };
 
   const handleFormChange = (e) => {
