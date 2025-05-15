@@ -5,8 +5,10 @@ import VenueSettings from '../components/settings/VenueSettings';
 import BrandingSettings from '../components/settings/BrandingSettings';
 import SubscriptionStatus from '../components/settings/SubscriptionStatus';
 import PageContainer from '../components/PageContainer';
+import usePageTitle from '../hooks/usePageTitle';
 
 const SettingsPage = () => {
+  usePageTitle('Settings');
   const [venueId, setVenueId] = useState(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
