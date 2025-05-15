@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import Papa from 'papaparse';
-import { useVenue } from '../../context/VenueContext';
+import { useVenue } from '../context/VenueContext';
 
 const StaffPage = () => {
   const { venueId } = useVenue();
