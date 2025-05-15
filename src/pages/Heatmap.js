@@ -56,6 +56,64 @@ const Heatmap = () => {
     load();
   }, []);
 
+  const loadZones = async (venueId) => {
+    const { data } = await supabase.from('zones').select('*').eq('venue_id', venueId);
+    setZones(data || []);
+    if (data && data.length > 0) setSelectedZoneId(data[0].id);
+  };
+
+  const loadTables = async (venueId) => {
+    const { data } = await supabase.from('table_positions').select('*').eq('venue_id', venueId);
+    const container = layoutRef.current;
+    if (!container) return;
+    const { width, height } = container.getBoundingClientRect();
+    setTables(
+      (data || []).map(t => ({
+        ...t,
+        x_px: (t.x_percent / 100) * width,
+        y_px: (t.y_percent / 100) * height
+      }))
+    );
+  };
+
+  const fetchFeedback = async (venueId) => {
+    const { data } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('venue_id', venueId)
+      .order('created_at', { ascending: false });
+
+    const sessionMap = {}, latestSession = {}, ratings = {};
+    for (const entry of data) {
+      const table = entry.table_number;
+      if (!table) continue;
+      if (!latestSession[table]) {
+        latestSession[table] = entry.session_id;
+        sessionMap[table] = [entry];
+      } else if (entry.session_id === latestSession[table]) {
+        sessionMap[table].push(entry);
+      }
+    }
+
+    for (const table in sessionMap) {
+      const valid = sessionMap[table].filter(e => e.rating !== null && !e.is_actioned).map(e => e.rating);
+      ratings[table] = valid.length > 0 ? valid.reduce((a, b) => a + b) / valid.length : null;
+    }
+    setFeedbackMap(ratings);
+  };
+
+  const openFeedbackModal = async (tableNumber) => {
+    const { data } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('venue_id', venueId)
+      .eq('table_number', tableNumber)
+      .order('created_at', { ascending: false });
+
+    setFeedbackModalData(data);
+    setSelectedTable(tableNumber);
+  };
+
   const loadStaff = async (venueId) => {
     const { data } = await supabase.from('staff').select('id, first_name, last_name').eq('venue_id', venueId);
     setStaffList(data || []);
@@ -115,90 +173,6 @@ const Heatmap = () => {
       </div>
     </div>
   );
-
-  const addTable = () => {
-    const number = newTableNumber.trim();
-    if (!number || tables.find(t => t.table_number === number)) return alert('Table number must be unique.');
-    if (tables.length >= tableLimit) return alert('Max table limit reached.');
-    const { width, height } = layoutRef.current.getBoundingClientRect();
-    setTables(prev => [...prev, {
-      id: `temp-${Date.now()}`,
-      table_number: number,
-      x_px: Math.round(width / 2),
-      y_px: Math.round(height / 2),
-      shape: newTableShape,
-      venue_id: venueId,
-      zone_id: selectedZoneId
-    }]);
-    setNewTableNumber('');
-    setHasUnsavedChanges(true);
-  };
-
-  const removeTable = async (id) => {
-    const isTemp = id.startsWith('temp-');
-    setTables(prev => prev.filter(t => t.id !== id));
-    if (!isTemp) await supabase.from('table_positions').delete().eq('id', id);
-    setHasUnsavedChanges(true);
-  };
-
-  const clearAllTables = async () => {
-    if (!venueId) return;
-    if (!window.confirm('Are you sure you want to delete ALL tables?')) return;
-    await supabase.from('table_positions').delete().eq('venue_id', venueId);
-    setTables([]);
-    setHasUnsavedChanges(false);
-  };
-
-  const createNewZone = async () => {
-    const { data } = await supabase.from('zones').insert({ name: 'New Zone', venue_id: venueId, order: zones.length + 1 }).select('*').single();
-    if (data) { await loadZones(venueId); setSelectedZoneId(data.id); }
-  };
-
-  const deleteZone = async (zoneId) => {
-    const count = tables.filter(t => t.zone_id === zoneId).length;
-    if (count > 0 && !window.confirm(`This zone contains ${count} table(s). Deleting the zone will remove them. Proceed?`)) return;
-    await supabase.from('table_positions').delete().eq('zone_id', zoneId);
-    await supabase.from('zones').delete().eq('id', zoneId);
-    await loadZones(venueId);
-    await loadTables(venueId);
-  };
-
-  const handleZoneRename = (id, name) => setZones(z => z.map(zone => zone.id === id ? { ...zone, name } : zone));
-  const saveZoneRename = async (id) => {
-    const z = zones.find(z => z.id === id);
-    await supabase.from('zones').update({ name: z.name }).eq('id', id);
-    setEditingZoneId(null);
-  };
-
-  const handleToggleEdit = () => {
-    if (editMode && hasUnsavedChanges && !window.confirm('You have unsaved changes. Exit anyway?')) return;
-    setEditMode(!editMode);
-  };
-
-  const saveLayout = async () => {
-    if (!venueId || !layoutRef.current) return;
-    setSaving(true);
-    const { width, height } = layoutRef.current.getBoundingClientRect();
-    const payload = tables.map(t => ({
-      id: t.id.startsWith('temp-') ? uuidv4() : t.id,
-      venue_id: t.venue_id,
-      table_number: t.table_number,
-      x_percent: (t.x_px / width) * 100,
-      y_percent: (t.y_px / height) * 100,
-      shape: t.shape,
-      zone_id: t.zone_id ?? null
-    }));
-    const { error } = await supabase.from('table_positions').upsert(payload);
-    if (!error) { setEditMode(false); setHasUnsavedChanges(false); }
-    setSaving(false);
-  };
-
-  const getFeedbackColor = (avg) => {
-    if (avg === null || avg === undefined) return 'bg-blue-500';
-    if (avg > 4) return 'bg-green-500';
-    if (avg >= 2.5) return 'bg-amber-400';
-    return 'bg-red-600';
-  };
 
   return (
     <PageContainer>
