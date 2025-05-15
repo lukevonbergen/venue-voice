@@ -94,69 +94,61 @@ const StaffPage = () => {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-bold">Manage Staff</h1>
-
-      <div className="bg-white p-4 rounded-lg shadow border">
-        <h2 className="text-lg font-semibold mb-2">{editingId ? 'Edit Staff Member' : 'Add Staff Member'}</h2>
-        <form onSubmit={handleAddOrUpdateStaff} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input name="first_name" placeholder="First Name*" value={form.first_name} onChange={handleFormChange} className="border p-2 rounded" required />
-          <input name="last_name" placeholder="Last Name*" value={form.last_name} onChange={handleFormChange} className="border p-2 rounded" required />
-          <input name="email" placeholder="Email*" value={form.email} onChange={handleFormChange} className="border p-2 rounded col-span-2" required />
-          <input name="role" placeholder="Role (optional)" value={form.role} onChange={handleFormChange} className="border p-2 rounded col-span-2" />
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded col-span-2 hover:bg-blue-700">
-            {editingId ? 'Update Staff' : 'Add Staff'}
-          </button>
-        </form>
-      </div>
-
-      <div className="bg-white p-4 rounded-lg shadow border">
-        <h2 className="text-lg font-semibold mb-2">Upload CSV</h2>
-        <input type="file" accept=".csv" onChange={handleCSVUpload} className="mb-2" />
-        {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
-      </div>
-
-      <div className="bg-white p-4 rounded-lg shadow border">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold">Staff List</h2>
-          <button onClick={handleDownloadCSV} className="text-sm text-blue-600 hover:underline">Download CSV</button>
+      <h1 className="text-3xl font-bold mb-6">Manage Staff</h1>
+  
+      <div className="space-y-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+          <h2 className="text-xl font-semibold">{editingId ? 'Edit Staff Member' : 'Add Staff Member'}</h2>
+          <form onSubmit={handleAddOrUpdateStaff} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input name="first_name" placeholder="First Name*" value={form.first_name} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
+            <input name="last_name" placeholder="Last Name*" value={form.last_name} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
+            <input name="email" placeholder="Email*" value={form.email} onChange={handleFormChange} className="border p-3 rounded-xl col-span-2 focus:ring-2 focus:ring-blue-500" required />
+            <input name="role" placeholder="Role (optional)" value={form.role} onChange={handleFormChange} className="border p-3 rounded-xl col-span-2 focus:ring-2 focus:ring-blue-500" />
+            <button type="submit" className="bg-blue-600 text-white px-4 py-3 rounded-xl col-span-2 hover:bg-blue-700 transition-all font-semibold">
+              {editingId ? 'Update Staff' : 'Add Staff'}
+            </button>
+          </form>
         </div>
-        {staffList.length === 0 ? (
-          <p className="text-sm text-gray-500">No staff members yet.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b">
-                <th className="py-2">Name</th>
-                <th className="py-2">Email</th>
-                <th className="py-2">Role</th>
-                <th className="py-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staffList.map(staff => (
-                <tr key={staff.id} className="border-b">
-                  <td className="py-2">{staff.first_name} {staff.last_name}</td>
-                  <td className="py-2">{staff.email}</td>
-                  <td className="py-2">{staff.role}</td>
-                  <td className="py-2 text-right space-x-2">
-                    <button
-                      onClick={() => handleEdit(staff)}
-                      className="text-blue-600 text-sm hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(staff.id)}
-                      className="text-red-600 text-sm hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </td>
+  
+        <div className="bg-white p-6 rounded-2xl shadow-sm border">
+          <h2 className="text-xl font-semibold mb-2">Upload CSV</h2>
+          <input type="file" accept=".csv" onChange={handleCSVUpload} className="mb-2" />
+          {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
+        </div>
+  
+        <div className="bg-white p-6 rounded-2xl shadow-sm border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Staff List</h2>
+            <button onClick={handleDownloadCSV} className="text-sm text-blue-600 hover:underline font-medium">Download CSV</button>
+          </div>
+          {staffList.length === 0 ? (
+            <p className="text-sm text-gray-500">No staff members yet.</p>
+          ) : (
+            <table className="w-full text-sm table-auto">
+              <thead>
+                <tr className="border-b bg-gray-50 text-left">
+                  <th className="py-3 px-2">Name</th>
+                  <th className="py-3 px-2">Email</th>
+                  <th className="py-3 px-2">Role</th>
+                  <th className="py-3 px-2 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {staffList.map(staff => (
+                  <tr key={staff.id} className="border-b hover:bg-gray-50 transition">
+                    <td className="py-2 px-2">{staff.first_name} {staff.last_name}</td>
+                    <td className="py-2 px-2">{staff.email}</td>
+                    <td className="py-2 px-2">{staff.role}</td>
+                    <td className="py-2 px-2 text-right space-x-3">
+                      <button onClick={() => handleEdit(staff)} className="text-blue-600 hover:underline text-sm">Edit</button>
+                      <button onClick={() => handleDelete(staff.id)} className="text-red-600 hover:underline text-sm">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </PageContainer>
   );
