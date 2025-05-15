@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import { Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -14,6 +15,7 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [tableFilter, setTableFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (venueId) {
@@ -134,17 +136,24 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
       {sessionsToShow.map((session) => (
         <div
           key={session.session_id}
-          onClick={() => { setSelectedSession(session); setShowModal(true); }}
-          className="cursor-pointer border p-4 rounded mb-4 bg-white hover:bg-gray-50"
+          className="border p-4 rounded mb-4 bg-white hover:bg-gray-50"
         >
           <div className="flex justify-between items-center">
-            <div>
+            <div onClick={() => { setSelectedSession(session); setShowModal(true); }} className="cursor-pointer">
               <h3 className="text-sm font-semibold text-gray-800">
                 Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
               </h3>
               <p className="text-xs text-blue-600">Click to view</p>
             </div>
-            {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
+            <div className="flex items-center gap-2">
+              {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
+              <button
+                onClick={() => navigate('/dashboard/heatmap')}
+                className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+              >
+                View Heatmap
+              </button>
+            </div>
           </div>
         </div>
       ))}
