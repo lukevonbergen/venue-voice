@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -19,6 +19,8 @@ const DashboardFrame = ({ children }) => {
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState({ first_name: '', last_name: '', email: '' });
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -36,6 +38,16 @@ const DashboardFrame = ({ children }) => {
     };
 
     fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
@@ -73,30 +85,33 @@ const DashboardFrame = ({ children }) => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-xs text-gray-500">ID: {venueId || '...'}</div>
-            <div className="relative group">
+            <div className="relative" ref={dropdownRef}>
               <img
                 src={`https://ui-avatars.com/api/?name=${userInfo.first_name || 'User'}`}
                 alt="User"
                 className="w-8 h-8 rounded-full border cursor-pointer"
+                onClick={() => setDropdownOpen(prev => !prev)}
               />
-              <div className="absolute right-0 top-10 hidden group-hover:flex flex-col bg-white border shadow-lg rounded-md min-w-[180px] z-50">
-                <div className="px-4 py-3 text-sm text-gray-700 border-b">
-                  <div className="font-medium">{userInfo.first_name} {userInfo.last_name}</div>
-                  <div className="text-xs text-gray-500">{userInfo.email}</div>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-10 flex flex-col bg-white border shadow-lg rounded-md min-w-[180px] z-50">
+                  <div className="px-4 py-3 text-sm text-gray-700 border-b">
+                    <div className="font-medium">{userInfo.first_name} {userInfo.last_name}</div>
+                    <div className="text-xs text-gray-500">{userInfo.email}</div>
+                  </div>
+                  <Link
+                    to="/dashboard/settings"
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Account Settings
+                  </Link>
+                  <button
+                    onClick={() => setIsLogoutModalOpen(true)}
+                    className="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Sign Out
+                  </button>
                 </div>
-                <Link
-                  to="/dashboard/settings"
-                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Account Settings
-                </Link>
-                <button
-                  onClick={() => setIsLogoutModalOpen(true)}
-                  className="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                >
-                  Sign Out
-                </button>
-              </div>
+              )}
             </div>
           </div>
         </div>
