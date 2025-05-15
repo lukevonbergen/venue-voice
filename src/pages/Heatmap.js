@@ -3,10 +3,12 @@ import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
+import usePageTitle from '../hooks/usePageTitle';
 
 const GRID_SIZE = 20;
 
 const Heatmap = () => {
+  usePageTitle('Heatmap');
   const layoutRef = useRef(null);
 
   const [venueId, setVenueId] = useState(null);
