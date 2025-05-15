@@ -15,7 +15,6 @@ const Heatmap = () => {
   const [newTableShape, setNewTableShape] = useState('square');
   const [saving, setSaving] = useState(false);
   const [tableLimit, setTableLimit] = useState(null);
-  const [deletedIds, setDeletedIds] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [feedbackMap, setFeedbackMap] = useState({});
@@ -136,11 +135,40 @@ const Heatmap = () => {
     setHasUnsavedChanges(true);
   };
 
-  const removeTable = (id) => {
+  const removeTable = async (id) => {
     const isTemp = id.startsWith('temp-');
-    if (!isTemp) setDeletedIds(prev => [...prev, id]);
     setTables(prev => prev.filter(t => t.id !== id));
+
+    if (!isTemp) {
+      const { error } = await supabase
+        .from('table_positions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting table from Supabase:', error);
+      }
+    }
+
     setHasUnsavedChanges(true);
+  };
+
+  const clearAllTables = async () => {
+    if (!venueId) return;
+    const confirm = window.confirm('Are you sure you want to delete ALL tables? This cannot be undone.');
+    if (!confirm) return;
+
+    const { error } = await supabase
+      .from('table_positions')
+      .delete()
+      .eq('venue_id', venueId);
+
+    if (error) {
+      console.error('Error clearing all tables:', error);
+    } else {
+      setTables([]);
+      setHasUnsavedChanges(false);
+    }
   };
 
   const handleDragStop = (e, data, tableId) => {
@@ -172,15 +200,10 @@ const Heatmap = () => {
       shape: t.shape
     }));
 
-    if (deletedIds.length) {
-      await supabase.from('table_positions').delete().in('id', deletedIds);
-    }
-
     const { error } = await supabase.from('table_positions').upsert(payload);
     if (error) {
       console.error('Save error:', error);
     } else {
-      setDeletedIds([]);
       setEditMode(false);
       setHasUnsavedChanges(false);
     }
@@ -206,7 +229,7 @@ const Heatmap = () => {
   return (
     <PageContainer>
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <h1 className="text-2xl font-bold">Table Heatmap</h1>
           {editMode && (
             <>
@@ -238,6 +261,12 @@ const Heatmap = () => {
                 className="text-sm bg-green-600 text-white px-3 py-1 rounded"
               >
                 {saving ? 'Saving...' : 'Save Layout'}
+              </button>
+              <button
+                onClick={clearAllTables}
+                className="text-sm text-red-600 border border-red-600 px-3 py-1 rounded"
+              >
+                Clear All Tables
               </button>
             </>
           )}
