@@ -92,6 +92,7 @@ const StaffPage = () => {
   };
 
   return (
+    <PageContainer>
     <div className="max-w-3xl mx-auto space-y-8">
       <h1 className="text-2xl font-bold">Manage Staff</h1>
 
@@ -158,6 +159,7 @@ const StaffPage = () => {
         )}
       </div>
     </div>
+    </PageContainer>
   );
 };
 
