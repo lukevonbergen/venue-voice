@@ -36,30 +36,25 @@ const StaffPage = () => {
 
   const handleAddOrUpdateStaff = async (e) => {
     e.preventDefault();
-    if (!form.first_name || !form.last_name || !form.email) return;
-  
     const payload = { ...form, venue_id: venueId };
   
     if (editingId) {
-      const { data, error } = await supabase
+      const { error: updateError } = await supabase
         .from('staff')
         .update(payload)
-        .eq('id', editingId)
-        .select(); // Required to trigger update and confirm it worked
+        .eq('id', editingId);
   
-      if (!data?.length) {
-        alert('Update failed: No record found for this ID.');
-        return;
-      }
-  
-      if (error) {
-        alert('Update error: ' + error.message);
+      if (updateError) {
+        alert('Update error: ' + updateError.message);
         return;
       }
     } else {
-      const { error } = await supabase.from('staff').insert([payload]);
-      if (error) {
-        alert('Insert error: ' + error.message);
+      const { error: insertError } = await supabase
+        .from('staff')
+        .insert([payload]);
+  
+      if (insertError) {
+        alert('Insert error: ' + insertError.message);
         return;
       }
     }
@@ -68,7 +63,7 @@ const StaffPage = () => {
     setEditingId(null);
     setModalOpen(false);
     loadStaff();
-  };  
+  };
   
 
   const handleEdit = (staff) => {
