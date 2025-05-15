@@ -202,15 +202,39 @@ const Heatmap = () => {
 
   const deleteZone = async (zoneId) => {
     const tablesInZone = tables.filter(t => t.zone_id === zoneId);
+  
     if (tablesInZone.length > 0) {
-      const confirm = window.confirm(`This zone contains ${tablesInZone.length} table(s). Deleting the zone will unassign those tables. Proceed?`);
+      const confirm = window.confirm(
+        `This zone contains ${tablesInZone.length} table(s). Deleting the zone will permanently remove those tables. Proceed?`
+      );
       if (!confirm) return;
-      await supabase.from('table_positions').update({ zone_id: null }).eq('zone_id', zoneId);
+  
+      // ✅ Delete all tables in this zone
+      const { error: tableDeleteError } = await supabase
+        .from('table_positions')
+        .delete()
+        .eq('zone_id', zoneId);
+  
+      if (tableDeleteError) {
+        console.error('Error deleting tables in zone:', tableDeleteError);
+        return;
+      }
     }
-    await supabase.from('zones').delete().eq('id', zoneId);
-    await loadZones(venueId);
-    await loadTables(venueId);
+  
+    // ✅ Then delete the zone itself
+    const { error: zoneDeleteError } = await supabase
+      .from('zones')
+      .delete()
+      .eq('id', zoneId);
+  
+    if (zoneDeleteError) {
+      console.error('Failed to delete zone:', zoneDeleteError);
+    } else {
+      await loadZones(venueId);
+      await loadTables(venueId);
+    }
   };
+  
 
   const createNewZone = async () => {
     const { data, error } = await supabase.from('zones').insert({
