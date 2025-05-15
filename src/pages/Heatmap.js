@@ -194,30 +194,44 @@ const Heatmap = () => {
     setHasUnsavedChanges(true);
   };
 
-  const saveLayout = async () => {
-    if (!venueId || !layoutRef.current) return;
-    setSaving(true);
+  const clearAllTables = async () => {
+    if (!venueId) return;
+    const confirmClear = window.confirm('Are you sure you want to delete ALL tables? This cannot be undone.');
+    if (!confirmClear) return;
 
-    const { width, height } = layoutRef.current.getBoundingClientRect();
+    const { error } = await supabase
+      .from('table_positions')
+      .delete()
+      .eq('venue_id', venueId);
 
-    const payload = tables.map(t => ({
-      id: t.id.startsWith('temp-') ? uuidv4() : t.id,
-      venue_id: t.venue_id,
-      table_number: t.table_number,
-      x_percent: (t.x_px / width) * 100,
-      y_percent: (t.y_px / height) * 100,
-      shape: t.shape
-    }));
-
-    const { error } = await supabase.from('table_positions').upsert(payload);
     if (error) {
-      console.error('Save error:', error);
+      console.error('Error clearing all tables:', error);
     } else {
-      setEditMode(false);
+      setTables([]);
       setHasUnsavedChanges(false);
     }
+  };
 
-    setSaving(false);
+  const handleDragStop = (e, data, tableId) => {
+    const snappedX = snapToGrid(data.x);
+    const snappedY = snapToGrid(data.y);
+
+    setTables(prev =>
+      prev.map(t =>
+        t.id === tableId
+          ? { ...t, x_px: snappedX, y_px: snappedY }
+          : t
+      )
+    );
+    setHasUnsavedChanges(true);
+  };
+
+  const handleToggleEdit = () => {
+    if (editMode && hasUnsavedChanges) {
+      const confirmExit = window.confirm('You have unsaved changes. Exit anyway?');
+      if (!confirmExit) return;
+    }
+    setEditMode(!editMode);
   };
 
   const getFeedbackColor = (avg) => {
