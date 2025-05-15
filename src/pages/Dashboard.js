@@ -6,8 +6,10 @@ import FeedbackTabs from '../components/FeedbackTabs';
 import SessionsActionedTile from '../components/reports/SessionsActionedTile';
 import UnresolvedAlertsTile from '../components/reports/UnresolvedAlertsTile';
 import AvgSatisfactionTile from '../components/reports/AvgSatisfactionTile';
+import usePageTitle from '../hooks/usePageTitle';
 
 const DashboardPage = () => {
+  usePageTitle('Overview');
   const [venueId, setVenueId] = useState(null);
   const [questionsMap, setQuestionsMap] = useState({});
   const [sortOrder, setSortOrder] = useState('desc');
