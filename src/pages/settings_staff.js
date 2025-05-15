@@ -72,6 +72,8 @@ const StaffPage = () => {
   
 
   const handleEdit = (staff) => {
+    console.log('EDIT:', staff);        // This should show the full object
+    console.log('ID Being Set:', staff.id); // This must be a UUID string
     setForm({
       first_name: staff.first_name,
       last_name: staff.last_name,
