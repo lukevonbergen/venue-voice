@@ -11,6 +11,7 @@ const StaffPage = () => {
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', role: '' });
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -45,6 +46,7 @@ const StaffPage = () => {
 
     setForm({ first_name: '', last_name: '', email: '', role: '' });
     setEditingId(null);
+    setModalOpen(false);
     loadStaff();
   };
 
@@ -56,6 +58,7 @@ const StaffPage = () => {
       role: staff.role || ''
     });
     setEditingId(staff.id);
+    setModalOpen(true);
   };
 
   const handleCSVUpload = (e) => {
@@ -122,28 +125,8 @@ const StaffPage = () => {
       <h1 className="text-3xl font-bold mb-6">Manage Staff</h1>
 
       <div className="space-y-6">
-        {/* Add + Upload */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-6">
-          <h2 className="text-xl font-semibold">{editingId ? 'Edit Staff Member' : 'Add Staff Member'}</h2>
-          <form onSubmit={handleAddOrUpdateStaff} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="first_name" placeholder="First Name*" value={form.first_name} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
-            <input name="last_name" placeholder="Last Name*" value={form.last_name} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
-            <input name="email" placeholder="Email*" value={form.email} onChange={handleFormChange} className="border p-3 rounded-xl col-span-2 focus:ring-2 focus:ring-blue-500" required />
-            <input name="role" placeholder="Role (optional)" value={form.role} onChange={handleFormChange} className="border p-3 rounded-xl col-span-2 focus:ring-2 focus:ring-blue-500" />
-            <button type="submit" className="bg-blue-600 text-white px-4 py-3 rounded-xl col-span-2 hover:bg-blue-700 transition-all font-semibold">
-              {editingId ? 'Update Staff' : 'Add Staff'}
-            </button>
-          </form>
-
-          <div>
-            <h3 className="text-lg font-medium mb-2">Upload CSV</h3>
-            <input type="file" accept=".csv" onChange={handleCSVUpload} className="mb-2" />
-            {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="flex items-center justify-between">
+        {/* Top row: Search + Add Staff */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <input
             type="text"
             placeholder="Search staff..."
@@ -151,11 +134,21 @@ const StaffPage = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button onClick={handleDownloadCSV} className="ml-4 text-sm text-blue-600 hover:underline font-medium">Download CSV</button>
+          <button
+            onClick={() => { setModalOpen(true); setForm({ first_name: '', last_name: '', email: '', role: '' }); setEditingId(null); }}
+            className="bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-all font-semibold"
+          >
+            Add Staff Member
+          </button>
         </div>
 
         {/* Staff List */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Staff List</h2>
+            <button onClick={handleDownloadCSV} className="text-sm text-blue-600 hover:underline font-medium">Download CSV</button>
+          </div>
+
           {paginatedStaff.length === 0 ? (
             <p className="text-sm text-gray-500">No staff members found.</p>
           ) : (
@@ -206,6 +199,40 @@ const StaffPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Staff Form Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative space-y-6">
+            <button
+              className="absolute top-3 right-4 text-gray-500 hover:text-black"
+              onClick={() => setModalOpen(false)}
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">{editingId ? 'Edit Staff' : 'Add Staff'}</h2>
+              <label className="text-sm text-blue-600 hover:underline cursor-pointer">
+                Upload CSV
+                <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
+              </label>
+            </div>
+
+            <form onSubmit={handleAddOrUpdateStaff} className="grid grid-cols-1 gap-4">
+              <input name="first_name" placeholder="First Name*" value={form.first_name} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
+              <input name="last_name" placeholder="Last Name*" value={form.last_name} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
+              <input name="email" placeholder="Email*" value={form.email} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" required />
+              <input name="role" placeholder="Role (optional)" value={form.role} onChange={handleFormChange} className="border p-3 rounded-xl focus:ring-2 focus:ring-blue-500" />
+              <button type="submit" className="bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-all font-semibold">
+                {editingId ? 'Update Staff' : 'Add Staff'}
+              </button>
+            </form>
+
+            {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 };
