@@ -56,6 +56,90 @@ const Heatmap = () => {
     load();
   }, []);
 
+  const handleToggleEdit = () => {
+    if (editMode && hasUnsavedChanges && !window.confirm('You have unsaved changes. Exit anyway?')) return;
+    setEditMode(!editMode);
+  };
+
+  const addTable = () => {
+    const number = newTableNumber.trim();
+    if (!number || tables.find(t => t.table_number === number)) return alert('Table number must be unique.');
+    if (tables.length >= tableLimit) return alert('Max table limit reached.');
+    const { width, height } = layoutRef.current.getBoundingClientRect();
+    setTables(prev => [...prev, {
+      id: `temp-${Date.now()}`,
+      table_number: number,
+      x_px: Math.round(width / 2),
+      y_px: Math.round(height / 2),
+      shape: newTableShape,
+      venue_id: venueId,
+      zone_id: selectedZoneId
+    }]);
+    setNewTableNumber('');
+    setHasUnsavedChanges(true);
+  };
+
+  const saveLayout = async () => {
+    if (!venueId || !layoutRef.current) return;
+    setSaving(true);
+    const { width, height } = layoutRef.current.getBoundingClientRect();
+    const payload = tables.map(t => ({
+      id: t.id.startsWith('temp-') ? uuidv4() : t.id,
+      venue_id: t.venue_id,
+      table_number: t.table_number,
+      x_percent: (t.x_px / width) * 100,
+      y_percent: (t.y_px / height) * 100,
+      shape: t.shape,
+      zone_id: t.zone_id ?? null
+    }));
+    const { error } = await supabase.from('table_positions').upsert(payload);
+    if (!error) { setEditMode(false); setHasUnsavedChanges(false); }
+    setSaving(false);
+  };
+
+  const clearAllTables = async () => {
+    if (!venueId) return;
+    if (!window.confirm('Are you sure you want to delete ALL tables?')) return;
+    await supabase.from('table_positions').delete().eq('venue_id', venueId);
+    setTables([]);
+    setHasUnsavedChanges(false);
+  };
+
+  const handleZoneRename = (id, name) => setZones(z => z.map(zone => zone.id === id ? { ...zone, name } : zone));
+  const saveZoneRename = async (id) => {
+    const z = zones.find(z => z.id === id);
+    await supabase.from('zones').update({ name: z.name }).eq('id', id);
+    setEditingZoneId(null);
+  };
+
+  const deleteZone = async (zoneId) => {
+    const count = tables.filter(t => t.zone_id === zoneId).length;
+    if (count > 0 && !window.confirm(`This zone contains ${count} table(s). Deleting the zone will remove them. Proceed?`)) return;
+    await supabase.from('table_positions').delete().eq('zone_id', zoneId);
+    await supabase.from('zones').delete().eq('id', zoneId);
+    await loadZones(venueId);
+    await loadTables(venueId);
+  };
+
+  const createNewZone = async () => {
+    const { data } = await supabase.from('zones').insert({ name: 'New Zone', venue_id: venueId, order: zones.length + 1 }).select('*').single();
+    if (data) { await loadZones(venueId); setSelectedZoneId(data.id); }
+  };
+
+  const getFeedbackColor = (avg) => {
+    if (avg === null || avg === undefined) return 'bg-blue-500';
+    if (avg > 4) return 'bg-green-500';
+    if (avg >= 2.5) return 'bg-amber-400';
+    return 'bg-red-600';
+  };
+
+  const removeTable = async (id) => {
+    const isTemp = id.startsWith('temp-');
+    setTables(prev => prev.filter(t => t.id !== id));
+    if (!isTemp) await supabase.from('table_positions').delete().eq('id', id);
+    setHasUnsavedChanges(true);
+  };
+
   const loadZones = async (venueId) => {
     const { data } = await supabase.from('zones').select('*').eq('venue_id', venueId);
     setZones(data || []);
