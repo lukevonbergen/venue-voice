@@ -30,6 +30,7 @@ const StaffPage = () => {
     if (error) console.error('Error loading staff:', error);
     console.log('Staff loaded:', data);
     setStaffList(data || []);
+    setFilteredStaff(data || []);
   };
 
   const handleFormChange = (e) => {
