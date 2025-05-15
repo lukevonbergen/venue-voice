@@ -3,8 +3,10 @@ import supabase from '../utils/supabase';
 import Template1 from '../components/QRTemplates/Template1';
 import Template2 from '../components/QRTemplates/Template2';
 import PageContainer from '../components/PageContainer';
+import usePageTitle from '../hooks/usePageTitle';
 
 const QRTemplates = () => {
+  usePageTitle('QR Templates');
   const [logo, setLogo] = useState(null);
   const [primaryColor, setPrimaryColor] = useState('#1890ff');
   const [secondaryColor, setSecondaryColor] = useState('#52c41a');
