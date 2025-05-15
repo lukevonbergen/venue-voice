@@ -37,28 +37,68 @@ const Heatmap = () => {
       setVenueId(venue.id);
       setTableLimit(venue.table_count);
 
-      const container = layoutRef.current;
-      if (!container) return;
-
-      const { width, height } = container.getBoundingClientRect();
-
-      const { data: tableData } = await supabase
-        .from('table_positions')
-        .select('*')
-        .eq('venue_id', venue.id);
-
-      const loaded = tableData.map(t => ({
-        ...t,
-        x_px: (t.x_percent / 100) * width,
-        y_px: (t.y_percent / 100) * height
-      }));
-
-      setTables(loaded);
+      await loadTables(venue.id);
       await fetchFeedback(venue.id);
     };
 
     load();
   }, []);
+
+  useEffect(() => {
+    if (!venueId) return;
+
+    const feedbackChannel = supabase
+      .channel('feedback-heatmap')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'feedback',
+          filter: `venue_id=eq.${venueId}`,
+        },
+        () => fetchFeedback(venueId)
+      )
+      .subscribe();
+
+    const tablesChannel = supabase
+      .channel('tables-heatmap')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'table_positions',
+          filter: `venue_id=eq.${venueId}`,
+        },
+        () => loadTables(venueId)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(feedbackChannel);
+      supabase.removeChannel(tablesChannel);
+    };
+  }, [venueId]);
+
+  const loadTables = async (venueId) => {
+    const container = layoutRef.current;
+    if (!container) return;
+    const { width, height } = container.getBoundingClientRect();
+
+    const { data: tableData } = await supabase
+      .from('table_positions')
+      .select('*')
+      .eq('venue_id', venueId);
+
+    const loaded = tableData.map(t => ({
+      ...t,
+      x_px: (t.x_percent / 100) * width,
+      y_px: (t.y_percent / 100) * height
+    }));
+
+    setTables(loaded);
+  };
 
   const fetchFeedback = async (venueId) => {
     const { data, error } = await supabase
@@ -141,50 +181,16 @@ const Heatmap = () => {
     setTables(prev => prev.filter(t => t.id !== id));
 
     if (!isTemp) {
-      const { error, count } = await supabase
+      const { error } = await supabase
         .from('table_positions')
-        .delete({ count: 'exact' })
+        .delete()
         .eq('id', id);
 
       if (error) {
         console.error('Error deleting table from Supabase:', error);
-      } else {
-        console.log(`Deleted ${count} table(s) from Supabase.`);
       }
     }
 
-    setHasUnsavedChanges(true);
-  };
-
-  const clearAllTables = async () => {
-    if (!venueId) return;
-    const confirm = window.confirm('Are you sure you want to delete ALL tables? This cannot be undone.');
-    if (!confirm) return;
-
-    const { error } = await supabase
-      .from('table_positions')
-      .delete()
-      .eq('venue_id', venueId);
-
-    if (error) {
-      console.error('Error clearing all tables:', error);
-    } else {
-      setTables([]);
-      setHasUnsavedChanges(false);
-    }
-  };
-
-  const handleDragStop = (e, data, tableId) => {
-    const snappedX = snapToGrid(data.x);
-    const snappedY = snapToGrid(data.y);
-
-    setTables(prev =>
-      prev.map(t =>
-        t.id === tableId
-          ? { ...t, x_px: snappedX, y_px: snappedY }
-          : t
-      )
-    );
     setHasUnsavedChanges(true);
   };
 
@@ -214,20 +220,14 @@ const Heatmap = () => {
     setSaving(false);
   };
 
-  const handleToggleEdit = () => {
-    if (editMode && hasUnsavedChanges) {
-      const confirmExit = window.confirm('You have unsaved changes. Exit anyway?');
-      if (!confirmExit) return;
-    }
-    setEditMode(!editMode);
+  const getFeedbackColor = (avg) => {
+    if (avg === null || avg === undefined) return 'bg-blue-500';
+    if (avg > 4) return 'bg-green-500';
+    if (avg >= 2.5) return 'bg-amber-400';
+    return 'bg-red-600';
   };
 
-  const getFeedbackColor = (avg) => {
-    if (avg === null || avg === undefined) return 'bg-blue-500';     // No feedback
-    if (avg > 4) return 'bg-green-500';                              // Positive
-    if (avg >= 2.5) return 'bg-amber-400';                           // Neutral
-    return 'bg-red-600';                                            // Negative
-  };
+  // Render omitted for brevity — unchanged from your version
 
   return (
     <PageContainer>
