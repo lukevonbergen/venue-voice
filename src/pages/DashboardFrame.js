@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, LogOut, BarChart, Settings } from 'lucide-react';
+import {
+  LayoutDashboard,
+  MessageSquare,
+  LogOut,
+  BarChart,
+  Settings,
+  Map,
+  QrCode,
+} from 'lucide-react';
 import supabase from '../utils/supabase';
 import { useVenue } from '../context/VenueContext';
 
@@ -35,7 +43,7 @@ const DashboardFrame = ({ children }) => {
     <div className="min-h-screen bg-gray-100">
       {/* Top Bar */}
       <div className="bg-white border-b shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
             <img
               src="https://www.getchatters.com/img/Logo.svg"
@@ -53,9 +61,10 @@ const DashboardFrame = ({ children }) => {
             />
             <button
               onClick={() => setIsLogoutModalOpen(true)}
-              className="text-sm text-red-600 hover:underline"
+              className="text-red-600 hover:text-red-700"
+              title="Sign Out"
             >
-              Sign Out
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -67,8 +76,8 @@ const DashboardFrame = ({ children }) => {
           <NavLink to="/dashboard" icon={LayoutDashboard}>Dashboard</NavLink>
           <NavLink to="/dashboard/questions" icon={MessageSquare}>Questions</NavLink>
           <NavLink to="/dashboard/reports" icon={BarChart}>Reports</NavLink>
-          <NavLink to="/dashboard/heatmap" icon={BarChart}>Heatmap</NavLink>
-          <NavLink to="/dashboard/templates" icon={BarChart}>QR Templates</NavLink>
+          <NavLink to="/dashboard/heatmap" icon={Map}>Heatmap</NavLink>
+          <NavLink to="/dashboard/templates" icon={QrCode}>QR Templates</NavLink>
           <NavLink to="/dashboard/settings" icon={Settings}>Settings</NavLink>
         </div>
       </div>
