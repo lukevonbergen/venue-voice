@@ -134,18 +134,20 @@ const Heatmap = () => {
     setHasUnsavedChanges(true);
   };
 
-  const removeTable = async (id, table_number) => {
+  const removeTable = async (id) => {
     const isTemp = id.startsWith('temp-');
     setTables(prev => prev.filter(t => t.id !== id));
 
     if (!isTemp) {
-      const { error } = await supabase
+      const { error, count } = await supabase
         .from('table_positions')
-        .delete()
-        .match({ venue_id: venueId, table_number });
+        .delete({ count: 'exact' })
+        .eq('id', id);
 
       if (error) {
         console.error('Error deleting table from Supabase:', error);
+      } else {
+        console.log(`Deleted ${count} table(s) from Supabase.`);
       }
     }
 
@@ -321,7 +323,7 @@ const Heatmap = () => {
 
               {editMode && (
                 <button
-                  onClick={() => removeTable(t.id, t.table_number)}
+                  onClick={() => removeTable(t.id)}
                   className="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
                 >
                   ×
