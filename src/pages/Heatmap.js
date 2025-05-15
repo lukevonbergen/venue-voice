@@ -271,6 +271,57 @@ const Heatmap = () => {
     return 'bg-red-600';
   };
 
+  const removeTable = async (id) => {
+    const isTemp = id.startsWith('temp-');
+    setTables(prev => prev.filter(t => t.id !== id));
+
+    if (!isTemp) {
+      const { error } = await supabase
+        .from('table_positions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting table from Supabase:', error);
+      }
+    }
+
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDragStop = (e, data, tableId) => {
+    const snappedX = snapToGrid(data.x);
+    const snappedY = snapToGrid(data.y);
+
+    setTables(prev =>
+      prev.map(t =>
+        t.id === tableId
+          ? { ...t, x_px: snappedX, y_px: snappedY }
+          : t
+      )
+    );
+    setHasUnsavedChanges(true);
+  };
+
+  const clearAllTables = async () => {
+    if (!venueId) return;
+    const confirmClear = window.confirm('Are you sure you want to delete ALL tables? This cannot be undone.');
+    if (!confirmClear) return;
+
+    const { error } = await supabase
+      .from('table_positions')
+      .delete()
+      .eq('venue_id', venueId);
+
+    if (error) {
+      console.error('Error clearing all tables:', error);
+    } else {
+      setTables([]);
+      setHasUnsavedChanges(false);
+    }
+  };
+
+
   return (
     <PageContainer>
       <div className="flex items-center justify-between mb-4">
