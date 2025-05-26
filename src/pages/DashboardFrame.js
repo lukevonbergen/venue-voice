@@ -57,7 +57,7 @@ const DashboardFrame = ({ children }) => {
   };
 
   const NavLink = ({ to, children, icon: Icon }) => {
-    const isActive = location.pathname === to;
+    const isActive = location.pathname.startsWith(to);
     return (
       <Link
         to={to}
