@@ -186,7 +186,20 @@ const StaffPage = () => {
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Staff List</h2>
-            <button onClick={handleDownloadCSV} className="text-sm text-blue-600 hover:underline font-medium">Download CSV</button>
+            <div className="flex items-center gap-4">
+              <a
+                href="/dashboard/staff/leaderboard"
+                className="text-sm text-gray-600 hover:text-blue-600 hover:underline font-medium transition"
+              >
+                View Leaderboard
+              </a>
+              <button
+                onClick={handleDownloadCSV}
+                className="text-sm text-blue-600 hover:underline font-medium"
+              >
+                Download CSV
+              </button>
+            </div>
           </div>
 
           {paginatedStaff.length === 0 ? (
