@@ -225,12 +225,27 @@ const Heatmap = () => {
   };
 
   const markResolved = async (feedbackId) => {
-    const staffId = staffSelections[feedbackId];
-    if (!staffId) return alert('Please select a staff member');
-    await supabase.from('feedback').update({ is_actioned: true, resolved_at: new Date(), resolved_by: staffId }).eq('id', feedbackId);
-    await fetchFeedback(venueId);
-    setFeedbackModalData(prev => prev.map(f => f.id === feedbackId ? { ...f, is_actioned: true, resolved_by: staffId } : f));
-  };
+  const staffId = staffSelections[feedbackId];
+  if (!staffId) return alert('Please select a staff member');
+
+  const { error } = await supabase
+    .from('feedback')
+    .update({
+      is_actioned: true,
+      resolved_at: new Date(),
+      resolved_by: staffId
+    })
+    .eq('id', feedbackId);
+
+  if (error) {
+    console.error('Error resolving feedback:', error.message);
+    return alert('Something went wrong marking as resolved.');
+  }
+
+  // Remove it from modal state
+  setFeedbackModalData(prev => prev.filter(f => f.id !== feedbackId));
+};
+
 
   const undoResolved = async (feedbackId) => {
     await supabase.from('feedback').update({ is_actioned: false, resolved_at: null, resolved_by: null }).eq('id', feedbackId);
