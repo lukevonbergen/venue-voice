@@ -15,6 +15,8 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [tableFilter, setTableFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedStaffId, setSelectedStaffId] = useState('');
+  const [staffList, setStaffList] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +24,20 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
       loadFeedback(venueId);
       setupRealtime(venueId);
     }
+  }, [venueId]);
+
+  useEffect(() => {
+    if (!venueId) return;
+
+    const loadStaff = async () => {
+      const { data } = await supabase
+        .from('staff')
+        .select('id, first_name, last_name')
+        .eq('venue_id', venueId);
+      setStaffList(data || []);
+    };
+
+    loadStaff();
   }, [venueId]);
 
   const loadFeedback = async (venueId) => {
@@ -90,10 +106,26 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
 
   const FeedbackModal = ({ session, onClose }) => {
     const markSessionAsActioned = async () => {
+      if (!selectedStaffId) return alert('Please select a staff member');
+
       const ids = session.items.map(i => i.id);
-      await supabase.from('feedback').update({ is_actioned: true }).in('id', ids);
+      const { error } = await supabase
+        .from('feedback')
+        .update({
+          is_actioned: true,
+          resolved_by: selectedStaffId,
+          resolved_at: new Date()
+        })
+        .in('id', ids);
+
+      if (error) {
+        alert('Something went wrong updating feedback');
+        return;
+      }
+
       await loadFeedback(venueId);
       onClose();
+      setSelectedStaffId('');
     };
 
     if (!session) return null;
@@ -109,8 +141,28 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
           </h2>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Resolved by</label>
+            <select
+              value={selectedStaffId}
+              onChange={(e) => setSelectedStaffId(e.target.value)}
+              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              <option value="">Select Staff Member</option>
+              {staffList.map(s => (
+                <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+              ))}
+            </select>
+          </div>
+
           {renderFeedbackItems(session.items)}
-          <button onClick={markSessionAsActioned} className="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+
+          <button
+            onClick={markSessionAsActioned}
+            disabled={!selectedStaffId}
+            className={`mt-4 px-4 py-2 rounded text-white ${selectedStaffId ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-300 cursor-not-allowed'}`}
+          >
             Mark as Actioned
           </button>
         </div>
