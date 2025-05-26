@@ -175,7 +175,7 @@ const StaffPage = () => {
           />
           <button
             onClick={() => { setModalOpen(true); setForm({ first_name: '', last_name: '', email: '', role: '' }); setEditingId(null); }}
-            className="bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-all font-semibold"
+            className="bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-all"
           >
             Add Staff Member
           </button>
