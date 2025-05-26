@@ -7,75 +7,83 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
 const StaffLeaderboard = ({ venueId }) => {
-    usePageTitle('Staff Leaderboard');
+  usePageTitle('Staff Leaderboard');
   const [staffStats, setStaffStats] = useState([]);
-  const [timeFilter, setTimeFilter] = useState('7d'); // options: '7d', '30d', 'all'
+  const [timeFilter, setTimeFilter] = useState('7d'); // '7d', '30d', 'all'
 
+  // ✅ Define this BEFORE useEffect
+  const fetchStaffLeaderboard = async (venueId) => {
+    console.log('✅ Fetching leaderboard for venue:', venueId);
+    let fromDate;
+    const now = dayjs();
+    if (timeFilter === '7d') fromDate = now.subtract(7, 'day').toISOString();
+    if (timeFilter === '30d') fromDate = now.subtract(30, 'day').toISOString();
+
+    console.log('🕒 Time filter:', timeFilter, 'From date:', fromDate || 'all time');
+
+    let feedbackQuery = supabase
+      .from('feedback')
+      .select('id, resolved_by, resolved_at')
+      .eq('venue_id', venueId)
+      .eq('is_actioned', true);
+
+    if (fromDate) feedbackQuery = feedbackQuery.gte('resolved_at', fromDate);
+
+    const { data: feedbackData, error: feedbackError } = await feedbackQuery;
+
+    if (feedbackError) {
+      console.error('❌ Error fetching feedback:', feedbackError);
+      return;
+    }
+
+    console.log('📥 Feedback rows fetched:', feedbackData.length);
+    console.log('🔎 Raw feedback:', feedbackData);
+
+    const staffCounts = {};
+    const staffIds = new Set();
+
+    for (const fb of feedbackData) {
+      if (!fb.resolved_by) continue;
+      staffCounts[fb.resolved_by] = (staffCounts[fb.resolved_by] || 0) + 1;
+      staffIds.add(fb.resolved_by);
+    }
+
+    console.log('📊 Staff counts map:', staffCounts);
+    console.log('🧑‍🤝‍🧑 Unique staff IDs:', [...staffIds]);
+
+    if (staffIds.size === 0) {
+      console.warn('⚠️ No staff IDs found. Nobody has resolved feedback in this period.');
+      setStaffStats([]);
+      return;
+    }
+
+    const { data: staffData, error: staffError } = await supabase
+      .from('staff')
+      .select('id, first_name, last_name')
+      .in('id', [...staffIds]);
+
+    if (staffError) {
+      console.error('❌ Error fetching staff info:', staffError);
+      return;
+    }
+
+    console.log('👥 Staff data from DB:', staffData);
+
+    const combined = staffData.map(s => ({
+      id: s.id,
+      name: `${s.first_name} ${s.last_name}`,
+      count: staffCounts[s.id] || 0
+    }));
+
+    const sorted = combined.sort((a, b) => b.count - a.count);
+    console.log('🏁 Final sorted leaderboard:', sorted);
+    setStaffStats(sorted);
+  };
+
+  // ✅ useEffect AFTER fetch function
   useEffect(() => {
     if (venueId) fetchStaffLeaderboard(venueId);
   }, [venueId, timeFilter]);
-
-const fetchStaffLeaderboard = async (venueId) => {
-    console.log('Fetching leaderboard for venue:', venueId);
-  let fromDate;
-  const now = dayjs();
-  if (timeFilter === '7d') fromDate = now.subtract(7, 'day').toISOString();
-  if (timeFilter === '30d') fromDate = now.subtract(30, 'day').toISOString();
-
-  let feedbackQuery = supabase
-    .from('feedback')
-    .select('id, resolved_by, resolved_at')
-    .eq('venue_id', venueId)
-    .eq('is_actioned', true);
-
-  if (fromDate) feedbackQuery = feedbackQuery.gte('resolved_at', fromDate);
-
-  const { data: feedbackData, error: feedbackError } = await feedbackQuery;
-  console.log('Fetched feedback:', feedbackData);
-  if (feedbackError) {
-    console.error('Error fetching feedback:', feedbackError);
-    return;
-  }
-
-  const staffCounts = {};
-  const staffIds = new Set();
-
-  for (const fb of feedbackData) {
-    if (!fb.resolved_by) continue;
-    staffCounts[fb.resolved_by] = (staffCounts[fb.resolved_by] || 0) + 1;
-    staffIds.add(fb.resolved_by);
-  }
-
-  console.log('Staff counts:', staffCounts);
-    console.log('Staff IDs:', [...staffIds]);
-
-
-  if (staffIds.size === 0) {
-    setStaffStats([]);
-    return;
-  }
-
-  const { data: staffData, error: staffError } = await supabase
-
-    .from('staff')
-    .select('id, first_name, last_name')
-    .in('id', [...staffIds]);
-
-  if (staffError) {
-    console.error('Error fetching staff info:', staffError);
-    return;
-  }
-
-  const combined = staffData.map(s => ({
-    id: s.id,
-    name: `${s.first_name} ${s.last_name}`,
-    count: staffCounts[s.id] || 0
-  }));
-
-  const sorted = combined.sort((a, b) => b.count - a.count);
-  setStaffStats(sorted);
-};
-
 
   const renderMedal = (index) => {
     if (index === 0) return '🥇';
