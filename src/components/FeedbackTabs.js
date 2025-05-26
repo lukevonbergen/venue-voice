@@ -107,71 +107,93 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
     </div>
   );
 
-  const FeedbackModal = ({ session, onClose }) => {
-    const markSessionAsActioned = async () => {
-      if (!selectedStaffId) return alert('Please select a staff member');
+const FeedbackModal = ({ session, onClose }) => {
+  const markSessionAsActioned = async () => {
+    if (!selectedStaffId) return alert('Please select a staff member');
 
-      const ids = session.items.map(i => i.id);
-      const { error } = await supabase
-        .from('feedback')
-        .update({
-          is_actioned: true,
-          resolved_by: selectedStaffId,
-          resolved_at: new Date()
-        })
-        .in('id', ids);
+    const ids = session.items.map(i => i.id);
+    const { error } = await supabase
+      .from('feedback')
+      .update({
+        is_actioned: true,
+        resolved_by: selectedStaffId,
+        resolved_at: new Date()
+      })
+      .in('id', ids);
 
-      if (error) {
-        alert('Something went wrong updating feedback');
-        return;
-      }
+    if (error) {
+      alert('Something went wrong updating feedback');
+      return;
+    }
 
-      await loadFeedback(venueId);
-      onClose();
-      setSelectedStaffId('');
-    };
-
-    if (!session) return null;
-
-    return (
-      <div
-        id="modal-overlay"
-        onClick={(e) => e.target.id === 'modal-overlay' && onClose()}
-        className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-      >
-        <div className="bg-white w-full max-w-md p-6 rounded shadow-lg relative">
-          <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Table {session.items[0].table_number} – {dayjs(session.items[0].created_at).format('dddd D MMMM, h:mma')} ({dayjs(session.items[0].created_at).fromNow()})
-          </h2>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Resolved by</label>
-            <select
-              value={selectedStaffId}
-              onChange={(e) => setSelectedStaffId(e.target.value)}
-              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-            >
-              <option value="">Select Staff Member</option>
-              {staffList.map(s => (
-                <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-              ))}
-            </select>
-          </div>
-
-          {renderFeedbackItems(session.items)}
-
-          <button
-            onClick={markSessionAsActioned}
-            disabled={!selectedStaffId}
-            className={`mt-4 px-4 py-2 rounded text-white ${selectedStaffId ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-300 cursor-not-allowed'}`}
-          >
-            Mark as Actioned
-          </button>
-        </div>
-      </div>
-    );
+    await loadFeedback(venueId);
+    onClose();
+    setSelectedStaffId('');
   };
+
+  if (!session) return null;
+
+  const timestamp = session.items[0].created_at;
+
+  return (
+    <div
+      id="modal-overlay"
+      onClick={(e) => e.target.id === 'modal-overlay' && onClose()}
+      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+    >
+      <div className="bg-white w-full max-w-md p-6 rounded shadow-lg relative">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Table {session.items[0].table_number}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {dayjs(timestamp).format('dddd D MMMM, h:mma')} • {dayjs(timestamp).fromNow()}
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Resolved by</label>
+          <select
+            value={selectedStaffId}
+            onChange={(e) => setSelectedStaffId(e.target.value)}
+            className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+          >
+            <option value="">Select Staff Member</option>
+            {staffList.map(s => (
+              <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-3">
+          {session.items.map((f, j) => (
+            <div key={j} className="p-3 bg-gray-50 rounded border">
+              <p className="text-sm font-medium text-gray-800 mb-1">
+                {questionsMap[f.question_id]}
+              </p>
+              <p className="text-sm text-gray-600">Rating: {f.rating}</p>
+              {f.additional_feedback && (
+                <p className="mt-2 italic text-gray-700 text-sm">"{f.additional_feedback}"</p>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={markSessionAsActioned}
+          disabled={!selectedStaffId}
+          className={`mt-6 w-full px-4 py-2 rounded text-white text-sm flex items-center justify-center gap-2 ${selectedStaffId ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300 cursor-not-allowed'}`}
+        >
+          <UserCheck size={16} />
+          Mark as Actioned
+        </button>
+      </div>
+    </div>
+  );
+};
+
 
   const displayTab = activeTab === 'alerts' ? alerts
     : activeTab === 'actioned' ? actionedFeedback
