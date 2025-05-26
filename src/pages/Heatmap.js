@@ -113,22 +113,34 @@ const Heatmap = () => {
   };
 
   const saveLayout = async () => {
-    if (!venueId || !layoutRef.current) return;
-    setSaving(true);
-    const { width, height } = layoutRef.current.getBoundingClientRect();
-    const payload = tables.map(t => ({
-      id: t.id.startsWith('temp-') ? uuidv4() : t.id,
-      venue_id: t.venue_id,
-      table_number: t.table_number,
-      x_percent: (t.x_px / width) * 100,
-      y_percent: (t.y_px / height) * 100,
-      shape: t.shape,
-      zone_id: t.zone_id ?? null
-    }));
-    const { error } = await supabase.from('table_positions').upsert(payload);
-    if (!error) { setEditMode(false); setHasUnsavedChanges(false); }
-    setSaving(false);
-  };
+  if (!venueId || !layoutRef.current) return;
+  setSaving(true);
+  const { width, height } = layoutRef.current.getBoundingClientRect();
+  const payload = tables.map(t => ({
+    id: t.id.startsWith('temp-') ? uuidv4() : t.id,
+    venue_id: t.venue_id,
+    table_number: t.table_number,
+    x_percent: (t.x_px / width) * 100,
+    y_percent: (t.y_px / height) * 100,
+    shape: t.shape,
+    zone_id: t.zone_id ?? null
+  }));
+
+  const { error } = await supabase
+    .from('table_positions')
+    .upsert(payload, { onConflict: 'id' });
+
+  if (error) {
+    console.error('Save layout failed:', error);
+    alert('Error saving layout. Check console for details.');
+  } else {
+    setEditMode(false);
+    setHasUnsavedChanges(false);
+  }
+
+  setSaving(false);
+};
+
 
   const clearAllTables = async () => {
     if (!venueId) return;
