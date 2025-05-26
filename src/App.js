@@ -25,6 +25,7 @@ import PricingPage from './pages/Pricing';
 import FeaturesPage from './pages/Features';
 import DemoPage from './pages/DemoPage';
 import Settings_Staff from './pages/settings_staff';
+import StaffLeaderboard from './pages/Staff_Leaderboard';
 import ContactPage from './pages/ContactPage';
 import SecurityPage from './pages/SecurityPage';
 import TermsAndConditionsPage from './pages/Terms';
@@ -143,7 +144,7 @@ function App() {
         }
       />
       <Route
-        path="/dashboard/settings/staff"
+        path="/dashboard/staff"
         element={
           <VenueProvider>
             <DashboardFrame>
@@ -172,12 +173,24 @@ function App() {
           </VenueProvider>
         }
       />
+
       <Route
         path="/dashboard/heatmap"
         element={
           <VenueProvider>
             <DashboardFrame>
               <Heatmap />
+            </DashboardFrame>
+          </VenueProvider>
+        }
+      />
+
+      <Route
+        path="/dashboard/staff/leaderboard"
+        element={
+          <VenueProvider>
+            <DashboardFrame>
+              <StaffLeaderboard />
             </DashboardFrame>
           </VenueProvider>
         }
