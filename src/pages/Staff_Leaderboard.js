@@ -4,11 +4,11 @@ import PageContainer from '../components/PageContainer';
 import usePageTitle from '../hooks/usePageTitle';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useVenueContext } from '../context/VenueContext';
+import { useVenue } from '../context/VenueContext';
 dayjs.extend(relativeTime);
 
 const StaffLeaderboard = () => {
-  const { venueId } = useVenueContext();
+  const { venueId } = useVenue();
   usePageTitle('Staff Leaderboard');
   const [staffStats, setStaffStats] = useState([]);
   const [timeFilter, setTimeFilter] = useState('7d'); // '7d', '30d', 'all'
