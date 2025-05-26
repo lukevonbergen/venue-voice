@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import { useVenue } from '../context/VenueContext';
 
 const StaffPage = () => {
+  usePageTitle('Staff Management');
   const { venueId } = useVenue();
   const [staffList, setStaffList] = useState([]);
   const [filteredStaff, setFilteredStaff] = useState([]);
