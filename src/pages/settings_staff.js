@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
+import usePageTitle from '../hooks/usePageTitle';
 import Papa from 'papaparse';
 import { useVenue } from '../context/VenueContext';
 
