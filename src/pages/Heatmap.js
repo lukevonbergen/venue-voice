@@ -179,9 +179,22 @@ const Heatmap = () => {
   };
 
   const removeTable = async (id) => {
-    const isTemp = id.startsWith('temp-');
+    const table = tables.find(t => t.id === id);
+    if (!table) return;
+
     setTables(prev => prev.filter(t => t.id !== id));
-    if (!isTemp) await supabase.from('table_positions').delete().eq('id', id);
+
+    const isTemp = id.startsWith('temp-');
+    if (!isTemp) {
+      await supabase
+        .from('table_positions')
+        .delete()
+        .match({
+          venue_id: venueId,
+          table_number: table.table_number,
+        });
+    }
+
     setHasUnsavedChanges(true);
   };
 
