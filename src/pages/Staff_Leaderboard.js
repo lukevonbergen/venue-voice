@@ -2,16 +2,16 @@ import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import usePageTitle from '../hooks/usePageTitle';
+import { useVenue } from '../context/VenueContext';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useVenue } from '../context/VenueContext';
 dayjs.extend(relativeTime);
 
 const StaffLeaderboard = () => {
   const { venueId } = useVenue();
   usePageTitle('Staff Leaderboard');
   const [staffStats, setStaffStats] = useState([]);
-  const [timeFilter, setTimeFilter] = useState('7d');
+  const [timeFilter, setTimeFilter] = useState('7d'); // '7d', '30d', 'all'
 
   const fetchStaffLeaderboard = async (venueId) => {
     let fromDate;
@@ -21,49 +21,60 @@ const StaffLeaderboard = () => {
 
     let feedbackQuery = supabase
       .from('feedback')
-      .select('id, resolved_by, resolved_at')
-      .eq('venue_id', venueId)
-      .eq('is_actioned', true);
+      .select('id, session_id, resolved_by, resolved_at, is_actioned')
+      .eq('venue_id', venueId);
 
     if (fromDate) feedbackQuery = feedbackQuery.gte('resolved_at', fromDate);
 
     const { data: feedbackData, error: feedbackError } = await feedbackQuery;
     if (feedbackError) return;
 
-    const staffCounts = {};
-    const staffIds = new Set();
-
-    for (const fb of feedbackData) {
-      if (!fb.resolved_by) continue;
-      staffCounts[fb.resolved_by] = (staffCounts[fb.resolved_by] || 0) + 1;
-      staffIds.add(fb.resolved_by);
+    // Group feedback by session
+    const sessionMap = {};
+    for (const entry of feedbackData) {
+      if (!entry.session_id) continue;
+      if (!sessionMap[entry.session_id]) sessionMap[entry.session_id] = [];
+      sessionMap[entry.session_id].push(entry);
     }
 
-    if (staffIds.size === 0) {
-      setStaffStats([]);
-      return;
+    const sessionCounts = {}; // { staffId: count }
+    for (const [sessionId, items] of Object.entries(sessionMap)) {
+      const allActioned = items.every(item => item.is_actioned);
+      const resolver = items[0]?.resolved_by;
+      if (allActioned && resolver) {
+        sessionCounts[resolver] = (sessionCounts[resolver] || 0) + 1;
+      }
     }
+
+    const staffIds = Object.keys(sessionCounts);
+    if (staffIds.length === 0) return setStaffStats([]);
 
     const { data: staffData, error: staffError } = await supabase
       .from('staff')
       .select('id, first_name, last_name')
-      .in('id', [...staffIds]);
+      .in('id', staffIds);
 
     if (staffError) return;
 
     const combined = staffData.map(s => ({
       id: s.id,
       name: `${s.first_name} ${s.last_name}`,
-      count: staffCounts[s.id] || 0
-    }));
+      count: sessionCounts[s.id] || 0
+    })).sort((a, b) => b.count - a.count);
 
-    const sorted = combined.sort((a, b) => b.count - a.count);
-    setStaffStats(sorted);
+    setStaffStats(combined);
   };
 
   useEffect(() => {
     if (venueId) fetchStaffLeaderboard(venueId);
   }, [venueId, timeFilter]);
+
+  const renderMedal = (index) => {
+    if (index === 0) return '🥇';
+    if (index === 1) return '🥈';
+    if (index === 2) return '🥉';
+    return '🏅';
+  };
 
   return (
     <PageContainer>
@@ -83,15 +94,19 @@ const StaffLeaderboard = () => {
       </div>
 
       {staffStats.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-center items-end max-w-4xl mx-auto">
+        <div className="flex gap-4 items-end justify-center mt-10">
           {staffStats.slice(0, 3).map((s, i) => (
-            <div
-              key={s.id}
-              className={`flex flex-col items-center justify-end bg-white shadow rounded p-4 ${i === 0 ? 'h-52' : i === 1 ? 'h-40' : 'h-36'}`}
-            >
-              <span className="text-3xl">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
-              <div className="font-semibold text-lg mt-2 text-gray-800">{s.name}</div>
-              <div className="text-sm text-gray-600">{s.count} resolved</div>
+            <div key={s.id} className={`text-center ${i === 0 ? 'order-last' : ''}`}>
+              <div
+                className={`rounded-t-lg bg-yellow-100 px-6 py-4 shadow font-semibold text-gray-800 ${i === 0 ? 'text-lg' : 'text-base'}`}
+              >
+                {renderMedal(i)} {s.name}
+              </div>
+              <div
+                className={`bg-yellow-400 w-24 mx-auto rounded-b-lg shadow-md text-white font-bold flex items-center justify-center ${i === 0 ? 'h-32' : i === 1 ? 'h-24' : 'h-20'}`}
+              >
+                {s.count}
+              </div>
             </div>
           ))}
         </div>
