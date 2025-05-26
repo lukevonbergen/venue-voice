@@ -185,30 +185,42 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
         <button className={`${activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`} onClick={() => setActiveTab('all')}>All Feedback</button>
       </div>
 
-      {sessionsToShow.map((session) => (
-        <div
-          key={session.session_id}
-          className="border p-4 rounded mb-4 bg-white hover:bg-gray-50"
-        >
-          <div className="flex justify-between items-center">
-            <div onClick={() => { setSelectedSession(session); setShowModal(true); }} className="cursor-pointer">
-              <h3 className="text-sm font-semibold text-gray-800">
-                Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </h3>
-              <p className="text-xs text-blue-600">Click to view</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
-              <button
-                onClick={() => navigate('/dashboard/heatmap')}
-                className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
-              >
-                View on Heatmap
-              </button>
+       {sessionsToShow.length > 0 ? (
+        sessionsToShow.map((session) => (
+          <div
+            key={session.session_id}
+            className="border p-4 rounded mb-4 bg-white hover:bg-gray-50"
+          >
+            <div className="flex justify-between items-center">
+              <div onClick={() => { setSelectedSession(session); setShowModal(true); }} className="cursor-pointer">
+                <h3 className="text-sm font-semibold text-gray-800">
+                  Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </h3>
+                <p className="text-xs text-blue-600">Click to view</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
+                <button
+                  onClick={() => navigate('/dashboard/heatmap')}
+                  className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+                >
+                  View on Heatmap
+                </button>
+              </div>
             </div>
           </div>
+        ))
+      ) : (
+        <div className="text-center text-gray-600 my-20">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/3159/3159066.png"
+            alt="No feedback"
+            className="w-20 mx-auto mb-4 opacity-60"
+          />
+          <h3 className="text-lg font-semibold">No feedback to action</h3>
+          <p className="text-sm mt-1">You're doing great. Keep it up 🚀</p>
         </div>
-      ))}
+      )}
 
       <div className="text-sm text-gray-600 mt-4">
         Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalSessions)} of {totalSessions} feedback records
