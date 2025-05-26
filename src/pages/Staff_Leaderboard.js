@@ -99,7 +99,7 @@ const StaffLeaderboard = () => {
               className="bg-white rounded-2xl shadow p-6 flex flex-col items-center"
             >
               <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center text-2xl font-bold text-purple-600 mb-4">
-                {s.name.charAt(0)}
+                {s.name.split(' ').map(word => word[0]).join('').toUpperCase()}
               </div>
               <h2 className="text-lg font-semibold text-gray-800">{s.name}</h2>
               <p className="text-sm text-gray-500 mb-4">Feedback Resolved</p>
