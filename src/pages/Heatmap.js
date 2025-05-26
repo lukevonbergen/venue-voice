@@ -30,7 +30,14 @@ const Heatmap = () => {
   const [selectedStaffId, setSelectedStaffId] = useState('');
 
   const [selectedTable, setSelectedTable] = useState(null);
+
   const [feedbackModalData, setFeedbackModalData] = useState([]);
+  useEffect(() => {
+  if (!selectedTable && venueId) {
+    fetchFeedback(venueId); // Re-sync heatmap when drawer closes
+  }
+}, [selectedTable, venueId]);
+
   const [staffSelections, setStaffSelections] = useState({});
 
   useEffect(() => {
@@ -56,6 +63,31 @@ const Heatmap = () => {
     };
     load();
   }, []);
+
+  useEffect(() => {
+  if (!venueId) return;
+
+  const channel = supabase
+    .channel('feedback_updates')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'feedback',
+        filter: `venue_id=eq.${venueId}`,
+      },
+      (payload) => {
+        console.log('Realtime feedback update:', payload);
+        fetchFeedback(venueId);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [venueId]);
 
   const handleToggleEdit = () => {
     if (editMode && hasUnsavedChanges && !window.confirm('You have unsaved changes. Exit anyway?')) return;
