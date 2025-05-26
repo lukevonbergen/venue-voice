@@ -115,7 +115,10 @@ const Heatmap = () => {
   const saveLayout = async () => {
   if (!venueId || !layoutRef.current) return;
   setSaving(true);
+
   const { width, height } = layoutRef.current.getBoundingClientRect();
+
+  // Build the payload based on local state
   const payload = tables.map(t => ({
     id: t.id.startsWith('temp-') ? uuidv4() : t.id,
     venue_id: t.venue_id,
@@ -126,6 +129,30 @@ const Heatmap = () => {
     zone_id: t.zone_id ?? null
   }));
 
+  // 🔍 Get what's already in Supabase
+  const { data: existing } = await supabase
+    .from('table_positions')
+    .select('id')
+    .eq('venue_id', venueId);
+
+  const existingIds = new Set((existing || []).map(t => t.id));
+  const currentIds = new Set(
+    payload
+      .filter(t => !t.id.startsWith('temp-')) // exclude new ones
+      .map(t => t.id)
+  );
+
+  const idsToDelete = [...existingIds].filter(id => !currentIds.has(id));
+
+  // 🗑 Delete tables that were removed locally
+  if (idsToDelete.length > 0) {
+    await supabase
+      .from('table_positions')
+      .delete()
+      .in('id', idsToDelete);
+  }
+
+  // ⬆️ Upsert all current layout
   const { error } = await supabase
     .from('table_positions')
     .upsert(payload, { onConflict: 'id' });
