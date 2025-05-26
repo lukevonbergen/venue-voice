@@ -57,19 +57,23 @@ const DashboardFrame = ({ children }) => {
   };
 
   const NavLink = ({ to, children, icon: Icon }) => {
-    const isActive = location.pathname.startsWith(to);
-    return (
-      <Link
-        to={to}
-        className={`flex items-center gap-2 text-sm px-3 py-2 rounded transition-all duration-200 ${
-          isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'
-        }`}
-      >
-        {Icon && <Icon className="w-5 h-5" />}
-        {children}
-      </Link>
-    );
-  };
+  const isExactMatch = location.pathname === to;
+  const isNestedMatch = to !== '/dashboard' && location.pathname.startsWith(to);
+  const isActive = isExactMatch || isNestedMatch;
+
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-2 text-sm px-3 py-2 rounded transition-all duration-200 ${
+        isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'
+      }`}
+    >
+      {Icon && <Icon className="w-5 h-5" />}
+      {children}
+    </Link>
+  );
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100">
