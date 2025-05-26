@@ -11,17 +11,13 @@ const StaffLeaderboard = () => {
   const { venueId } = useVenue();
   usePageTitle('Staff Leaderboard');
   const [staffStats, setStaffStats] = useState([]);
-  const [timeFilter, setTimeFilter] = useState('7d'); // '7d', '30d', 'all'
+  const [timeFilter, setTimeFilter] = useState('7d');
 
-  // ✅ Define this BEFORE useEffect
   const fetchStaffLeaderboard = async (venueId) => {
-    console.log('✅ Fetching leaderboard for venue:', venueId);
     let fromDate;
     const now = dayjs();
     if (timeFilter === '7d') fromDate = now.subtract(7, 'day').toISOString();
     if (timeFilter === '30d') fromDate = now.subtract(30, 'day').toISOString();
-
-    console.log('🕒 Time filter:', timeFilter, 'From date:', fromDate || 'all time');
 
     let feedbackQuery = supabase
       .from('feedback')
@@ -32,14 +28,7 @@ const StaffLeaderboard = () => {
     if (fromDate) feedbackQuery = feedbackQuery.gte('resolved_at', fromDate);
 
     const { data: feedbackData, error: feedbackError } = await feedbackQuery;
-
-    if (feedbackError) {
-      console.error('❌ Error fetching feedback:', feedbackError);
-      return;
-    }
-
-    console.log('📥 Feedback rows fetched:', feedbackData.length);
-    console.log('🔎 Raw feedback:', feedbackData);
+    if (feedbackError) return;
 
     const staffCounts = {};
     const staffIds = new Set();
@@ -50,11 +39,7 @@ const StaffLeaderboard = () => {
       staffIds.add(fb.resolved_by);
     }
 
-    console.log('📊 Staff counts map:', staffCounts);
-    console.log('🧑‍🤝‍🧑 Unique staff IDs:', [...staffIds]);
-
     if (staffIds.size === 0) {
-      console.warn('⚠️ No staff IDs found. Nobody has resolved feedback in this period.');
       setStaffStats([]);
       return;
     }
@@ -64,12 +49,7 @@ const StaffLeaderboard = () => {
       .select('id, first_name, last_name')
       .in('id', [...staffIds]);
 
-    if (staffError) {
-      console.error('❌ Error fetching staff info:', staffError);
-      return;
-    }
-
-    console.log('👥 Staff data from DB:', staffData);
+    if (staffError) return;
 
     const combined = staffData.map(s => ({
       id: s.id,
@@ -78,21 +58,12 @@ const StaffLeaderboard = () => {
     }));
 
     const sorted = combined.sort((a, b) => b.count - a.count);
-    console.log('🏁 Final sorted leaderboard:', sorted);
     setStaffStats(sorted);
   };
 
-  // ✅ useEffect AFTER fetch function
   useEffect(() => {
     if (venueId) fetchStaffLeaderboard(venueId);
   }, [venueId, timeFilter]);
-
-  const renderMedal = (index) => {
-    if (index === 0) return '🥇';
-    if (index === 1) return '🥈';
-    if (index === 2) return '🥉';
-    return '🏅';
-  };
 
   return (
     <PageContainer>
@@ -112,17 +83,15 @@ const StaffLeaderboard = () => {
       </div>
 
       {staffStats.length > 0 ? (
-        <div className="bg-white shadow-md rounded overflow-hidden">
-          {staffStats.map((s, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-center items-end max-w-4xl mx-auto">
+          {staffStats.slice(0, 3).map((s, i) => (
             <div
               key={s.id}
-              className="flex items-center justify-between px-4 py-3 border-b last:border-b-0 hover:bg-gray-50"
+              className={`flex flex-col items-center justify-end bg-white shadow rounded p-4 ${i === 0 ? 'h-52' : i === 1 ? 'h-40' : 'h-36'}`}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{renderMedal(i)}</span>
-                <span className="font-medium text-gray-800">{s.name}</span>
-              </div>
-              <span className="text-sm text-gray-600">{s.count} feedback resolved</span>
+              <span className="text-3xl">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
+              <div className="font-semibold text-lg mt-2 text-gray-800">{s.name}</div>
+              <div className="text-sm text-gray-600">{s.count} resolved</div>
             </div>
           ))}
         </div>
