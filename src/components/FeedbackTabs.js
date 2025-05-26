@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../utils/supabase';
-import { Bell } from 'lucide-react';
+import { Bell, Calendar, Clock, Timer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const ITEMS_PER_PAGE = 20;
 
@@ -139,7 +142,7 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
         <div className="bg-white w-full max-w-md p-6 rounded shadow-lg relative">
           <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+            Table {session.items[0].table_number} – {dayjs(session.items[0].created_at).format('dddd D MMMM, h:mma')} ({dayjs(session.items[0].created_at).fromNow()})
           </h2>
 
           <div className="mb-4">
@@ -185,18 +188,32 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
         <button className={`${activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`} onClick={() => setActiveTab('all')}>All Feedback</button>
       </div>
 
-       {sessionsToShow.length > 0 ? (
+      {sessionsToShow.length > 0 ? (
         sessionsToShow.map((session) => (
           <div
             key={session.session_id}
             className="border p-4 rounded mb-4 bg-white hover:bg-gray-50"
           >
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
               <div onClick={() => { setSelectedSession(session); setShowModal(true); }} className="cursor-pointer">
-                <h3 className="text-sm font-semibold text-gray-800">
-                  Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </h3>
-                <p className="text-xs text-blue-600">Click to view</p>
+                <div className="text-sm font-semibold text-gray-800 mb-1">
+                  Table {session.items[0].table_number}
+                </div>
+
+                <div className="flex items-center text-xs text-gray-600 gap-1 mb-1">
+                  <Calendar size={14} />
+                  {dayjs(session.items[0].created_at).format('dddd D MMMM')}
+                </div>
+
+                <div className="flex items-center text-xs text-gray-600 gap-1 mb-1">
+                  <Clock size={14} />
+                  {dayjs(session.items[0].created_at).format('h:mma')}
+                </div>
+
+                <div className="flex items-center text-xs text-gray-400 italic gap-1">
+                  <Timer size={14} />
+                  {dayjs(session.items[0].created_at).fromNow()}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
@@ -222,23 +239,27 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
         </div>
       )}
 
-      <div className="text-sm text-gray-600 mt-4">
-        Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalSessions)} of {totalSessions} feedback records
-      </div>
+      {totalSessions > 0 && (
+        <>
+          <div className="text-sm text-gray-600 mt-4">
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalSessions)} of {totalSessions} feedback records
+          </div>
 
-      {totalSessions > ITEMS_PER_PAGE && (
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 text-sm border rounded disabled:opacity-50"
-          >Prev</button>
-          <button
-            onClick={() => setCurrentPage(p => p + 1)}
-            disabled={currentPage * ITEMS_PER_PAGE >= totalSessions}
-            className="px-3 py-1 text-sm border rounded disabled:opacity-50"
-          >Next</button>
-        </div>
+          {totalSessions > ITEMS_PER_PAGE && (
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
+              >Prev</button>
+              <button
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage * ITEMS_PER_PAGE >= totalSessions}
+                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
+              >Next</button>
+            </div>
+          )}
+        </>
       )}
 
       {showModal && (
