@@ -186,12 +186,36 @@ const Heatmap = () => {
     setFeedbackMap(ratings);
   };
 
-  const openFeedbackModal = async (tableNumber) => {
+    const openFeedbackModal = async (tableNumber) => {
+    const now = dayjs();
+    const cutoff = now.subtract(2, 'hour').toISOString();
+
+    // 1. Get the most recent session for that table
+    const { data: recent } = await supabase
+      .from('feedback')
+      .select('session_id, created_at')
+      .eq('venue_id', venueId)
+      .eq('table_number', tableNumber)
+      .gt('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const latestSessionId = recent?.[0]?.session_id;
+
+    if (!latestSessionId) {
+      setFeedbackModalData([]); // nothing to show
+      setSelectedTable(tableNumber);
+      return;
+    }
+
+    // 2. Get all feedback for that latest session, unresolved only
     const { data } = await supabase
       .from('feedback')
       .select('*')
       .eq('venue_id', venueId)
       .eq('table_number', tableNumber)
+      .eq('session_id', latestSessionId)
+      .eq('is_actioned', false)
       .order('created_at', { ascending: false });
 
     setFeedbackModalData(data);
