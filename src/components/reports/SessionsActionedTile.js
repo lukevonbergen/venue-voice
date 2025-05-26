@@ -1,4 +1,3 @@
-// src/components/tiles/SessionsActionedTile.js
 import React, { useEffect, useState } from 'react';
 import supabase from '../../utils/supabase';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
@@ -11,38 +10,34 @@ const SessionsActionedTile = ({ venueId }) => {
   useEffect(() => {
     if (!venueId) return;
 
-    const fetch = async () => {
-      const { data, error } = await supabase
-        .from('feedback')
-        .select('*')
-        .eq('venue_id', venueId);
+const fetch = async () => {
+  const { data, error } = await supabase
+    .from('feedback')
+    .select('*')
+    .eq('venue_id', venueId);
 
-      if (error) {
-        console.error('Error fetching feedback:', error);
-        return;
-      }
+  if (error) {
+    console.error('Error fetching feedback:', error);
+    return;
+  }
 
-      // Group feedback by session
-      const grouped = {};
-      for (const row of data || []) {
-        if (!grouped[row.session_id]) grouped[row.session_id] = [];
-        grouped[row.session_id].push(row);
-      }
+  const grouped = {};
+  for (const row of data || []) {
+    if (!grouped[row.session_id]) grouped[row.session_id] = [];
+    grouped[row.session_id].push(row);
+  }
 
-      const sessions = Object.values(grouped);
+  const sessions = Object.values(grouped);
 
-      // Only include sessions with at least one rating ≤ 2
-      const alertSessions = sessions.filter(session =>
-        session.some(i => i.rating !== null && i.rating <= 2)
-      );
+  const totalSessions = sessions.length;
+  const actionedSessions = sessions.filter(session =>
+    session.every(i => i.is_actioned)
+  ).length;
 
-      const actionedAlerts = alertSessions.filter(session =>
-        session.every(i => i.is_actioned)
-      ).length;
+  setTotal(totalSessions);
+  setActioned(actionedSessions);
+};
 
-      setTotal(alertSessions.length);
-      setActioned(actionedAlerts);
-    };
 
     fetch();
   }, [venueId]);
