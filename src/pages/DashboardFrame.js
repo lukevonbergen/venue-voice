@@ -121,7 +121,7 @@ const DashboardFrame = ({ children }) => {
       {/* Navigation Bar */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-4 items-center">
-          <NavLink to="/dashboard" icon={LayoutDashboard}>Dashboard</NavLink>
+          <NavLink to="/dashboard" icon={LayoutDashboard}>Overview</NavLink>
           <NavLink to="/dashboard/questions" icon={MessageSquare}>Questions</NavLink>
           <NavLink to="/dashboard/reports" icon={BarChart}>Reports</NavLink>
           <NavLink to="/dashboard/heatmap" icon={Map}>Heatmap</NavLink>
