@@ -185,52 +185,31 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
         <button className={`${activeTab === 'all' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500'} pb-2`} onClick={() => setActiveTab('all')}>All Feedback</button>
       </div>
 
-      {sessionsToShow.length > 0 ? (
-        <>
-          {sessionsToShow.map((session) => (
-            <div
-              key={session.session_id}
-              className="border p-4 rounded mb-4 bg-white hover:bg-gray-50"
-            >
-              <div className="flex justify-between items-center">
-                <div onClick={() => { setSelectedSession(session); setShowModal(true); }} className="cursor-pointer">
-                  <h3 className="text-sm font-semibold text-gray-800">
-                    Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </h3>
-                  <p className="text-xs text-blue-600">Click to view</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
-                  <button
-                    onClick={() => navigate('/dashboard/heatmap')}
-                    className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
-                  >
-                    View on Heatmap
-                  </button>
-                </div>
+       {sessionsToShow.length > 0 ? (
+        sessionsToShow.map((session) => (
+          <div
+            key={session.session_id}
+            className="border p-4 rounded mb-4 bg-white hover:bg-gray-50"
+          >
+            <div className="flex justify-between items-center">
+              <div onClick={() => { setSelectedSession(session); setShowModal(true); }} className="cursor-pointer">
+                <h3 className="text-sm font-semibold text-gray-800">
+                  Table {session.items[0].table_number} – {new Date(session.items[0].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(session.items[0].created_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </h3>
+                <p className="text-xs text-blue-600">Click to view</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {session.lowScore && !session.isActioned && <Bell className="text-red-500" size={18} />}
+                <button
+                  onClick={() => navigate('/dashboard/heatmap')}
+                  className="text-sm bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+                >
+                  View on Heatmap
+                </button>
               </div>
             </div>
-          ))}
-
-          <div className="text-sm text-gray-600 mt-4">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, totalSessions)} of {totalSessions} feedback records
           </div>
-
-          {totalSessions > ITEMS_PER_PAGE && (
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
-              >Prev</button>
-              <button
-                onClick={() => setCurrentPage(p => p + 1)}
-                disabled={currentPage * ITEMS_PER_PAGE >= totalSessions}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
-              >Next</button>
-            </div>
-          )}
-        </>
+        ))
       ) : (
         <div className="text-center text-gray-600 my-20">
           <img
@@ -241,13 +220,6 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
           <h3 className="text-lg font-semibold">No feedback to action</h3>
           <p className="text-sm mt-1">You're doing great. Keep it up 🚀</p>
         </div>
-      )}
-
-      {showModal && (
-        <FeedbackModal session={selectedSession} onClose={() => {
-          setShowModal(false);
-          setSelectedSession(null);
-        }} />
       )}
 
       <div className="text-sm text-gray-600 mt-4">
