@@ -27,6 +27,7 @@ const Heatmap = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [feedbackMap, setFeedbackMap] = useState({});
   const [staffList, setStaffList] = useState([]);
+  const [selectedStaffId, setSelectedStaffId] = useState('');
 
   const [selectedTable, setSelectedTable] = useState(null);
   const [feedbackModalData, setFeedbackModalData] = useState([]);
@@ -266,6 +267,32 @@ const Heatmap = () => {
     setSelectedTable(null);
   };
 
+  const markAllResolved = async () => {
+    if (!selectedStaffId) return alert('Please select a staff member');
+
+    const errors = [];
+    for (const f of feedbackModalData) {
+      const { error } = await supabase
+        .from('feedback')
+        .update({
+          is_actioned: true,
+          resolved_at: new Date(),
+          resolved_by: selectedStaffId
+        })
+        .eq('id', f.id);
+
+      if (error) errors.push(f.id);
+    }
+
+    if (errors.length > 0) {
+      alert(`Some entries failed to update: ${errors.join(', ')}`);
+    }
+
+    // Remove resolved items from state
+    setFeedbackModalData([]);
+    setSelectedTable(null);
+  };
+
   return (
     <div className="fixed inset-0 z-40 bg-black/50" onClick={handleBackdropClick}>
       <div
@@ -277,6 +304,23 @@ const Heatmap = () => {
             <h3 className="text-xl font-semibold">Feedback for Table {selectedTable}</h3>
             <button onClick={() => setSelectedTable(null)} className="text-gray-500 hover:text-black text-lg">&times;</button>
           </div>
+
+          <div className="mb-6">
+            <label htmlFor="staff-selector" className="block text-sm font-medium text-gray-700 mb-1">Resolved by</label>
+            <select
+              id="staff-selector"
+              name="staff-selector"
+              className="w-full border border-gray-300 rounded text-sm px-2 py-1"
+              value={selectedStaffId}
+              onChange={(e) => setSelectedStaffId(e.target.value)}
+            >
+              <option value="">Select Staff Member</option>
+              {staffList.map(staff => (
+                <option key={staff.id} value={staff.id}>{staff.first_name} {staff.last_name}</option>
+              ))}
+            </select>
+          </div>
+
           {feedbackModalData.map(f => (
             <div key={f.id} className="border rounded-lg p-4 mb-4 shadow-sm">
               <div className="text-sm text-gray-500 mb-1">Session: {f.session_id?.slice(0, 8)} • {dayjs(f.created_at).fromNow()}</div>
@@ -287,26 +331,16 @@ const Heatmap = () => {
               {f.additional_feedback && (
                 <div className="text-sm italic text-gray-700 mb-2">"{f.additional_feedback}"</div>
               )}
-              <div className="space-y-2">
-                <select
-                  className="w-full border border-gray-300 rounded text-sm px-2 py-1"
-                  value={staffSelections[f.id] || ''}
-                  onChange={(e) => setStaffSelections(prev => ({ ...prev, [f.id]: e.target.value }))}
-                >
-                  <option value="">Select Staff Member</option>
-                  {staffList.map(staff => (
-                    <option key={staff.id} value={staff.id}>{staff.first_name} {staff.last_name}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => markResolved(f.id)}
-                  className="w-full text-sm bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
-                >
-                  Mark Resolved
-                </button>
-              </div>
             </div>
           ))}
+
+          <button
+            onClick={markAllResolved}
+            disabled={!selectedStaffId}
+            className={`w-full text-sm px-3 py-2 rounded mt-4 ${selectedStaffId ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+          >
+            Mark All Resolved
+          </button>
         </div>
       </div>
     </div>
