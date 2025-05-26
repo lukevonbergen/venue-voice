@@ -106,7 +106,7 @@ const StaffLeaderboard = () => {
               <div className="flex justify-between items-center w-full border-t pt-4">
                 <div className="text-center">
                   <div className="text-xl font-bold text-gray-800">{s.count}</div>
-                  <div className="text-xs text-gray-500">Sessions</div>
+                  <div className="text-xs text-gray-500">Resolved</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl font-bold text-gray-800">{s.rank}<sup>{rankSuffix(s.rank)}</sup></div>
