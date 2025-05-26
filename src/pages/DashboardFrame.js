@@ -8,6 +8,7 @@ import {
   Settings,
   Map,
   QrCode,
+  User,
 } from 'lucide-react';
 import supabase from '../utils/supabase';
 import { useVenue } from '../context/VenueContext';
@@ -125,6 +126,7 @@ const DashboardFrame = ({ children }) => {
           <NavLink to="/dashboard/reports" icon={BarChart}>Reports</NavLink>
           <NavLink to="/dashboard/heatmap" icon={Map}>Heatmap</NavLink>
           <NavLink to="/dashboard/templates" icon={QrCode}>QR Templates</NavLink>
+          <NavLink to="/dashboard/settings/staff" icon={Uaer}>Staff</NavLink>
           <NavLink to="/dashboard/settings" icon={Settings}>Settings</NavLink>
         </div>
       </div>
