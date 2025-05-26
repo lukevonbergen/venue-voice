@@ -186,41 +186,38 @@ const Heatmap = () => {
     setFeedbackMap(ratings);
   };
 
-    const openFeedbackModal = async (tableNumber) => {
-    const now = dayjs();
-    const cutoff = now.subtract(2, 'hour').toISOString();
+  const openFeedbackModal = async (tableNumber) => {
+  const now = dayjs();
+  const cutoff = now.subtract(2, 'hour').toISOString();
 
-    // 1. Get the most recent session for that table
-    const { data: recent } = await supabase
-      .from('feedback')
-      .select('session_id, created_at')
-      .eq('venue_id', venueId)
-      .eq('table_number', tableNumber)
-      .gt('created_at', cutoff)
-      .order('created_at', { ascending: false })
-      .limit(1);
+  // Get most recent session (still within last 2 hrs)
+  const { data: recent } = await supabase
+    .from('feedback')
+    .select('session_id, created_at')
+    .eq('venue_id', venueId)
+    .eq('table_number', tableNumber)
+    .gt('created_at', cutoff)
+    .order('created_at', { ascending: false })
+    .limit(1);
 
-    const latestSessionId = recent?.[0]?.session_id;
+  const latestSessionId = recent?.[0]?.session_id;
+  if (!latestSessionId) return;
 
-    if (!latestSessionId) {
-      setFeedbackModalData([]); // nothing to show
-      setSelectedTable(tableNumber);
-      return;
-    }
+  // Get feedback for that session, unresolved only, joined with questions
+  const { data } = await supabase
+    .from('feedback')
+    .select('*, questions(question)')
+    .eq('venue_id', venueId)
+    .eq('table_number', tableNumber)
+    .eq('session_id', latestSessionId)
+    .eq('is_actioned', false)
+    .order('created_at', { ascending: false });
 
-    // 2. Get all feedback for that latest session, unresolved only
-    const { data } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId)
-      .eq('table_number', tableNumber)
-      .eq('session_id', latestSessionId)
-      .eq('is_actioned', false)
-      .order('created_at', { ascending: false });
+  if (!data || data.length === 0) return;
 
-    setFeedbackModalData(data);
-    setSelectedTable(tableNumber);
-  };
+  setFeedbackModalData(data);
+  setSelectedTable(tableNumber);
+};
 
   const loadStaff = async (venueId) => {
     const { data } = await supabase.from('staff').select('id, first_name, last_name').eq('venue_id', venueId);
@@ -241,46 +238,65 @@ const Heatmap = () => {
     setFeedbackModalData(prev => prev.map(f => f.id === feedbackId ? { ...f, is_actioned: false, resolved_by: null } : f));
   };
 
-  const FeedbackModal = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
-        <h3 className="text-lg font-semibold mb-4">Feedback for Table {selectedTable}</h3>
-        <button onClick={() => setSelectedTable(null)} className="absolute top-2 right-2 text-gray-400 hover:text-black">✕</button>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+  const FeedbackDrawer = () => {
+  const unresolvedCount = feedbackModalData.filter(f => !f.is_actioned).length;
+
+  useEffect(() => {
+    if (unresolvedCount === 0) {
+      setSelectedTable(null);
+    }
+  }, [unresolvedCount]);
+
+  const handleBackdropClick = () => {
+    setSelectedTable(null);
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 bg-black/50" onClick={handleBackdropClick}>
+      <div
+        className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50 overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Feedback for Table {selectedTable}</h3>
+            <button onClick={() => setSelectedTable(null)} className="text-gray-500 hover:text-black text-lg">&times;</button>
+          </div>
           {feedbackModalData.map(f => (
-            <div key={f.id} className="border rounded p-3">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
-                <span>Session: {f.session_id?.slice(0, 8)}</span>
-                <span>{dayjs(f.created_at).fromNow()}</span>
+            <div key={f.id} className="border rounded-lg p-4 mb-4 shadow-sm">
+              <div className="text-sm text-gray-500 mb-1">Session: {f.session_id?.slice(0, 8)} • {dayjs(f.created_at).fromNow()}</div>
+              <div className="text-sm font-medium mb-1">{f.questions?.question || 'Unknown question'}</div>
+              <div className="mb-2">
+                <span className="text-sm">Rating:</span> <span className="font-semibold">{f.rating ?? 'N/A'}</span>
               </div>
-              <div className="mb-1 text-sm">Rating: {f.rating ?? 'N/A'}</div>
-              {f.additional_feedback && <div className="text-sm italic text-gray-700">"{f.additional_feedback}"</div>}
-              {f.is_actioned ? (
-                <div className="mt-2">
-                  <div className="text-xs text-gray-600">Resolved by: {staffList.find(s => s.id === f.resolved_by)?.first_name || 'Unknown'}</div>
-                  <button onClick={() => undoResolved(f.id)} className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded mt-1">Undo</button>
-                </div>
-              ) : (
-                <div className="mt-2 space-y-2">
-                  <select
-                    className="w-full border border-gray-300 rounded text-sm px-2 py-1"
-                    value={staffSelections[f.id] || ''}
-                    onChange={(e) => setStaffSelections(prev => ({ ...prev, [f.id]: e.target.value }))}
-                  >
-                    <option value="">Select Staff Member</option>
-                    {staffList.map(staff => (
-                      <option key={staff.id} value={staff.id}>{staff.first_name} {staff.last_name}</option>
-                    ))}
-                  </select>
-                  <button onClick={() => markResolved(f.id)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Mark Resolved</button>
-                </div>
+              {f.additional_feedback && (
+                <div className="text-sm italic text-gray-700 mb-2">"{f.additional_feedback}"</div>
               )}
+              <div className="space-y-2">
+                <select
+                  className="w-full border border-gray-300 rounded text-sm px-2 py-1"
+                  value={staffSelections[f.id] || ''}
+                  onChange={(e) => setStaffSelections(prev => ({ ...prev, [f.id]: e.target.value }))}
+                >
+                  <option value="">Select Staff Member</option>
+                  {staffList.map(staff => (
+                    <option key={staff.id} value={staff.id}>{staff.first_name} {staff.last_name}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => markResolved(f.id)}
+                  className="w-full text-sm bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
+                >
+                  Mark Resolved
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </div>
     </div>
   );
+};
 
   return (
     <PageContainer>
@@ -395,7 +411,7 @@ const Heatmap = () => {
         </div>
       </div>
 
-      {selectedTable && <FeedbackModal />}
+      {selectedTable && <FeedbackDrawer />}
     </PageContainer>
   );
 };
