@@ -16,6 +16,7 @@ const StaffLeaderboard = ({ venueId }) => {
   }, [venueId, timeFilter]);
 
 const fetchStaffLeaderboard = async (venueId) => {
+    console.log('Fetching leaderboard for venue:', venueId);
   let fromDate;
   const now = dayjs();
   if (timeFilter === '7d') fromDate = now.subtract(7, 'day').toISOString();
@@ -30,6 +31,7 @@ const fetchStaffLeaderboard = async (venueId) => {
   if (fromDate) feedbackQuery = feedbackQuery.gte('resolved_at', fromDate);
 
   const { data: feedbackData, error: feedbackError } = await feedbackQuery;
+  console.log('Fetched feedback:', feedbackData);
   if (feedbackError) {
     console.error('Error fetching feedback:', feedbackError);
     return;
@@ -44,12 +46,17 @@ const fetchStaffLeaderboard = async (venueId) => {
     staffIds.add(fb.resolved_by);
   }
 
+  console.log('Staff counts:', staffCounts);
+    console.log('Staff IDs:', [...staffIds]);
+
+
   if (staffIds.size === 0) {
     setStaffStats([]);
     return;
   }
 
   const { data: staffData, error: staffError } = await supabase
+
     .from('staff')
     .select('id, first_name, last_name')
     .in('id', [...staffIds]);
