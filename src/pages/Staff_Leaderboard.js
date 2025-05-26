@@ -15,34 +15,60 @@ const StaffLeaderboard = ({ venueId }) => {
     if (venueId) fetchStaffLeaderboard(venueId);
   }, [venueId, timeFilter]);
 
-  const fetchStaffLeaderboard = async (venueId) => {
-    let fromDate;
-    const now = dayjs();
-    if (timeFilter === '7d') fromDate = now.subtract(7, 'day').toISOString();
-    if (timeFilter === '30d') fromDate = now.subtract(30, 'day').toISOString();
+const fetchStaffLeaderboard = async (venueId) => {
+  let fromDate;
+  const now = dayjs();
+  if (timeFilter === '7d') fromDate = now.subtract(7, 'day').toISOString();
+  if (timeFilter === '30d') fromDate = now.subtract(30, 'day').toISOString();
 
-    let query = supabase
-      .from('feedback')
-      .select('resolved_by, staff:id(resolved_by, first_name, last_name)', { count: 'exact' })
-      .eq('venue_id', venueId)
-      .eq('is_actioned', true);
+  let feedbackQuery = supabase
+    .from('feedback')
+    .select('id, resolved_by, resolved_at')
+    .eq('venue_id', venueId)
+    .eq('is_actioned', true);
 
-    if (fromDate) query = query.gte('resolved_at', fromDate);
+  if (fromDate) feedbackQuery = feedbackQuery.gte('resolved_at', fromDate);
 
-    const { data, error } = await query;
-    if (error) return console.error('Error loading leaderboard:', error);
+  const { data: feedbackData, error: feedbackError } = await feedbackQuery;
+  if (feedbackError) {
+    console.error('Error fetching feedback:', feedbackError);
+    return;
+  }
 
-    const counts = {};
-    for (const row of data) {
-      const id = row.resolved_by;
-      if (!id || !row.staff) continue;
-      if (!counts[id]) counts[id] = { id, name: `${row.staff.first_name} ${row.staff.last_name}`, count: 0 };
-      counts[id].count++;
-    }
+  const staffCounts = {};
+  const staffIds = new Set();
 
-    const sorted = Object.values(counts).sort((a, b) => b.count - a.count);
-    setStaffStats(sorted);
-  };
+  for (const fb of feedbackData) {
+    if (!fb.resolved_by) continue;
+    staffCounts[fb.resolved_by] = (staffCounts[fb.resolved_by] || 0) + 1;
+    staffIds.add(fb.resolved_by);
+  }
+
+  if (staffIds.size === 0) {
+    setStaffStats([]);
+    return;
+  }
+
+  const { data: staffData, error: staffError } = await supabase
+    .from('staff')
+    .select('id, first_name, last_name')
+    .in('id', [...staffIds]);
+
+  if (staffError) {
+    console.error('Error fetching staff info:', staffError);
+    return;
+  }
+
+  const combined = staffData.map(s => ({
+    id: s.id,
+    name: `${s.first_name} ${s.last_name}`,
+    count: staffCounts[s.id] || 0
+  }));
+
+  const sorted = combined.sort((a, b) => b.count - a.count);
+  setStaffStats(sorted);
+};
+
 
   const renderMedal = (index) => {
     if (index === 0) return '🥇';
