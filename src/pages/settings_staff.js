@@ -96,52 +96,97 @@ const StaffPage = () => {
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    console.log('Uploading CSV file:', file.name);
+    console.log('📥 Uploading CSV file:', file.name);
     setUploading(true);
+
     Papa.parse(file, {
       header: true,
       complete: async (results) => {
+        console.log('🧾 Raw CSV results:', results);
+
         const rows = results.data
           .filter(r => r.first_name && r.last_name && r.email)
           .map(r => ({
-            first_name: r.first_name,
-            last_name: r.last_name,
-            email: r.email,
-            role: r.role || '',
+            first_name: r.first_name.trim(),
+            last_name: r.last_name.trim(),
+            email: r.email.trim(),
+            role: r.role?.trim() || '',
             venue_id: venueId
           }));
 
-        console.log('Parsed CSV rows:', rows);
-        if (rows.length) {
-          const { error } = await supabase.from('staff').insert(rows);
-          if (error) console.error('CSV insert error:', error);
+        console.log('✅ Parsed & cleaned rows:', rows);
+
+        if (!venueId) {
+          console.error('❌ Missing venueId. Cannot import staff.');
+          alert('No venue selected.');
+          setUploading(false);
+          return;
         }
+
+        if (rows.length === 0) {
+          console.warn('⚠️ No valid rows to insert.');
+          alert('No valid staff found in CSV.');
+          setUploading(false);
+          return;
+        }
+
+        console.log('🧹 Deleting existing staff for venue_id:', venueId);
+        const { error: deleteError, data: deleteData } = await supabase
+          .from('staff')
+          .delete()
+          .eq('venue_id', venueId);
+
+        if (deleteError) {
+          console.error('❌ Error deleting staff:', deleteError);
+          alert('Failed to clear existing staff: ' + deleteError.message);
+          setUploading(false);
+          return;
+        }
+
+        console.log('✅ Deleted old staff:', deleteData);
+
+        console.log('📤 Inserting new staff...');
+        const { error: insertError, data: insertData } = await supabase
+          .from('staff')
+          .insert(rows);
+
+        if (insertError) {
+          console.error('❌ Insert error:', insertError);
+          alert('Error importing staff: ' + insertError.message);
+        } else {
+          console.log('✅ Staff inserted successfully:', insertData);
+          alert('Staff imported successfully!');
+        }
+
         loadStaff();
         setUploading(false);
       },
+      error: (parseError) => {
+        console.error('❌ Error parsing CSV:', parseError);
+        alert('Failed to read CSV file.');
+        setUploading(false);
+      }
     });
   };
 
   const handleDownloadCSV = () => {
-  console.log('Downloading staff list as CSV');
-
-  const publicData = staffList.map(({ email, first_name, last_name, role }) => ({
-    email,
-    first_name,
-    last_name,
-    role
-  }));
-
-  const csv = Papa.unparse(publicData);
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', 'staff_list.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+    console.log('Downloading staff list as CSV');
+    const publicData = staffList.map(({ email, first_name, last_name, role }) => ({
+      email,
+      first_name,
+      last_name,
+      role
+    }));
+    const csv = Papa.unparse(publicData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'staff_list.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this staff member?')) return;
