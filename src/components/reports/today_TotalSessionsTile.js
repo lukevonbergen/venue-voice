@@ -64,7 +64,7 @@ const SessionsActionedTile = ({ venueId }) => {
         />
       </div>
       <p className="text-sm text-gray-700">
-        {actioned} of {total} sessions have been actioned
+        Today: {actioned} of {total} sessions resolved
       </p>
     </div>
   );
