@@ -246,30 +246,36 @@ const Heatmap = () => {
   };
 
   const fetchFeedback = async (venueId) => {
-    const { data } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('venue_id', venueId)
-      .order('created_at', { ascending: false });
+  const now = dayjs();
+  const cutoff = now.subtract(2, 'hour').toISOString();
 
-    const sessionMap = {}, latestSession = {}, ratings = {};
-    for (const entry of data) {
-      const table = entry.table_number;
-      if (!table) continue;
-      if (!latestSession[table]) {
-        latestSession[table] = entry.session_id;
-        sessionMap[table] = [entry];
-      } else if (entry.session_id === latestSession[table]) {
-        sessionMap[table].push(entry);
-      }
-    }
+  const { data } = await supabase
+    .from('feedback')
+    .select('*')
+    .eq('venue_id', venueId)
+    .gt('created_at', cutoff) // 👈 Only fetch recent feedback
+    .order('created_at', { ascending: false });
 
-    for (const table in sessionMap) {
-      const valid = sessionMap[table].filter(e => e.rating !== null && !e.is_actioned).map(e => e.rating);
-      ratings[table] = valid.length > 0 ? valid.reduce((a, b) => a + b) / valid.length : null;
+  const sessionMap = {}, latestSession = {}, ratings = {};
+  for (const entry of data) {
+    const table = entry.table_number;
+    if (!table) continue;
+    if (!latestSession[table]) {
+      latestSession[table] = entry.session_id;
+      sessionMap[table] = [entry];
+    } else if (entry.session_id === latestSession[table]) {
+      sessionMap[table].push(entry);
     }
-    setFeedbackMap(ratings);
-  };
+  }
+
+  for (const table in sessionMap) {
+    const valid = sessionMap[table].filter(e => e.rating !== null && !e.is_actioned);
+    ratings[table] = valid.length > 0 ? valid.reduce((a, b) => a + b.rating, 0) / valid.length : null;
+  }
+
+  setFeedbackMap(ratings);
+};
+
 
   const openFeedbackModal = async (tableNumber) => {
   const now = dayjs();
