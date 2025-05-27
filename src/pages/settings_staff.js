@@ -208,10 +208,10 @@ const StaffPage = () => {
             <table className="w-full text-sm table-auto">
               <thead>
                 <tr className="border-b bg-gray-100 text-left">
-                  <th className="py-3 px-2">Name</th>
-                  <th className="py-3 px-2">Email</th>
-                  <th className="py-3 px-2">Job Title</th>
-                  <th className="py-3 px-2 text-right">Actions</th>
+                  <th className="py-3 px-2 w-1/4">Name</th>
+                  <th className="py-3 px-2 w-1/4">Email</th>
+                  <th className="py-3 px-2 w-1/4">Job Title</th>
+                  <th className="py-3 px-2 w-1/4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
