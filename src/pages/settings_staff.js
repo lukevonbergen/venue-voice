@@ -93,34 +93,58 @@ const StaffPage = () => {
     setModalOpen(true);
   };
 
-  const handleCSVUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    console.log('Uploading CSV file:', file.name);
-    setUploading(true);
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        const rows = results.data
-          .filter(r => r.first_name && r.last_name && r.email)
-          .map(r => ({
-            first_name: r.first_name,
-            last_name: r.last_name,
-            email: r.email,
-            role: r.role || '',
-            venue_id: venueId
-          }));
+const handleCSVUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  console.log('Uploading CSV file:', file.name);
+  setUploading(true);
 
-        console.log('Parsed CSV rows:', rows);
-        if (rows.length) {
-          const { error } = await supabase.from('staff').insert(rows);
-          if (error) console.error('CSV insert error:', error);
+  Papa.parse(file, {
+    header: true,
+    complete: async (results) => {
+      const rows = results.data
+        .filter(r => r.first_name && r.last_name && r.email)
+        .map(r => ({
+          first_name: r.first_name,
+          last_name: r.last_name,
+          email: r.email,
+          role: r.role || '',
+          venue_id: venueId
+        }));
+
+      console.log('Parsed CSV rows:', rows);
+
+      if (rows.length) {
+        // Delete existing staff for the venue first
+        const { error: deleteError } = await supabase
+          .from('staff')
+          .delete()
+          .eq('venue_id', venueId);
+
+        if (deleteError) {
+          console.error('Error deleting existing staff:', deleteError);
+          alert('Error clearing existing staff before import.');
+          setUploading(false);
+          return;
         }
-        loadStaff();
-        setUploading(false);
-      },
-    });
-  };
+
+        // Insert new staff
+        const { error: insertError } = await supabase
+          .from('staff')
+          .insert(rows);
+
+        if (insertError) {
+          console.error('CSV insert error:', insertError);
+          alert('Error importing staff.');
+        }
+      }
+
+      loadStaff();
+      setUploading(false);
+    },
+  });
+};
+
 
   const handleDownloadCSV = () => {
   console.log('Downloading staff list as CSV');
