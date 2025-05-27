@@ -118,26 +118,64 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
       ))}
 
       {showModal && selectedSession && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-md p-6 rounded shadow-lg relative">
-            <button onClick={() => setShowModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
-            <h2 className="text-lg font-semibold mb-4">Resolve Feedback</h2>
-            <select value={selectedStaffId} onChange={e => setSelectedStaffId(e.target.value)} className="w-full border mb-4 p-2 rounded">
-              <option value="">Select Staff</option>
-              {staffList.map(s => (
-                <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-              ))}
-            </select>
-            <button
-              onClick={() => markSessionAsActioned(selectedSession)}
-              disabled={!selectedStaffId}
-              className={`w-full py-2 rounded text-white ${selectedStaffId ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300 cursor-not-allowed'}`}
-            >
-              <UserCheck size={16} className="inline mr-1" /> Mark as Actioned
-            </button>
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white w-full max-w-md p-6 rounded shadow-lg relative">
+      <button
+        onClick={() => setShowModal(false)}
+        className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl"
+      >
+        &times;
+      </button>
+
+      <h2 className="text-lg font-semibold mb-4">Resolve Feedback</h2>
+
+      {/* Staff dropdown */}
+      <select
+        value={selectedStaffId}
+        onChange={e => setSelectedStaffId(e.target.value)}
+        className="w-full border mb-4 p-2 rounded"
+      >
+        <option value="">Select Staff</option>
+        {staffList.map(s => (
+          <option key={s.id} value={s.id}>
+            {s.first_name} {s.last_name}
+          </option>
+        ))}
+      </select>
+
+      {/* Feedback content */}
+      <div className="space-y-3 mb-4">
+        {selectedSession.items.map((f, i) => (
+          <div key={i} className="p-3 bg-gray-50 rounded border">
+            <p className="text-sm font-medium text-gray-800 mb-1">
+              {questionsMap[f.question_id] || 'Unknown question'}
+            </p>
+            <p className="text-sm text-gray-600">Rating: {f.rating}</p>
+            {f.additional_feedback && (
+              <p className="mt-2 italic text-gray-700 text-sm">
+                "{f.additional_feedback}"
+              </p>
+            )}
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+
+      {/* Action button */}
+      <button
+        onClick={() => markSessionAsActioned(selectedSession)}
+        disabled={!selectedStaffId}
+        className={`w-full py-2 rounded text-white ${
+          selectedStaffId
+            ? 'bg-green-600 hover:bg-green-700'
+            : 'bg-gray-300 cursor-not-allowed'
+        }`}
+      >
+        <UserCheck size={16} className="inline mr-1" /> Mark as Actioned
+      </button>
+    </div>
+  </div>
+)}
+
     </>
   );
 };
