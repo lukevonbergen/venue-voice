@@ -123,17 +123,25 @@ const StaffPage = () => {
   };
 
   const handleDownloadCSV = () => {
-    console.log('Downloading staff list as CSV');
-    const csv = Papa.unparse(staffList);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'staff_list.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  console.log('Downloading staff list as CSV');
+
+  const publicData = staffList.map(({ email, first_name, last_name, role }) => ({
+    email,
+    first_name,
+    last_name,
+    role
+  }));
+
+  const csv = Papa.unparse(publicData);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'staff_list.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this staff member?')) return;
