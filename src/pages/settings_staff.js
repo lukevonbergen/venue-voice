@@ -93,9 +93,20 @@ const StaffPage = () => {
     setModalOpen(true);
   };
 
+
   const handleCSVUpload = (e) => {
   const file = e.target.files[0];
   if (!file) return;
+
+  // Show overwrite warning
+  const confirmed = window.confirm(
+    '⚠️ This will permanently delete all current staff for this venue and replace them with the CSV data. Do you want to continue?'
+  );
+
+  if (!confirmed) {
+    console.log('🚫 Upload cancelled by user.');
+    return;
+  }
 
   console.log('📥 Uploading CSV file:', file.name);
   setUploading(true);
@@ -111,7 +122,7 @@ const StaffPage = () => {
         .map(r => ({
           first_name: r.first_name.trim(),
           last_name: r.last_name.trim(),
-          email: r.email.trim().toLowerCase(), // lowercased for deduping
+          email: r.email.trim().toLowerCase(), // lowercase for deduping
           role: r.role?.trim() || '',
           venue_id: venueId
         }));
@@ -176,6 +187,7 @@ const StaffPage = () => {
     }
   });
 };
+
 
 
   const handleDownloadCSV = () => {
