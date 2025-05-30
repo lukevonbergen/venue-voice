@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { ModalProvider } from './context/ModalContext';
 import LandingPage from './pages/LandingPage';
 import 'antd/dist/reset.css';
 import DashboardPage from './pages/Dashboard';
@@ -201,9 +202,11 @@ function App() {
 
 const AppWrapper = () => (
   <Router>
-    <App />
-    <Analytics />
-    <SpeedInsights />
+    <ModalProvider>
+      <App />
+        <Analytics />
+          <SpeedInsights />
+    </ModalProvider>
   </Router>
 );
 

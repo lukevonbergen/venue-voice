@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import Papa from 'papaparse';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import usePageTitle from '../hooks/usePageTitle';
-import Papa from 'papaparse';
 import { useVenue } from '../context/VenueContext';
+import { useModal } from '../context/ModalContext';
+import ConfirmModal from '../components/modal/ConfirmModal';
 
 const StaffPage = () => {
   usePageTitle('Staff Management');
   const { venueId } = useVenue();
+  const { showModal, closeModal } = useModal();
+
   const [staffList, setStaffList] = useState([]);
   const [filteredStaff, setFilteredStaff] = useState([]);
   const [form, setForm] = useState({ first_name: '', last_name: '', email: '', role: '' });
@@ -27,26 +31,21 @@ const StaffPage = () => {
   }, [staffList, searchTerm]);
 
   const loadStaff = async () => {
-    console.log('Loading staff for venue:', venueId);
     const { data, error } = await supabase.from('staff').select('*').eq('venue_id', venueId);
     if (error) console.error('Error loading staff:', error);
     const sorted = (data || []).sort((a, b) => a.first_name.localeCompare(b.first_name));
-    console.log('Sorted staff:', sorted);
     setStaffList(sorted);
     setFilteredStaff(sorted);
   };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Form change - ${name}:`, value);
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAddOrUpdateStaff = async (e) => {
     e.preventDefault();
     const payload = { ...form, venue_id: venueId };
-    console.log('Submitting form, editingId:', editingId);
-    console.log('Payload:', payload);
 
     if (editingId) {
       const { error: updateError } = await supabase
@@ -55,11 +54,8 @@ const StaffPage = () => {
         .eq('id', editingId);
 
       if (updateError) {
-        console.error('Update error:', updateError);
         alert('Update error: ' + updateError.message);
         return;
-      } else {
-        console.log('Staff updated successfully');
       }
     } else {
       const { error: insertError } = await supabase
@@ -67,11 +63,8 @@ const StaffPage = () => {
         .insert([payload]);
 
       if (insertError) {
-        console.error('Insert error:', insertError);
         alert('Insert error: ' + insertError.message);
         return;
-      } else {
-        console.log('Staff inserted successfully');
       }
     }
 
@@ -82,7 +75,6 @@ const StaffPage = () => {
   };
 
   const handleEdit = (staff) => {
-    console.log('Editing staff:', staff);
     setForm({
       first_name: staff.first_name,
       last_name: staff.last_name,
@@ -93,105 +85,88 @@ const StaffPage = () => {
     setModalOpen(true);
   };
 
-
   const handleCSVUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // Show overwrite warning
-  const confirmed = window.confirm(
-    '⚠️ This will permanently delete all current staff for this venue and replace them with the CSV data. Do you want to continue?'
-  );
+    showModal(
+      <ConfirmModal
+        message="⚠️ This will delete all current staff for this venue and replace them with the CSV data. Continue?"
+        onConfirm={() => {
+          closeModal();
+          actuallyHandleUpload(file);
+        }}
+        onCancel={closeModal}
+      />
+    );
+  };
 
-  if (!confirmed) {
-    console.log('🚫 Upload cancelled by user.');
-    return;
-  }
+  const actuallyHandleUpload = (file) => {
+    setUploading(true);
 
-  console.log('📥 Uploading CSV file:', file.name);
-  setUploading(true);
+    Papa.parse(file, {
+      header: true,
+      complete: async (results) => {
+        const cleanedRows = results.data
+          .filter(r => r.first_name && r.last_name && r.email)
+          .map(r => ({
+            first_name: r.first_name.trim(),
+            last_name: r.last_name.trim(),
+            email: r.email.trim().toLowerCase(),
+            role: r.role?.trim() || '',
+            venue_id: venueId
+          }));
 
-  Papa.parse(file, {
-    header: true,
-    complete: async (results) => {
-      console.log('🧾 Raw CSV results:', results);
+        if (!venueId) {
+          alert('No venue selected.');
+          setUploading(false);
+          return;
+        }
 
-      // Step 1: Clean and validate
-      const cleanedRows = results.data
-        .filter(r => r.first_name && r.last_name && r.email)
-        .map(r => ({
-          first_name: r.first_name.trim(),
-          last_name: r.last_name.trim(),
-          email: r.email.trim().toLowerCase(), // lowercase for deduping
-          role: r.role?.trim() || '',
-          venue_id: venueId
-        }));
+        if (cleanedRows.length === 0) {
+          alert('No valid staff found in CSV.');
+          setUploading(false);
+          return;
+        }
 
-      if (!venueId) {
-        console.error('❌ Missing venueId. Cannot import staff.');
-        alert('No venue selected.');
+        const uniqueByEmail = {};
+        for (const row of cleanedRows) {
+          uniqueByEmail[row.email] = row;
+        }
+        const uniqueRows = Object.values(uniqueByEmail);
+
+        const { error: deleteError } = await supabase
+          .from('staff')
+          .delete()
+          .eq('venue_id', venueId);
+
+        if (deleteError) {
+          alert('Failed to clear existing staff: ' + deleteError.message);
+          setUploading(false);
+          return;
+        }
+
+        const { error: insertError } = await supabase
+          .from('staff')
+          .insert(uniqueRows);
+
+        if (insertError) {
+          alert('Error importing staff: ' + insertError.message);
+        } else {
+          alert('Staff imported successfully!');
+        }
+
+        loadStaff();
         setUploading(false);
-        return;
-      }
-
-      if (cleanedRows.length === 0) {
-        console.warn('⚠️ No valid rows to import.');
-        alert('No valid staff found in CSV.');
+      },
+      error: (parseError) => {
+        alert('Failed to read CSV file.');
         setUploading(false);
-        return;
       }
-
-      // Step 2: De-dupe by email
-      const uniqueByEmail = {};
-      for (const row of cleanedRows) {
-        uniqueByEmail[row.email] = row; // last one wins
-      }
-      const uniqueRows = Object.values(uniqueByEmail);
-      console.log(`✅ ${uniqueRows.length} unique staff rows ready to insert.`);
-
-      // Step 3: Delete all current staff for the venue
-      console.log('🧹 Deleting existing staff for venue_id:', venueId);
-      const { error: deleteError } = await supabase
-        .from('staff')
-        .delete()
-        .eq('venue_id', venueId);
-
-      if (deleteError) {
-        console.error('❌ Error deleting existing staff:', deleteError);
-        alert('Failed to clear existing staff: ' + deleteError.message);
-        setUploading(false);
-        return;
-      }
-
-      // Step 4: Insert cleaned + unique staff
-      console.log('📤 Inserting new staff...');
-      const { error: insertError, data: insertData } = await supabase
-        .from('staff')
-        .insert(uniqueRows);
-
-      if (insertError) {
-        console.error('❌ Insert error:', insertError);
-        alert('Error importing staff: ' + insertError.message);
-      } else {
-        console.log('✅ Staff imported successfully:', insertData);
-        alert('Staff imported successfully!');
-      }
-
-      loadStaff();
-      setUploading(false);
-    },
-    error: (parseError) => {
-      console.error('❌ Error parsing CSV:', parseError);
-      alert('Failed to read CSV file.');
-      setUploading(false);
-    }
-  });
-};
-
-
+    });
+  };
 
   const handleDownloadCSV = () => {
-    console.log('Downloading staff list as CSV');
     const publicData = staffList.map(({ email, first_name, last_name, role }) => ({
       email,
       first_name,
@@ -211,14 +186,12 @@ const StaffPage = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this staff member?')) return;
-    console.log('Deleting staff with ID:', id);
     await supabase.from('staff').delete().eq('id', id);
     loadStaff();
   };
 
   const handleSearch = (term) => {
     const lowered = term.toLowerCase();
-    console.log('Searching staff with term:', term);
     const filtered = staffList.filter(
       (s) =>
         s.first_name.toLowerCase().includes(lowered) ||
@@ -233,8 +206,6 @@ const StaffPage = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  console.log('Current paginated staff:', paginatedStaff);
 
   return (
     <PageContainer>
