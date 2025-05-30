@@ -116,7 +116,7 @@ const StaffPage = () => {
           last_name: r.last_name.trim(),
           email: r.email.trim().toLowerCase(),
           role: r.role?.trim() || '',
-          venue_id: venueId
+          venue_id: venueId,
         }));
 
       if (!venueId) {
@@ -136,27 +136,45 @@ const StaffPage = () => {
       for (const row of cleanedRows) {
         uniqueByEmail[row.email] = row;
       }
+      const dedupedRows = Object.values(uniqueByEmail);
 
-      const uniqueRows = Object.values(uniqueByEmail);
+      // Step 1: Fetch existing staff for this venue
+      const { data: existingStaff, error: fetchError } = await supabase
+        .from('staff')
+        .select('id, email')
+        .eq('venue_id', venueId);
 
-      try {
-        const { error: upsertError } = await supabase
-          .from('staff')
-          .upsert(uniqueRows, {
-            onConflict: ['email', 'venue_id']
-          });
-
-        if (upsertError) {
-          toast.error('Error importing staff: ' + upsertError.message);
-        } else {
-          toast.success('Staff imported successfully!');
-        }
-
-        loadStaff();
-      } catch (err) {
-        toast.error('Unexpected error: ' + err.message);
+      if (fetchError) {
+        toast.error('Failed to fetch existing staff: ' + fetchError.message);
+        setUploading(false);
+        return;
       }
 
+      const emailToId = {};
+      (existingStaff || []).forEach(s => {
+        emailToId[s.email.toLowerCase()] = s.id;
+      });
+
+      // Step 2: Build upsert payload
+      const upsertRows = dedupedRows.map(row => ({
+        ...row,
+        id: emailToId[row.email] || undefined, // preserves ID if it exists
+      }));
+
+      // Step 3: Perform upsert
+      const { error: upsertError } = await supabase
+        .from('staff')
+        .upsert(upsertRows, {
+          onConflict: ['email', 'venue_id'],
+        });
+
+      if (upsertError) {
+        toast.error('Error importing staff: ' + upsertError.message);
+      } else {
+        toast.success('Staff imported successfully!');
+      }
+
+      loadStaff();
       setUploading(false);
     },
     error: (parseError) => {
