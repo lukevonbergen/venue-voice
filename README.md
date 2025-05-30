@@ -1,10 +1,10 @@
-# 📣 Chatters Feedback Platform for Hospitality
+# Chatters Feedback Platform for Hospitality
 
 A SaaS platform built to help hospitality venues (like pubs and restaurants) capture real-time table feedback, resolve issues before they turn into bad reviews, and track staff performance — all in one place.
 
 ---
 
-## 🚀 What It Does
+## What It Does
 
 - **Live Table Feedback**: Guests scan a QR code to leave feedback on their table — instantly.
 - **Real-Time Alerts**: Staff get notified when poor feedback is submitted.
@@ -15,7 +15,7 @@ A SaaS platform built to help hospitality venues (like pubs and restaurants) cap
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React + Tailwind CSS
 - **Routing**: React Router
