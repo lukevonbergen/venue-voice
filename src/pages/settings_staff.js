@@ -55,7 +55,7 @@ const StaffPage = () => {
         .eq('id', editingId);
 
       if (updateError) {
-        alert('Update error: ' + updateError.message);
+        toast.error('Update error: ' + updateError.message);
         return;
       }
     } else {
@@ -64,7 +64,7 @@ const StaffPage = () => {
         .insert([payload]);
 
       if (insertError) {
-        alert('Insert error: ' + insertError.message);
+        toast.error('Insert error: ' + insertError.message);
         return;
       }
     }
@@ -119,13 +119,13 @@ const StaffPage = () => {
           }));
 
         if (!venueId) {
-          alert('No venue selected.');
+          toast.error('No venue selected.');
           setUploading(false);
           return;
         }
 
         if (cleanedRows.length === 0) {
-          alert('No valid staff found in CSV.');
+          toast.error('No valid staff found in CSV.');
           setUploading(false);
           return;
         }
@@ -142,7 +142,7 @@ const StaffPage = () => {
           .eq('venue_id', venueId);
 
         if (deleteError) {
-          alert('Failed to clear existing staff: ' + deleteError.message);
+          toast.error('Failed to clear existing staff: ' + deleteError.message);
           setUploading(false);
           return;
         }
@@ -161,7 +161,7 @@ const StaffPage = () => {
         setUploading(false);
       },
       error: (parseError) => {
-        alert('Failed to read CSV file.');
+        toast.error('Failed to read CSV file.');
         setUploading(false);
       }
     });
