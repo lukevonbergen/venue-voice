@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Papa from 'papaparse';
+import toast from 'react-hot-toast';
 import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import usePageTitle from '../hooks/usePageTitle';
@@ -151,9 +152,9 @@ const StaffPage = () => {
           .insert(uniqueRows);
 
         if (insertError) {
-          alert('Error importing staff: ' + insertError.message);
+          toast.error('Error importing staff: ' + insertError.message);
         } else {
-          alert('Staff imported successfully!');
+          toast.success('Staff imported successfully!');
         }
 
         loadStaff();

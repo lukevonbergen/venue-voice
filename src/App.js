@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ModalProvider } from './context/ModalContext';
+import { Toaster } from 'react-hot-toast';
+
 import LandingPage from './pages/LandingPage';
 import 'antd/dist/reset.css';
 import DashboardPage from './pages/Dashboard';
@@ -203,6 +205,7 @@ function App() {
 const AppWrapper = () => (
   <Router>
     <ModalProvider>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <App />
         <Analytics />
           <SpeedInsights />
