@@ -5,6 +5,7 @@ import supabase from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import usePageTitle from '../hooks/usePageTitle';
 import { useVenue } from '../context/VenueContext';
+import { v4 as uuidv4 } from 'uuid';
 import { useModal } from '../context/ModalContext';
 import ConfirmModal from '../components/modal/ConfirmModal';
 
@@ -103,69 +104,68 @@ const StaffPage = () => {
   };
 
   const actuallyHandleUpload = (file) => {
-    setUploading(true);
+  setUploading(true);
 
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        const cleanedRows = results.data
-          .filter(r => r.first_name && r.last_name && r.email)
-          .map(r => ({
-            first_name: r.first_name.trim(),
-            last_name: r.last_name.trim(),
-            email: r.email.trim().toLowerCase(),
-            role: r.role?.trim() || '',
-            venue_id: venueId
-          }));
+  Papa.parse(file, {
+    header: true,
+    complete: async (results) => {
+      const cleanedRows = results.data
+        .filter(r => r.first_name && r.last_name && r.email)
+        .map(r => ({
+          first_name: r.first_name.trim(),
+          last_name: r.last_name.trim(),
+          email: r.email.trim().toLowerCase(),
+          role: r.role?.trim() || '',
+          venue_id: venueId
+        }));
 
-        if (!venueId) {
-          toast.error('No venue selected.');
-          setUploading(false);
-          return;
-        }
+      if (!venueId) {
+        toast.error('No venue selected.');
+        setUploading(false);
+        return;
+      }
 
-        if (cleanedRows.length === 0) {
-          toast.error('No valid staff found in CSV.');
-          setUploading(false);
-          return;
-        }
+      if (cleanedRows.length === 0) {
+        toast.error('No valid staff found in CSV.');
+        setUploading(false);
+        return;
+      }
 
-        const uniqueByEmail = {};
-        for (const row of cleanedRows) {
-          uniqueByEmail[row.email] = row;
-        }
-        const uniqueRows = Object.values(uniqueByEmail);
+      // De-dupe by email
+      const uniqueByEmail = {};
+      for (const row of cleanedRows) {
+        uniqueByEmail[row.email] = row;
+      }
 
-        const { error: deleteError } = await supabase
+      const uniqueRows = Object.values(uniqueByEmail);
+
+      try {
+        const { error: upsertError } = await supabase
           .from('staff')
-          .delete()
-          .eq('venue_id', venueId);
+          .upsert(uniqueRows, {
+            onConflict: ['email', 'venue_id']
+          });
 
-        if (deleteError) {
-          toast.error('Failed to clear existing staff: ' + deleteError.message);
-          setUploading(false);
-          return;
-        }
-
-        const { error: insertError } = await supabase
-          .from('staff')
-          .insert(uniqueRows);
-
-        if (insertError) {
-          toast.error('Error importing staff: ' + insertError.message);
+        if (upsertError) {
+          toast.error('Error importing staff: ' + upsertError.message);
         } else {
           toast.success('Staff imported successfully!');
         }
 
         loadStaff();
-        setUploading(false);
-      },
-      error: (parseError) => {
-        toast.error('Failed to read CSV file.');
-        setUploading(false);
+      } catch (err) {
+        toast.error('Unexpected error: ' + err.message);
       }
-    });
-  };
+
+      setUploading(false);
+    },
+    error: (parseError) => {
+      toast.error('Failed to read CSV file.');
+      setUploading(false);
+    }
+  });
+};
+
 
   const handleDownloadCSV = () => {
     const publicData = staffList.map(({ email, first_name, last_name, role }) => ({
