@@ -94,80 +94,89 @@ const StaffPage = () => {
   };
 
   const handleCSVUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    console.log('📥 Uploading CSV file:', file.name);
-    setUploading(true);
+  const file = e.target.files[0];
+  if (!file) return;
 
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        console.log('🧾 Raw CSV results:', results);
+  console.log('📥 Uploading CSV file:', file.name);
+  setUploading(true);
 
-        const rows = results.data
-          .filter(r => r.first_name && r.last_name && r.email)
-          .map(r => ({
-            first_name: r.first_name.trim(),
-            last_name: r.last_name.trim(),
-            email: r.email.trim(),
-            role: r.role?.trim() || '',
-            venue_id: venueId
-          }));
+  Papa.parse(file, {
+    header: true,
+    complete: async (results) => {
+      console.log('🧾 Raw CSV results:', results);
 
-        console.log('✅ Parsed & cleaned rows:', rows);
+      // Step 1: Clean and validate
+      const cleanedRows = results.data
+        .filter(r => r.first_name && r.last_name && r.email)
+        .map(r => ({
+          first_name: r.first_name.trim(),
+          last_name: r.last_name.trim(),
+          email: r.email.trim().toLowerCase(), // lowercased for deduping
+          role: r.role?.trim() || '',
+          venue_id: venueId
+        }));
 
-        if (!venueId) {
-          console.error('❌ Missing venueId. Cannot import staff.');
-          alert('No venue selected.');
-          setUploading(false);
-          return;
-        }
-
-        if (rows.length === 0) {
-          console.warn('⚠️ No valid rows to insert.');
-          alert('No valid staff found in CSV.');
-          setUploading(false);
-          return;
-        }
-
-        console.log('🧹 Deleting existing staff for venue_id:', venueId);
-        const { error: deleteError, data: deleteData } = await supabase
-          .from('staff')
-          .delete()
-          .eq('venue_id', venueId);
-
-        if (deleteError) {
-          console.error('❌ Error deleting staff:', deleteError);
-          alert('Failed to clear existing staff: ' + deleteError.message);
-          setUploading(false);
-          return;
-        }
-
-        console.log('✅ Deleted old staff:', deleteData);
-
-        console.log('📤 Inserting new staff...');
-        const { error: insertError, data: insertData } = await supabase
-          .from('staff')
-          .insert(rows);
-
-        if (insertError) {
-          console.error('❌ Insert error:', insertError);
-          alert('Error importing staff: ' + insertError.message);
-        } else {
-          console.log('✅ Staff inserted successfully:', insertData);
-          alert('Staff imported successfully!');
-        }
-
-        loadStaff();
+      if (!venueId) {
+        console.error('❌ Missing venueId. Cannot import staff.');
+        alert('No venue selected.');
         setUploading(false);
-      },
-      error: (parseError) => {
-        console.error('❌ Error parsing CSV:', parseError);
-        alert('Failed to read CSV file.');
-        setUploading(false);
+        return;
       }
-    });
-  };
+
+      if (cleanedRows.length === 0) {
+        console.warn('⚠️ No valid rows to import.');
+        alert('No valid staff found in CSV.');
+        setUploading(false);
+        return;
+      }
+
+      // Step 2: De-dupe by email
+      const uniqueByEmail = {};
+      for (const row of cleanedRows) {
+        uniqueByEmail[row.email] = row; // last one wins
+      }
+      const uniqueRows = Object.values(uniqueByEmail);
+      console.log(`✅ ${uniqueRows.length} unique staff rows ready to insert.`);
+
+      // Step 3: Delete all current staff for the venue
+      console.log('🧹 Deleting existing staff for venue_id:', venueId);
+      const { error: deleteError } = await supabase
+        .from('staff')
+        .delete()
+        .eq('venue_id', venueId);
+
+      if (deleteError) {
+        console.error('❌ Error deleting existing staff:', deleteError);
+        alert('Failed to clear existing staff: ' + deleteError.message);
+        setUploading(false);
+        return;
+      }
+
+      // Step 4: Insert cleaned + unique staff
+      console.log('📤 Inserting new staff...');
+      const { error: insertError, data: insertData } = await supabase
+        .from('staff')
+        .insert(uniqueRows);
+
+      if (insertError) {
+        console.error('❌ Insert error:', insertError);
+        alert('Error importing staff: ' + insertError.message);
+      } else {
+        console.log('✅ Staff imported successfully:', insertData);
+        alert('Staff imported successfully!');
+      }
+
+      loadStaff();
+      setUploading(false);
+    },
+    error: (parseError) => {
+      console.error('❌ Error parsing CSV:', parseError);
+      alert('Failed to read CSV file.');
+      setUploading(false);
+    }
+  });
+};
+
 
   const handleDownloadCSV = () => {
     console.log('Downloading staff list as CSV');
