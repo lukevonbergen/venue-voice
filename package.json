@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@sentry/react": "^9.24.0",
     "@stripe/stripe-js": "^5.4.0",
     "@supabase/supabase-js": "^2.47.10",
     "@testing-library/jest-dom": "^6.6.3",

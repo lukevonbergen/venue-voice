@@ -41,6 +41,16 @@ import './index.css';
 import { VenueProvider } from './context/VenueContext';
 import DashboardFrame from './pages/DashboardFrame';
 
+import * as Sentry from "@sentry/react";
+import { BrowserTracing } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: "https://c9adb03032f6c51d08b0cd3c27af6f80@o4509429646622720.ingest.de.sentry.io/4509429648195664",
+  integrations: [new BrowserTracing()],
+  tracesSampleRate: 1.0,
+  sendDefaultPii: true,
+});
+
 function App() {
   useEffect(() => {
     const hubspotScript = document.createElement('script');
@@ -206,9 +216,11 @@ const AppWrapper = () => (
   <Router>
     <ModalProvider>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <App />
-        <Analytics />
-          <SpeedInsights />
+      <Sentry.ErrorBoundary fallback={<p>Something went wrong!</p>} showDialog>
+        <App />
+      </Sentry.ErrorBoundary>
+      <Analytics />
+      <SpeedInsights />
     </ModalProvider>
   </Router>
 );
