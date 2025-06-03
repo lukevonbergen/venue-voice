@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@sentry/react": "^9.24.0",
+    "@sentry/tracing": "^7.120.3",
     "@stripe/stripe-js": "^5.4.0",
     "@supabase/supabase-js": "^2.47.10",
     "@testing-library/jest-dom": "^6.6.3",
