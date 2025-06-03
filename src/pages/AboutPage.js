@@ -112,16 +112,6 @@ const AboutUsPage = () => {
           </div>
         </div>
       </div>
-
-      <div className="text-center mt-12">
-  <button
-    onClick={() => { throw new Error("This is a test error for Sentry."); }}
-    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-  >
-    Trigger Sentry Test Error
-  </button>
-</div>
-
       <Footer />
     </div>
   );
