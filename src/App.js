@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ModalProvider } from './context/ModalContext';
@@ -46,23 +46,30 @@ import { browserTracingIntegration } from "@sentry/react";
 
 Sentry.init({
   dsn: "https://c9adb03032f6c51d08b0cd3c27af6f80@o4509429646622720.ingest.de.sentry.io/4509429648195664",
-  integrations: [new browserTracingIntegration()],
+  integrations: [browserTracingIntegration()],
   tracesSampleRate: 1.0,
   sendDefaultPii: true,
 });
 
 function App() {
+  const location = useLocation();
+
   useEffect(() => {
-    const hubspotScript = document.createElement('script');
-    hubspotScript.src = '//js.hs-scripts.com/48822376.js';
-    hubspotScript.async = true;
-    hubspotScript.defer = true;
-    hubspotScript.id = 'hs-script-loader';
-    document.body.appendChild(hubspotScript);
-    return () => {
-      document.body.removeChild(hubspotScript);
-    };
-  }, []);
+    const publicPages = ["/contact", "/demo"];
+
+    if (publicPages.includes(location.pathname)) {
+      const hubspotScript = document.createElement('script');
+      hubspotScript.src = '//js.hs-scripts.com/48822376.js';
+      hubspotScript.async = true;
+      hubspotScript.defer = true;
+      hubspotScript.id = 'hs-script-loader';
+      document.body.appendChild(hubspotScript);
+
+      return () => {
+        document.body.removeChild(hubspotScript);
+      };
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const gtagScript = document.createElement('script');
@@ -105,109 +112,17 @@ function App() {
       <Route path="/feedback" element={<CustomerFeedbackPage />} />
       <Route path="/feedback/:venueId" element={<CustomerFeedbackPage />} />
 
-      {/* 🔐 Dashboard Pages (inside VenueProvider + DashboardFrame) */}
-      <Route
-        path="/dashboard"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <DashboardPage />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/questions"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <ManageQuestions />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/tablefeedback"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <TablesDashboard />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/reports"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <ReportsPage />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/settings"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <SettingsPage />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/staff"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <Settings_Staff />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/templates"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <TemplatesPage />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-      <Route
-        path="/dashboard/feedbackfeed"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <FeedbackFeed />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-
-      <Route
-        path="/dashboard/heatmap"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <Heatmap />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
-
-      <Route
-        path="/dashboard/staff/leaderboard"
-        element={
-          <VenueProvider>
-            <DashboardFrame>
-              <StaffLeaderboard />
-            </DashboardFrame>
-          </VenueProvider>
-        }
-      />
+      {/* 🔐 Dashboard Pages */}
+      <Route path="/dashboard" element={<VenueProvider><DashboardFrame><DashboardPage /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/questions" element={<VenueProvider><DashboardFrame><ManageQuestions /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/tablefeedback" element={<VenueProvider><DashboardFrame><TablesDashboard /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/reports" element={<VenueProvider><DashboardFrame><ReportsPage /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/settings" element={<VenueProvider><DashboardFrame><SettingsPage /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/staff" element={<VenueProvider><DashboardFrame><Settings_Staff /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/templates" element={<VenueProvider><DashboardFrame><TemplatesPage /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/feedbackfeed" element={<VenueProvider><DashboardFrame><FeedbackFeed /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/heatmap" element={<VenueProvider><DashboardFrame><Heatmap /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/staff/leaderboard" element={<VenueProvider><DashboardFrame><StaffLeaderboard /></DashboardFrame></VenueProvider>} />
     </Routes>
   );
 }
