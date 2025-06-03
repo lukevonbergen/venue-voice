@@ -42,11 +42,11 @@ import { VenueProvider } from './context/VenueContext';
 import DashboardFrame from './pages/DashboardFrame';
 
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
+import { browserTracingIntegration } from "@sentry/react";
 
 Sentry.init({
   dsn: "https://c9adb03032f6c51d08b0cd3c27af6f80@o4509429646622720.ingest.de.sentry.io/4509429648195664",
-  integrations: [new BrowserTracing()],
+  integrations: [new browserTracingIntegration()],
   tracesSampleRate: 1.0,
   sendDefaultPii: true,
 });
