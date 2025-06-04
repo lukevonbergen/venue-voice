@@ -143,19 +143,27 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
         ))}
       </select>
 
-      {/* Feedback content */}
       <div className="space-y-3 mb-4">
         {selectedSession.items.map((f, i) => (
           <div key={i} className="p-3 bg-gray-50 rounded border">
-            <p className="text-sm font-medium text-gray-800 mb-1">
-              {questionsMap[f.question_id] || 'Unknown question'}
-            </p>
-            <p className="text-sm text-gray-600">Rating: {f.rating}</p>
+            {/* Only show question label if it exists */}
+            {questionsMap[f.question_id] && (
+              <p className="text-sm font-medium text-gray-800 mb-1">
+                {questionsMap[f.question_id]}
+              </p>
+            )}
+
+            {/* Only show rating if it exists */}
+            {f.rating !== null && (
+              <p className="text-sm text-gray-600">Rating: {f.rating}</p>
+            )}
+
+            {/* Show Additional Feedback label and content if present */}
             {f.additional_feedback && (
-                <div className="mt-2">
-                  <p className="text-sm font-medium text-gray-800 mb-1">Additional Feedback</p>
-                  <p className="italic text-gray-700 text-sm">"{f.additional_feedback}"</p>
-                </div>
+              <div className="mt-2">
+                <p className="text-sm font-medium text-gray-800 mb-1">Additional Feedback</p>
+                <p className="italic text-gray-700 text-sm">"{f.additional_feedback}"</p>
+              </div>
             )}
           </div>
         ))}

@@ -413,19 +413,35 @@ const Heatmap = () => {
 
           {feedbackModalData.map(f => (
             <div key={f.id} className="border rounded-lg p-4 mb-4 shadow-sm">
-              <div className="text-sm text-gray-500 mb-1">{dayjs(f.created_at).fromNow()}</div>
-              <div className="text-sm font-medium mb-1">{f.questions?.question || 'Unknown question'}</div>
-              <div className="mb-2">
-                <span className="text-sm">Rating:</span> <span className="font-semibold">{f.rating ?? 'N/A'}</span>
+              <div className="text-sm text-gray-500 mb-1">
+                {dayjs(f.created_at).fromNow()}
               </div>
+
+              {/* Only show question if it exists */}
+              {f.questions?.question && (
+                <div className="text-sm font-medium mb-1">
+                  {f.questions.question}
+                </div>
+              )}
+
+              {/* Only show rating if it’s a number */}
+              {f.rating !== null && f.rating !== undefined && (
+                <div className="mb-2">
+                  <span className="text-sm">Rating:</span>{' '}
+                  <span className="font-semibold">{f.rating}</span>
+                </div>
+              )}
+
+              {/* Additional Feedback */}
               {f.additional_feedback && (
-                  <div className="mt-2">
-                    <p className="text-sm font-medium text-gray-800 mb-1">Additional Feedback</p>
-                    <p className="italic text-gray-700 text-sm">"{f.additional_feedback}"</p>
-                  </div>
+                <div className="mt-2">
+                  <p className="text-sm font-medium text-gray-800 mb-1">Additional Feedback</p>
+                  <p className="italic text-gray-700 text-sm">"{f.additional_feedback}"</p>
+                </div>
               )}
             </div>
           ))}
+
 
           <button
             onClick={markAllResolved}
