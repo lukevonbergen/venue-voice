@@ -152,9 +152,10 @@ const FeedbackTabs = ({ venueId, questionsMap }) => {
             </p>
             <p className="text-sm text-gray-600">Rating: {f.rating}</p>
             {f.additional_feedback && (
-              <p className="mt-2 italic text-gray-700 text-sm">
-                "{f.additional_feedback}"
-              </p>
+                <div className="mt-2">
+                  <p className="text-sm font-medium text-gray-800 mb-1">Additional Feedback</p>
+                  <p className="italic text-gray-700 text-sm">"{f.additional_feedback}"</p>
+                </div>
             )}
           </div>
         ))}
