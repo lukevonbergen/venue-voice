@@ -55,8 +55,9 @@ const Footer = () => {
 
         {/* Copyright Notice */}
         <div className="border-t border-gray-100 mt-8 pt-8 text-center text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} Chatters. All rights reserved.
-        </div>
+  &copy; {new Date().getFullYear()} Chatters. All rights reserved. <br />
+  Chatters Ltd · Company No. 16500541
+</div>
       </div>
     </footer>
   );
