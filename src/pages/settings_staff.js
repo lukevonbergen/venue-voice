@@ -269,29 +269,31 @@ const StaffPage = () => {
           {paginatedStaff.length === 0 ? (
             <p className="text-sm text-gray-500">No staff members found.</p>
           ) : (
-            <table className="w-full text-sm table-auto">
-              <thead>
-                <tr className="border-b bg-gray-100 text-left">
-                  <th className="py-3 px-2 w-1/4">Name</th>
-                  <th className="py-3 px-2 w-1/4">Email</th>
-                  <th className="py-3 px-2 w-1/4">Job Title</th>
-                  <th className="py-3 px-2 w-1/4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedStaff.map((staff, index) => (
-                  <tr key={staff.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b`}>
-                    <td className="py-3 px-2">{staff.first_name} {staff.last_name}</td>
-                    <td className="py-3 px-2">{staff.email}</td>
-                    <td className="py-3 px-2">{staff.role}</td>
-                    <td className="py-3 px-2 text-right space-x-3">
-                      <button onClick={() => handleEdit(staff)} className="text-blue-600 hover:underline text-sm">Edit</button>
-                      <button onClick={() => handleDelete(staff.id)} className="text-red-600 hover:underline text-sm">Delete</button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm table-auto min-w-[600px]">
+                <thead>
+                  <tr className="border-b bg-gray-100 text-left">
+                    <th className="py-3 px-2 w-1/4">Name</th>
+                    <th className="py-3 px-2 w-1/4">Email</th>
+                    <th className="py-3 px-2 w-1/4">Job Title</th>
+                    <th className="py-3 px-2 w-1/4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {paginatedStaff.map((staff, index) => (
+                    <tr key={staff.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b`}>
+                      <td className="py-3 px-2">{staff.first_name} {staff.last_name}</td>
+                      <td className="py-3 px-2">{staff.email}</td>
+                      <td className="py-3 px-2">{staff.role}</td>
+                      <td className="py-3 px-2 text-right space-x-3">
+                        <button onClick={() => handleEdit(staff)} className="text-blue-600 hover:underline text-sm">Edit</button>
+                        <button onClick={() => handleDelete(staff.id)} className="text-red-600 hover:underline text-sm">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           <div className="flex justify-between items-center pt-4">
