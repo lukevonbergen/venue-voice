@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 const DemoModal = ({ isDemoModalOpen, closeDemoModal }) => {
+  useEffect(() => {
+    if (!isDemoModalOpen) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://js.hsforms.net/forms/embed/48822376.js';
+    script.defer = true;
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [isDemoModalOpen]);
+
   if (!isDemoModalOpen) return null;
 
   return (
@@ -14,9 +28,12 @@ const DemoModal = ({ isDemoModalOpen, closeDemoModal }) => {
           <X className="h-6 w-6 text-gray-600" />
         </button>
         <div className="p-8">
+          <h2 className="text-2xl font-bold mb-6">Chatters Enquiry</h2>
           <div
-            className="meetings-iframe-container"
-            data-src="https://meetings.hubspot.com/luke-von-bergen/chatters-demo?embed=true"
+            className="hs-form-frame"
+            data-region="na1"
+            data-form-id="9025b757-387d-4e0d-8d77-8b10660a1767"
+            data-portal-id="48822376"
           ></div>
         </div>
       </div>
