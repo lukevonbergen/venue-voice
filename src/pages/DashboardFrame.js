@@ -73,7 +73,7 @@ const DashboardFrame = ({ children }) => {
 
   const NavLink = ({ to, children, icon: Icon }) => {
   const isExactMatch = location.pathname === to;
-  const isNestedMatch = to !== '/dashboard' && location.pathname.startsWith(to);
+  const isNestedMatch = to !== '/' && location.pathname.startsWith(to);
   const isActive = isExactMatch || isNestedMatch;
 
   return (
@@ -125,7 +125,7 @@ const DashboardFrame = ({ children }) => {
                     <div className="text-xs text-gray-500">{userInfo.email}</div>
                   </div>
                   <Link
-                    to="/dashboard/settings"
+                    to="/settings"
                     className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Account Settings
@@ -146,13 +146,13 @@ const DashboardFrame = ({ children }) => {
       {/* Navigation Bar */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-4 items-center">
-          <NavLink to="/dashboard" icon={LayoutDashboard}>Overview</NavLink>
-          <NavLink to="/dashboard/questions" icon={MessageSquare}>Questions</NavLink>
-          <NavLink to="/dashboard/reports" icon={BarChart}>Reports</NavLink>
-          <NavLink to="/dashboard/heatmap" icon={Map}>Heatmap</NavLink>
-          <NavLink to="/dashboard/templates" icon={QrCode}>QR Templates</NavLink>
-          <NavLink to="/dashboard/staff" icon={User}>Staff</NavLink>
-          <NavLink to="/dashboard/settings" icon={Settings}>Settings</NavLink>
+          <NavLink to="/" icon={LayoutDashboard}>Overview</NavLink>
+          <NavLink to="/questions" icon={MessageSquare}>Questions</NavLink>
+          <NavLink to="/reports" icon={BarChart}>Reports</NavLink>
+          <NavLink to="/heatmap" icon={Map}>Heatmap</NavLink>
+          <NavLink to="/templates" icon={QrCode}>QR Templates</NavLink>
+          <NavLink to="/staff" icon={User}>Staff</NavLink>
+          <NavLink to="/settings" icon={Settings}>Settings</NavLink>
         </div>
       </div>
 

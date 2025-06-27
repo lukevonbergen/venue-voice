@@ -25,6 +25,8 @@ const DashboardRoutes = () => {
   return (
     <VenueProvider>
       <Routes>
+        {/* Redirect for /dashboard to my.getchatters.com/ */}
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         {/* 🔐 Auth Pages (no DashboardFrame) */}
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
@@ -32,17 +34,17 @@ const DashboardRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* 🧭 Dashboard Pages (wrapped in DashboardFrame) */}
-        <Route path="/dashboard" element={<DashboardFrame><DashboardPage /></DashboardFrame>} />
-        <Route path="/dashboard/questions" element={<DashboardFrame><ManageQuestions /></DashboardFrame>} />
-        <Route path="/dashboard/heatmap" element={<DashboardFrame><Heatmap /></DashboardFrame>} />
-        <Route path="/dashboard/tablefeedback" element={<DashboardFrame><TablesDashboard /></DashboardFrame>} />
-        <Route path="/dashboard/settings" element={<DashboardFrame><SettingsPage /></DashboardFrame>} />
-        <Route path="/dashboard/templates" element={<DashboardFrame><TemplatesPage /></DashboardFrame>} />
-        <Route path="/dashboard/reports" element={<DashboardFrame><ReportsPage /></DashboardFrame>} />
-        <Route path="/dashboard/staff" element={<DashboardFrame><Settings_Staff /></DashboardFrame>} />
-        <Route path="/dashboard/staff/leaderboard" element={<DashboardFrame><StaffLeaderboard /></DashboardFrame>} />
-        <Route path="/dashboard/feedbackfeed" element={<DashboardFrame><FeedbackFeed /></DashboardFrame>} />
-        <Route path="/dashboard/billing" element={<DashboardFrame><BillingPage /></DashboardFrame>} />
+        <Route path="/" element={<DashboardFrame><DashboardPage /></DashboardFrame>} />
+        <Route path="/questions" element={<DashboardFrame><ManageQuestions /></DashboardFrame>} />
+        <Route path="/heatmap" element={<DashboardFrame><Heatmap /></DashboardFrame>} />
+        <Route path="/tablefeedback" element={<DashboardFrame><TablesDashboard /></DashboardFrame>} />
+        <Route path="/settings" element={<DashboardFrame><SettingsPage /></DashboardFrame>} />
+        <Route path="/templates" element={<DashboardFrame><TemplatesPage /></DashboardFrame>} />
+        <Route path="/reports" element={<DashboardFrame><ReportsPage /></DashboardFrame>} />
+        <Route path="/staff" element={<DashboardFrame><Settings_Staff /></DashboardFrame>} />
+        <Route path="/staff/leaderboard" element={<DashboardFrame><StaffLeaderboard /></DashboardFrame>} />
+        <Route path="/feedbackfeed" element={<DashboardFrame><FeedbackFeed /></DashboardFrame>} />
+        <Route path="/settings/billing" element={<DashboardFrame><BillingPage /></DashboardFrame>} />
       </Routes>
     </VenueProvider>
   );
