@@ -252,7 +252,7 @@ const StaffPage = () => {
             <h2 className="text-xl font-semibold">Staff List</h2>
             <div className="flex items-center gap-4">
               <a
-                href="/dashboard/staff/leaderboard"
+                href="/staff/leaderboard"
                 className="text-sm text-gray-600 hover:text-blue-600 hover:underline font-medium transition"
               >
                 View Leaderboard

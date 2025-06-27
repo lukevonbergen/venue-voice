@@ -45,7 +45,7 @@ const DashboardFrame = ({ children }) => {
       const trialExpired =
         !venue.is_paid && new Date() > new Date(venue.trial_ends_at);
 
-      if (trialExpired && location.pathname !== '/billing') {
+      if (trialExpired && location.pathname !== '/settings/billing') {
         navigate('/billing');
       }
     } else {
