@@ -11,7 +11,7 @@ dayjs.extend(relativeTime);
 const GRID_SIZE = 20;
 
 const Heatmap = () => {
-  usePageTitle('Heatmap');
+  usePageTitle('Floor Plan');
   const layoutRef = useRef(null);
 
   const [venueId, setVenueId] = useState(null);
@@ -458,7 +458,7 @@ const Heatmap = () => {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-bold mb-6">Table Heatmap</h1>
+      <h1 className="text-2xl font-bold mb-6">Floor Plan</h1>
 
       <div className="bg-white border rounded p-6">
         <div className="flex items-center justify-between mb-4">
