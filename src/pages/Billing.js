@@ -77,29 +77,35 @@ const BillingPage = () => {
           </p>
         )}
         <div className="mb-6">
-          <label className="block mb-2 font-medium text-sm text-gray-700">Select a plan:</label>
-          <div className="flex gap-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                value="monthly"
-                checked={subscriptionType === 'monthly'}
-                onChange={() => setSubscriptionType('monthly')}
-                className="mr-2"
-              />
-              Monthly (£X)
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                value="yearly"
-                checked={subscriptionType === 'yearly'}
-                onChange={() => setSubscriptionType('yearly')}
-                className="mr-2"
-              />
-              Yearly (£Y)
-            </label>
-          </div>
+        <label className="block mb-2 font-medium text-sm text-gray-700">Select a plan:</label>
+            <div className="flex gap-4 flex-col sm:flex-row">
+                <label className="flex items-center border border-gray-300 rounded-lg p-3 cursor-pointer w-full sm:w-auto">
+                <input
+                    type="radio"
+                    value="monthly"
+                    checked={subscriptionType === 'monthly'}
+                    onChange={() => setSubscriptionType('monthly')}
+                    className="mr-2"
+                />
+                <span>
+                    <strong>£29/mo</strong> <span className="text-gray-500">(billed monthly)</span>
+                </span>
+                </label>
+
+                <label className="flex items-center border border-green-500 rounded-lg p-3 cursor-pointer w-full sm:w-auto bg-green-50">
+                <input
+                    type="radio"
+                    value="yearly"
+                    checked={subscriptionType === 'yearly'}
+                    onChange={() => setSubscriptionType('yearly')}
+                    className="mr-2"
+                />
+                <span>
+                    <strong>£278/yr</strong> <span className="text-green-600 font-medium ml-1">Save 20%</span>
+                    <span className="block text-xs text-gray-500">Equivalent to £23.17/mo</span>
+                </span>
+                </label>
+            </div>
         </div>
         <button
           onClick={handleCheckout}
