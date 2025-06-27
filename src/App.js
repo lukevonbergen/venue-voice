@@ -56,7 +56,7 @@ Sentry.init({
 
 function App() {
     const location = useLocation();
-    console.log('✅ Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+    console.log('✅ Supabase URL:', import.meta.env.REACT_APP_SUPABASE_URL);
 
   useEffect(() => {
     const handleAuthRedirect = async () => {
