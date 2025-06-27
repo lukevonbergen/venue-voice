@@ -46,7 +46,7 @@ const DashboardFrame = ({ children }) => {
         !venue.is_paid && new Date() > new Date(venue.trial_ends_at);
 
       if (trialExpired && location.pathname !== '/settings/billing') {
-        navigate('/billing');
+        navigate('/settings/billing');
       }
     } else {
       navigate('/signin');
@@ -95,7 +95,7 @@ const DashboardFrame = ({ children }) => {
       {!userInfo.is_paid && new Date() <= new Date(userInfo.trial_ends_at) && (
       <div className="bg-yellow-100 text-yellow-800 p-3 text-sm text-center">
         You're on a free trial. You have {Math.ceil((new Date(userInfo.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24))} day(s) left. 
-        <a href="/billing" className="underline ml-1">Upgrade now</a>
+        <a href="/settings/billing" className="underline ml-1">Upgrade now</a>
       </div>
 )}
       {/* Top Bar */}
