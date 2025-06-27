@@ -110,7 +110,27 @@ const DashboardFrame = ({ children }) => {
             <span className="text-sm text-gray-500">{venueName || 'Loading venue...'}</span>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-xs text-gray-500">ID: {venueId || '...'}</div>
+            <div className="text-xs text-gray-500 flex items-center gap-1">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(venueId);
+                }}
+                disabled={!venueId}
+                className="flex items-center text-xs text-gray-500 hover:text-gray-700 transition"
+                title="Copy Venue ID"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6v8a2 2 0 01-2 2h-2" />
+                </svg>
+                Copy Venue ID
+              </button>
+            </div>
             <div className="relative" ref={dropdownRef}>
               <img
                 src={`https://ui-avatars.com/api/?name=${userInfo.first_name || 'User'}`}
