@@ -39,6 +39,7 @@ import PrivacyPolicyPage from './pages/Privacy';
 import AboutPage from './pages/AboutPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import BillingPage from './pages/Billing';
 import './index.css';
 
 import { VenueProvider } from './context/VenueContext';
@@ -148,6 +149,7 @@ function App() {
       <Route path="/dashboard/feedbackfeed" element={<VenueProvider><DashboardFrame><FeedbackFeed /></DashboardFrame></VenueProvider>} />
       <Route path="/dashboard/heatmap" element={<VenueProvider><DashboardFrame><Heatmap /></DashboardFrame></VenueProvider>} />
       <Route path="/dashboard/staff/leaderboard" element={<VenueProvider><DashboardFrame><StaffLeaderboard /></DashboardFrame></VenueProvider>} />
+      <Route path="/dashboard/billing" element={<VenueProvider><DashboardFrame><BillingPage /></DashboardFrame></VenueProvider>}/>
     </Routes>
   );
 }

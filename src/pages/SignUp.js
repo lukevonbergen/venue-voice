@@ -15,44 +15,33 @@ const SignUpPage = () => {
   const navigate = useNavigate();
   
   const handleSignUp = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setIsLoading(false);
-      return;
-    }
+  if (password !== confirmPassword) {
+    setError('Passwords do not match.');
+    setIsLoading(false);
+    return;
+  }
 
-    try {
-      // Determine the price ID based on the selected subscription type
-      const priceId =
-        subscriptionType === 'monthly'
-          ? process.env.REACT_APP_STRIPE_PRICE_MONTHLY // Monthly price ID from env
-          : process.env.REACT_APP_STRIPE_PRICE_YEARLY; // Yearly price ID from env
+  try {
+    const response = await fetch('/api/create-trial-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, firstName, lastName, venueName }),
+    });
 
-      // Stripe Checkout
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, priceId, firstName, lastName, venueName, password }),
-      });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create Stripe checkout session');
-      }
-
-      const { id } = await response.json();
-      const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
-      await stripe.redirectToCheckout({ sessionId: id });
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    navigate('/dashboard'); // or show success screen
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">

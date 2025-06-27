@@ -184,7 +184,7 @@ const SettingsPage = () => {
 
         <SubscriptionStatus
           isPaid={isPaid}
-          onUpgrade={() => alert('Redirect to subscription upgrade page.')}
+          onUpgrade={() => window.location.href = '/dashboard/billing'}
         />
 
         <VenueSettings

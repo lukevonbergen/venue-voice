@@ -24,22 +24,37 @@ const DashboardFrame = ({ children }) => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const email = userData?.user?.email;
-      if (!email) return;
+  const fetchUserInfo = async () => {
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    const email = userData?.user?.email;
 
-      const { data: venue } = await supabase
-        .from('venues')
-        .select('first_name, last_name, email')
-        .eq('email', email)
-        .single();
+    if (!email) {
+      navigate('/signin');
+      return;
+    }
 
-      if (venue) setUserInfo(venue);
-    };
+    const { data: venue, error } = await supabase
+      .from('venues')
+      .select('first_name, last_name, email, is_paid, trial_ends_at')
+      .eq('email', email)
+      .single();
 
-    fetchUserInfo();
-  }, []);
+    if (venue) {
+      setUserInfo(venue);
+
+      const trialExpired =
+        !venue.is_paid && new Date() > new Date(venue.trial_ends_at);
+
+      if (trialExpired && location.pathname !== '/billing') {
+        navigate('/billing');
+      }
+    } else {
+      navigate('/signin');
+    }
+  };
+
+  fetchUserInfo();
+}, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -77,6 +92,12 @@ const DashboardFrame = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {!venue.is_paid && new Date() <= new Date(venue.trial_ends_at) && (
+      <div className="bg-yellow-100 text-yellow-800 p-3 text-sm text-center">
+        You're on a free trial. You have {Math.ceil((new Date(venue.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24))} day(s) left. 
+        <a href="/billing" className="underline ml-1">Upgrade now</a>
+      </div>
+)}
       {/* Top Bar */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
