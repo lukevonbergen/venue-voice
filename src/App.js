@@ -1,3 +1,25 @@
+useEffect(() => {
+  const handleAuthRedirect = async () => {
+    if (window.location.hash.includes('access_token')) {
+      await supabase.auth.getSessionFromUrl({ storeSession: true });
+
+      const isSignup = window.location.hash.includes('type=signup');
+      const isRecovery = window.location.hash.includes('type=recovery');
+
+      if (isSignup) {
+        toast.success('Account confirmed! Welcome aboard.');
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+      } else if (isRecovery) {
+        window.location.href = '/reset-password';
+      }
+    }
+  };
+
+  handleAuthRedirect();
+}, []);
+
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
