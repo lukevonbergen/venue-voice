@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, Users, Calendar, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
-import supabase from '../../utils/supabase';
+import { supabase } from '../../utils/supabase';
+
 
 const MetricsSection = ({ venueId }) => {
   const [feedback, setFeedback] = useState([]);

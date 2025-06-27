@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CalendarClock } from 'lucide-react';
-import supabase from '../../utils/supabase';
+import { supabase } from '../../utils/supabase';
 
 const RecentSessionsTile = ({ venueId }) => {
   const [value, setValue] = useState(0);

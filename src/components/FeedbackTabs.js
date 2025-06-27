@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import { Bell, Calendar, Clock, Timer, UserCheck, Hourglass } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';

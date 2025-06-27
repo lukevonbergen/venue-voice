@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart3 } from 'lucide-react';
-import supabase from '../../utils/supabase';
+import { supabase } from '../../utils/supabase';
 
 const AvgSatisfactionTile = ({ venueId }) => {
   const [value, setValue] = useState('N/A');
