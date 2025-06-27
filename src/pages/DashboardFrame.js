@@ -17,7 +17,7 @@ const DashboardFrame = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { venueName, venueId } = useVenue();
-  
+
   const [copied, setCopied] = useState(false);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -179,7 +179,7 @@ const DashboardFrame = ({ children }) => {
           <NavLink to="/" icon={LayoutDashboard}>Overview</NavLink>
           <NavLink to="/questions" icon={MessageSquare}>Questions</NavLink>
           <NavLink to="/reports" icon={BarChart}>Reports</NavLink>
-          <NavLink to="/heatmap" icon={Map}>Heatmap</NavLink>
+          <NavLink to="/floorplan" icon={Map}>Floor Plan</NavLink>
           <NavLink to="/templates" icon={QrCode}>QR Templates</NavLink>
           <NavLink to="/staff" icon={User}>Staff</NavLink>
           <NavLink to="/settings" icon={Settings}>Settings</NavLink>

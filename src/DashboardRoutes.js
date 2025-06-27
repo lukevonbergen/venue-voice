@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import DashboardPage from './pages/Dashboard';
 import ManageQuestions from './pages/ManageQuestions';
-import Heatmap from './pages/Heatmap';
+import Floorplan from './pages/Floorplan';
 import TablesDashboard from './pages/Dashboard_Tables';
 import SettingsPage from './pages/SettingsPage';
 import TemplatesPage from './pages/QRTemplates';
@@ -36,7 +36,7 @@ const DashboardRoutes = () => {
         {/* 🧭 Dashboard Pages (wrapped in DashboardFrame) */}
         <Route path="/" element={<DashboardFrame><DashboardPage /></DashboardFrame>} />
         <Route path="/questions" element={<DashboardFrame><ManageQuestions /></DashboardFrame>} />
-        <Route path="/heatmap" element={<DashboardFrame><Heatmap /></DashboardFrame>} />
+        <Route path="/floorplan" element={<DashboardFrame><FLoorplan /></DashboardFrame>} />
         <Route path="/tablefeedback" element={<DashboardFrame><TablesDashboard /></DashboardFrame>} />
         <Route path="/settings" element={<DashboardFrame><SettingsPage /></DashboardFrame>} />
         <Route path="/templates" element={<DashboardFrame><TemplatesPage /></DashboardFrame>} />

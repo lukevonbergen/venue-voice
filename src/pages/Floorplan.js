@@ -462,7 +462,7 @@ const Heatmap = () => {
 
       <div className="bg-white border rounded p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Manage Table Layout</h2>
+          <h2 className="text-lg font-semibold">Manage Floor Plan</h2>
           <button onClick={handleToggleEdit} className="text-blue-600 underline text-sm">{editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}</button>
         </div>
 
