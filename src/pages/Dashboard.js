@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import FeedbackTabs from '../components/FeedbackTabs';
 import SessionsActionedTile from '../components/reports/today_TotalSessionsTile';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');

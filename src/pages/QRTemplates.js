@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import Template1 from '../components/QRTemplates/Template1';
 import Template2 from '../components/QRTemplates/Template2';
 import PageContainer from '../components/PageContainer';

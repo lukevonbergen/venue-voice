@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import AccountSettings from '../components/settings/AccountSettings';
 import VenueSettings from '../components/settings/VenueSettings';
 import BrandingSettings from '../components/settings/BrandingSettings';

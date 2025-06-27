@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');

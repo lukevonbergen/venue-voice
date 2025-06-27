@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import PageContainer from '../components/PageContainer';
 import usePageTitle from '../hooks/usePageTitle';
 import { useVenue } from '../context/VenueContext';

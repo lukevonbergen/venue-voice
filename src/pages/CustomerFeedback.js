@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
 const CustomerFeedbackPage = () => {

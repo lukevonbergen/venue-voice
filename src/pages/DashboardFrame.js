@@ -10,7 +10,7 @@ import {
   QrCode,
   User,
 } from 'lucide-react';
-import supabase from '../utils/supabase';
+import { supabase } from '../utils/supabase';
 import { useVenue } from '../context/VenueContext';
 
 const DashboardFrame = ({ children }) => {
