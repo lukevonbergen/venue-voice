@@ -13,6 +13,11 @@ import StaffLeaderboard from './pages/Staff_Leaderboard';
 import BillingPage from './pages/Billing';
 import FeedbackFeed from './pages/FeedbackFeed';
 
+import SignInPage from './pages/SignIn';
+import SignUpPage from './pages/SignUp';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
 import { VenueProvider } from './context/VenueContext';
 import DashboardFrame from './pages/DashboardFrame';
 
@@ -20,6 +25,13 @@ const DashboardRoutes = () => {
   return (
     <VenueProvider>
       <Routes>
+        {/* 🔐 Auth Pages (no DashboardFrame) */}
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* 🧭 Dashboard Pages (wrapped in DashboardFrame) */}
         <Route path="/dashboard" element={<DashboardFrame><DashboardPage /></DashboardFrame>} />
         <Route path="/dashboard/questions" element={<DashboardFrame><ManageQuestions /></DashboardFrame>} />
         <Route path="/dashboard/heatmap" element={<DashboardFrame><Heatmap /></DashboardFrame>} />

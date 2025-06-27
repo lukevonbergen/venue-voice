@@ -3,15 +3,16 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { ModalProvider } from './context/ModalContext';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from "@vercel/speed-insights/react";
-import * as Sentry from "@sentry/react";
-import { browserTracingIntegration } from "@sentry/react";
+import { SpeedInsights } from '@vercel/speed-insights/react';
+import * as Sentry from '@sentry/react';
+import { browserTracingIntegration } from '@sentry/react';
 
 import MarketingRoutes from './MarketingRoutes';
 import DashboardRoutes from './DashboardRoutes';
 
+// 🔐 Replace with your actual Sentry DSN
 Sentry.init({
-  dsn: "your-sentry-dsn",
+  dsn: 'your-sentry-dsn',
   integrations: [browserTracingIntegration()],
   tracesSampleRate: 1.0,
   sendDefaultPii: true,
@@ -21,9 +22,8 @@ function App() {
   const [isDashboardDomain, setIsDashboardDomain] = useState(false);
 
   useEffect(() => {
-    // Safe to access window here
-    if (window.location.hostname.startsWith('my.')) {
-      setIsDashboardDomain(true);
+    if (typeof window !== 'undefined') {
+      setIsDashboardDomain(window.location.hostname.startsWith('my.'));
     }
   }, []);
 
