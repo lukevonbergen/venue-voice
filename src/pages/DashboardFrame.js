@@ -13,12 +13,12 @@ import {
 import { supabase } from '../utils/supabase';
 import { useVenue } from '../context/VenueContext';
 
-const [copied, setCopied] = useState(false);
-
 const DashboardFrame = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { venueName, venueId } = useVenue();
+  
+  const [copied, setCopied] = useState(false);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState({ first_name: '', last_name: '', email: '' });
